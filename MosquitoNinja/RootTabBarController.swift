@@ -16,6 +16,13 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         ]
     }
 
+    func showQuote() {
+        selectedIndex = 3
+        if let nav = selectedViewController as? UINavigationController {
+            nav.popToRootViewController(animated: false)
+        }
+    }
+
     func showAppointments() {
         selectedIndex = 2
         if let nav = selectedViewController as? UINavigationController {

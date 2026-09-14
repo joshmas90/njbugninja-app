@@ -7,6 +7,7 @@ final class WebViewController:
     WKUIDelegate
 {
     private var webView: WKWebView!
+    private let messageComposer = MessageComposer()
 
     private let page: String
     private let pageTitle: String
@@ -592,6 +593,11 @@ final class WebViewController:
             return
         }
 
+        if url.scheme?.lowercased() == "sms" {
+            messageComposer.present(from: self, smsURL: url)
+            return
+        }
+
         UIApplication.shared.open(
             url,
             options: [:]
@@ -627,6 +633,14 @@ final class WebViewController:
             alert,
             animated: true
         )
+    }
+
+    private func routeQuoteURL(_ url: URL) -> Bool {
+        guard url.fragment == "quote",
+              url.isFileURL || ["njbugninja.com", "www.njbugninja.com"].contains(url.host?.lowercased() ?? ""),
+              let root = tabBarController as? RootTabBarController else { return false }
+        root.showQuote()
+        return true
     }
 
     private func routeInternalWebsiteURL(
@@ -720,6 +734,11 @@ final class WebViewController:
             return
         }
 
+        if routeQuoteURL(url) {
+            decisionHandler(.cancel)
+            return
+        }
+
         if url.isFileURL {
             decisionHandler(.allow)
             return
@@ -767,6 +786,7 @@ final class WebViewController:
         if let url =
             navigationAction.request.url
         {
+            if routeQuoteURL(url) { return nil }
             if url.isFileURL {
                 webView.load(
                     navigationAction.request

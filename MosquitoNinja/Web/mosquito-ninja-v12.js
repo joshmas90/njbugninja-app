@@ -77,7 +77,7 @@ if (form) {
       `Property: ${d.get('message') || ''}`;
 
     status.textContent =
-      'Opening your messaging app. If it does not open, call or text 609-313-6317 directly.';
+      'Review your text in the in-app message sheet, then tap Send. Nothing is sent until you do.';
 
     window.location.href = `sms:+16093136317?&body=${encodeURIComponent(msg)}`;
   });

@@ -719,5 +719,5 @@ final class HomeViewController: NinjaBaseViewController {
     @objc private func openQuote() { tabBarController?.selectedIndex = 3 }
     @objc private func openAppointments() { (tabBarController as? RootTabBarController)?.showAppointments() }
     @objc private func call() { openExternal("tel:+16093136317") }
-    @objc private func text() { openExternal("sms:+16093136317") }
+    @objc private func text() { composeMessage() }
 }

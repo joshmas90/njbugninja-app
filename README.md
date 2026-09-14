@@ -5,14 +5,14 @@ A native UIKit customer-service app for Mosquito Ninja. The app uses native Home
 ## Native iOS features
 
 - Native service dashboard and navigation.
-- Native quote request flow that prepares a message for review in Messages.
+- Native quote request flow with a single in-app review/send sheet and feedback after iOS reports the result.
 - **Appointments center** with confirmed service date/time, service type, property label, notes, and service-day tools.
 - **Privacy-first local appointment alerts** at 24 hours and 1 hour before service.
 - Appointment notification permission is requested only when the customer chooses reminders.
 - Appointment information is stored on the customer’s device using `UserDefaults`.
 - **No live location tracking or location permission.**
 - Native service-prep guide.
-- `tel:`, `sms:`, and `mailto:` links open the appropriate iOS app.
+- Text buttons and bundled `sms:` links use Apple's in-app message composer. `tel:` and `mailto:` links open the appropriate iOS app.
 - Bundled service/reference pages remain available offline.
 - iPhone and iPad support, iOS 15+.
 - No Push Notifications entitlement, Associated Domains, camera, microphone, or location capability is required for the current local-reminder implementation.
@@ -52,3 +52,20 @@ On a Mac with Xcode:
 ```bash
 ./scripts/build-simulator.sh
 ```
+
+## In-app messaging
+
+Quotes and texts use `MFMessageComposeViewController`. Customers review once and tap Send inside the app. No backend or SMS-provider credentials are required. The device must be configured for messaging; unsupported devices keep the customer in the app and offer an explicit copy action.
+
+Completion feedback follows the MessageUI delegate result after the sheet dismisses. Apple's `.sent` means queued or sent, not delivered or received; the app makes no delivery or quote-acceptance guarantee. Replies arrive in Messages. Cancelling or failing leaves the native quote form intact for retry. MessageUI exposes initial content, so edits made inside Apple's composer are not promised to be saved. No new server storage or persistent draft storage is introduced.
+
+Physical-device checks required before release:
+
+- Quote: invalid fields stay in the form; valid details open one composer addressed to 609-313-6317.
+- Text: Home, Contact, Appointments and bundled-page links all open a composer without switching apps.
+- Send, cancel and failure each dismiss once, then show the correct result; cancelling/failing keeps the original quote form details.
+- Repeated taps do not stack composers; emoji, ampersands and multiline notes remain intact.
+- A device without messaging gets a clear unavailable state and optional copy action.
+- Check iPhone/iPad sheet layout, keyboard dismissal, VoiceOver and Reduce Motion.
+
+Reference: https://developer.apple.com/documentation/messageui/mfmessagecomposeviewcontroller

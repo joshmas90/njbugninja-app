@@ -15,7 +15,7 @@ final class ContactViewController: NinjaBaseViewController {
     }
 
     @objc private func call() { openExternal("tel:+16093136317") }
-    @objc private func text() { openExternal("sms:+16093136317") }
+    @objc private func text() { composeMessage() }
     @objc private func area() { navigationController?.pushViewController(WebViewController(page: "service-area.html", title: "Service Area"), animated: true) }
     @objc private func privacy() { navigationController?.pushViewController(WebViewController(page: "privacy.html", title: "Privacy"), animated: true) }
 }

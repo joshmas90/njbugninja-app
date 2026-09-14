@@ -320,6 +320,7 @@ final class NinjaScrollView: UIScrollView {
 class NinjaBaseViewController: UIViewController {
     let scrollView = NinjaScrollView()
     let contentStack = UIStackView()
+    private let messageComposer = MessageComposer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -476,6 +477,44 @@ class NinjaBaseViewController: UIViewController {
         return container
     }
 
+    func composeMessage(body: String = "", kind: MessageComposer.Kind = .text) {
+        messageComposer.present(from: self, body: body, kind: kind)
+    }
+
+    func openExternal(_ value: String) {
+        guard let url = URL(string: value) else {
+            showFeedback(
+                title: "Unable to Open",
+                detail: "That action could not be prepared. Please try again.",
+                kind: .error
+            )
+            return
+        }
+
+        if url.scheme?.lowercased() == "sms" {
+            messageComposer.present(from: self, smsURL: url)
+            return
+        }
+
+        UIApplication.shared.open(
+            url,
+            options: [:]
+        ) { [weak self] success in
+            guard !success else { return }
+
+            DispatchQueue.main.async {
+                self?.showFeedback(
+                    title: "Unable to Open",
+                    detail: "iOS could not open that action. Check your device settings and try again.",
+                    kind: .error
+                )
+            }
+        }
+    }
+}
+
+// Shared in-app status feedback, including MessageUI completion results.
+extension UIViewController {
     func showFeedback(
         title: String,
         detail: String,
@@ -491,6 +530,8 @@ class NinjaBaseViewController: UIViewController {
         banner.layer.borderWidth = 1
         banner.layer.borderColor =
             kind.accent.withAlphaComponent(0.44).cgColor
+        banner.isAccessibilityElement = true
+        banner.accessibilityLabel = "\(title). \(detail)"
         banner.alpha = 0
         banner.transform =
             CGAffineTransform(
@@ -510,6 +551,8 @@ class NinjaBaseViewController: UIViewController {
         titleLabel.textColor = .white
         titleLabel.font =
             .systemFont(ofSize: 13, weight: .heavy)
+        titleLabel.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: titleLabel.font)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
 
         let detailLabel = UILabel()
@@ -517,6 +560,8 @@ class NinjaBaseViewController: UIViewController {
         detailLabel.textColor = NinjaPalette.muted
         detailLabel.font =
             .systemFont(ofSize: 12, weight: .medium)
+        detailLabel.font = UIFontMetrics(forTextStyle: .footnote).scaledFont(for: detailLabel.font)
+        detailLabel.adjustsFontForContentSizeCategory = true
         detailLabel.numberOfLines = 0
 
         let labels = UIStackView(
@@ -582,6 +627,7 @@ class NinjaBaseViewController: UIViewController {
         ])
 
         view.bringSubviewToFront(banner)
+        UIAccessibility.post(notification: .announcement, argument: banner.accessibilityLabel)
 
         switch kind {
         case .success:
@@ -593,7 +639,7 @@ class NinjaBaseViewController: UIViewController {
         }
 
         UIView.animate(
-            withDuration: 0.24,
+            withDuration: UIAccessibility.isReduceMotionEnabled ? 0 : 0.24,
             delay: 0,
             usingSpringWithDamping: 0.84,
             initialSpringVelocity: 0.3,
@@ -607,7 +653,7 @@ class NinjaBaseViewController: UIViewController {
             deadline: .now() + duration
         ) {
             UIView.animate(
-                withDuration: 0.20,
+                withDuration: UIAccessibility.isReduceMotionEnabled ? 0 : 0.20,
                 animations: {
                     banner.alpha = 0
                     banner.transform =
@@ -623,29 +669,4 @@ class NinjaBaseViewController: UIViewController {
         }
     }
 
-    func openExternal(_ value: String) {
-        guard let url = URL(string: value) else {
-            showFeedback(
-                title: "Unable to Open",
-                detail: "That action could not be prepared. Please try again.",
-                kind: .error
-            )
-            return
-        }
-
-        UIApplication.shared.open(
-            url,
-            options: [:]
-        ) { [weak self] success in
-            guard !success else { return }
-
-            DispatchQueue.main.async {
-                self?.showFeedback(
-                    title: "Unable to Open",
-                    detail: "iOS could not open that action. Check your device settings and try again.",
-                    kind: .error
-                )
-            }
-        }
-    }
 }

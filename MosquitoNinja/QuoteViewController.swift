@@ -104,7 +104,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Build your request, review every detail, then choose whether to open it in Messages."
+                "Add your details, then review and send your request right here in the app."
             )
         )
 
@@ -222,7 +222,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             primaryButton(
-                "Review Request",
+                "Review & Send",
                 symbol:
                     "checkmark.bubble.fill",
                 action:
@@ -234,7 +234,7 @@ final class QuoteViewController:
             card(
                 title: "You stay in control",
                 detail:
-                    "Nothing is sent automatically. You will review the request here, confirm it, and then review it again in Messages before you choose Send.",
+                    "Review your prepared text in the sheet, then tap Send. You stay in the app. Replies arrive in Messages.",
                 symbol:
                     "hand.tap.fill",
                 accent:
@@ -408,82 +408,7 @@ final class QuoteViewController:
         Property: \(notes)
         """
 
-        guard let encoded =
-            message.addingPercentEncoding(
-                withAllowedCharacters:
-                    .urlQueryAllowed
-            )
-        else {
-            showFeedback(
-                title:
-                    "Request Couldn’t Be Prepared",
-                detail:
-                    "Please review the information and try again.",
-                kind: .error,
-                duration: 1.8
-            )
-
-            return
-        }
-
-        let reviewText = """
-        Service: \(selected)
-        Name: \(name)
-        Phone: \(phone)
-        Town/ZIP: \(location)
-
-        \(notes.isEmpty ? "No additional property notes." : notes)
-
-        Nothing has been sent yet.
-        """
-
-        let alert =
-            UIAlertController(
-                title:
-                    "Review Quote Request",
-                message:
-                    reviewText,
-                preferredStyle:
-                    .alert
-            )
-
-        alert.addAction(
-            UIAlertAction(
-                title: "Keep Editing",
-                style: .cancel
-            ) { _ in
-                NinjaHaptics.selection()
-            }
-        )
-
-        alert.addAction(
-            UIAlertAction(
-                title: "Open Messages",
-                style: .default
-            ) { [weak self] _ in
-                guard let self else {
-                    return
-                }
-
-                self.showFeedback(
-                    title:
-                        "Request Confirmed",
-                    detail:
-                        "Opening Messages. Review the prepared text once more before you choose Send.",
-                    kind: .success,
-                    duration: 0.75
-                ) { [weak self] in
-                    self?.openExternal(
-                        "sms:+16093136317?&body=\(encoded)"
-                    )
-                }
-            }
-        )
-
-        present(
-            alert,
-            animated: true
-        )
+        composeMessage(body: message, kind: .quote)
     }
 
     func textFieldDidBeginEditing(

@@ -571,5 +571,5 @@ final class AppointmentsViewController: NinjaBaseViewController {
     }
 
     @objc private func call() { openExternal("tel:+16093136317") }
-    @objc private func text() { openExternal("sms:+16093136317") }
+    @objc private func text() { composeMessage() }
 }
