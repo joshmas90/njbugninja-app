@@ -10,6 +10,97 @@ struct NinjaPalette {
 }
 
 
+final class NinjaActivityIndicator: UIView {
+    private let ring = CAShapeLayer()
+    private var running = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        isUserInteractionEnabled = false
+
+        ring.fillColor = UIColor.clear.cgColor
+        ring.strokeColor = NinjaPalette.red.cgColor
+        ring.lineWidth = 2.6
+        ring.lineCap = .round
+        ring.strokeStart = 0.08
+        ring.strokeEnd = 0.76
+        ring.shadowColor = NinjaPalette.red.cgColor
+        ring.shadowOpacity = 0.38
+        ring.shadowRadius = 4
+
+        layer.addSublayer(ring)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        ring.frame = bounds
+        ring.path = UIBezierPath(
+            ovalIn: bounds.insetBy(dx: 3, dy: 3)
+        ).cgPath
+    }
+
+    func startAnimating() {
+        guard !running else { return }
+        running = true
+
+        let animation = CABasicAnimation(
+            keyPath: "transform.rotation.z"
+        )
+        animation.fromValue = 0
+        animation.toValue = Double.pi * 2
+        animation.duration = 0.82
+        animation.repeatCount = .infinity
+        animation.timingFunction =
+            CAMediaTimingFunction(name: .linear)
+
+        layer.add(animation, forKey: "ninjaSpin")
+    }
+
+    func stopAnimating() {
+        running = false
+        layer.removeAnimation(forKey: "ninjaSpin")
+    }
+}
+
+enum NinjaFeedbackKind {
+    case success
+    case warning
+    case error
+    case info
+
+    var symbol: String {
+        switch self {
+        case .success:
+            return "checkmark.seal.fill"
+        case .warning:
+            return "exclamationmark.triangle.fill"
+        case .error:
+            return "xmark.octagon.fill"
+        case .info:
+            return "info.circle.fill"
+        }
+    }
+
+    var accent: UIColor {
+        switch self {
+        case .success:
+            return NinjaPalette.green
+        case .warning:
+            return NinjaPalette.red
+        case .error:
+            return NinjaPalette.red
+        case .info:
+            return UIColor.white
+        }
+    }
+}
+
 enum NinjaHaptics {
     static func impact(
         _ style: UIImpactFeedbackGenerator.FeedbackStyle = .light,
@@ -340,7 +431,8 @@ class NinjaBaseViewController: UIViewController {
         let container = UIView()
         container.backgroundColor = NinjaPalette.panel
         container.layer.cornerRadius = 16
-        container.layer.borderWidth = 0.5
+        container.layer.cornerCurve = .continuous
+        container.layer.borderWidth = 0.75
         container.layer.borderColor = UIColor.white.withAlphaComponent(0.10).cgColor
 
         let icon = UIImageView(image: UIImage(systemName: symbol))
@@ -382,8 +474,176 @@ class NinjaBaseViewController: UIViewController {
         return container
     }
 
+    func showFeedback(
+        title: String,
+        detail: String,
+        kind: NinjaFeedbackKind,
+        duration: TimeInterval = 1.25,
+        completion: (() -> Void)? = nil
+    ) {
+        let banner = UIView()
+        banner.translatesAutoresizingMaskIntoConstraints = false
+        banner.backgroundColor = NinjaPalette.panel
+        banner.layer.cornerRadius = 17
+        banner.layer.cornerCurve = .continuous
+        banner.layer.borderWidth = 1
+        banner.layer.borderColor =
+            kind.accent.withAlphaComponent(0.44).cgColor
+        banner.alpha = 0
+        banner.transform =
+            CGAffineTransform(
+                translationX: 0,
+                y: 18
+            )
+
+        let icon = UIImageView(
+            image: UIImage(systemName: kind.symbol)
+        )
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.tintColor = kind.accent
+        icon.contentMode = .scaleAspectFit
+
+        let titleLabel = UILabel()
+        titleLabel.text = title.uppercased()
+        titleLabel.textColor = .white
+        titleLabel.font =
+            .systemFont(ofSize: 13, weight: .heavy)
+        titleLabel.numberOfLines = 0
+
+        let detailLabel = UILabel()
+        detailLabel.text = detail
+        detailLabel.textColor = NinjaPalette.muted
+        detailLabel.font =
+            .systemFont(ofSize: 12, weight: .medium)
+        detailLabel.numberOfLines = 0
+
+        let labels = UIStackView(
+            arrangedSubviews: [
+                titleLabel,
+                detailLabel
+            ]
+        )
+        labels.axis = .vertical
+        labels.spacing = 3
+
+        let row = UIStackView(
+            arrangedSubviews: [
+                icon,
+                labels
+            ]
+        )
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+
+        banner.addSubview(row)
+        view.addSubview(banner)
+
+        NSLayoutConstraint.activate([
+            icon.widthAnchor.constraint(
+                equalToConstant: 25
+            ),
+            icon.heightAnchor.constraint(
+                equalToConstant: 25
+            ),
+
+            row.topAnchor.constraint(
+                equalTo: banner.topAnchor,
+                constant: 14
+            ),
+            row.leadingAnchor.constraint(
+                equalTo: banner.leadingAnchor,
+                constant: 15
+            ),
+            row.trailingAnchor.constraint(
+                equalTo: banner.trailingAnchor,
+                constant: -15
+            ),
+            row.bottomAnchor.constraint(
+                equalTo: banner.bottomAnchor,
+                constant: -14
+            ),
+
+            banner.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: 18
+            ),
+            banner.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -18
+            ),
+            banner.bottomAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                constant: -14
+            )
+        ])
+
+        view.bringSubviewToFront(banner)
+
+        switch kind {
+        case .success:
+            NinjaHaptics.success()
+        case .warning, .error:
+            NinjaHaptics.warning()
+        case .info:
+            NinjaHaptics.selection()
+        }
+
+        UIView.animate(
+            withDuration: 0.24,
+            delay: 0,
+            usingSpringWithDamping: 0.84,
+            initialSpringVelocity: 0.3,
+            options: [.curveEaseOut]
+        ) {
+            banner.alpha = 1
+            banner.transform = .identity
+        }
+
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + duration
+        ) {
+            UIView.animate(
+                withDuration: 0.20,
+                animations: {
+                    banner.alpha = 0
+                    banner.transform =
+                        CGAffineTransform(
+                            translationX: 0,
+                            y: 12
+                        )
+                }
+            ) { _ in
+                banner.removeFromSuperview()
+                completion?()
+            }
+        }
+    }
+
     func openExternal(_ value: String) {
-        guard let url = URL(string: value) else { return }
-        UIApplication.shared.open(url)
+        guard let url = URL(string: value) else {
+            showFeedback(
+                title: "Unable to Open",
+                detail: "That action could not be prepared. Please try again.",
+                kind: .error
+            )
+            return
+        }
+
+        UIApplication.shared.open(
+            url,
+            options: [:]
+        ) { [weak self] success in
+            guard !success else { return }
+
+            DispatchQueue.main.async {
+                self?.showFeedback(
+                    title: "Unable to Open",
+                    detail: "iOS could not open that action. Check your device settings and try again.",
+                    kind: .error
+                )
+            }
+        }
     }
 }
