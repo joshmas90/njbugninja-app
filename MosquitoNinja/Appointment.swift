@@ -12,7 +12,14 @@ struct ServiceAppointment: Codable, Equatable, Identifiable {
             case .mosquito: return "Mosquito"
             case .tick: return "Tick"
             case .both: return "Mosquito + Tick"
-            case .commercial: return "Commercial"
+            case .commercial: return "Commercial/Govt"
+            }
+        }
+
+        var displayName: String {
+            switch self {
+            case .commercial: return "Commercial / Government Service"
+            default: return rawValue
             }
         }
     }

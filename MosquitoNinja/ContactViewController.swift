@@ -6,7 +6,7 @@ final class ContactViewController: NinjaBaseViewController {
         title = "Contact"
         contentStack.addArrangedSubview(eyebrow("Mosquito Ninja"))
         contentStack.addArrangedSubview(headline("Direct when you need us.", size: 34))
-        contentStack.addArrangedSubview(body("Owner-operated service for South Jersey homes and commercial outdoor spaces."))
+        contentStack.addArrangedSubview(body("Owner-operated service for South Jersey residential, commercial and government properties."))
         contentStack.addArrangedSubview(primaryButton("Call 609-313-6317", symbol: "phone.fill", action: #selector(call)))
         contentStack.addArrangedSubview(secondaryButton("Text Mosquito Ninja", symbol: "message.fill", action: #selector(text)))
         contentStack.addArrangedSubview(secondaryButton("Check Service Area", symbol: "map.fill", action: #selector(area)))

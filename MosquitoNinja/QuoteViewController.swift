@@ -1,7 +1,7 @@
 import UIKit
 
 final class QuoteViewController: NinjaBaseViewController, UITextFieldDelegate, UITextViewDelegate {
-    private let service = UISegmentedControl(items: ["Mosquito", "Ticks", "Both", "Commercial"])
+    private let service = UISegmentedControl(items: ["Mosquito", "Ticks", "Both", "Comm/Govt"])
     private let nameField = UITextField()
     private let phoneField = UITextField()
     private let locationField = UITextField()
@@ -73,7 +73,9 @@ final class QuoteViewController: NinjaBaseViewController, UITextFieldDelegate, U
 
     @objc private func sendQuote() {
         view.endEditing(true)
-        let selected = service.titleForSegment(at: service.selectedSegmentIndex) ?? "Mosquito"
+        let selected = service.selectedSegmentIndex == 3
+            ? "Commercial / Government"
+            : (service.titleForSegment(at: service.selectedSegmentIndex) ?? "Mosquito")
         let notes = notesView.text.hasPrefix("Describe the property") ? "" : notesView.text ?? ""
         let message = """
         Hi Mosquito Ninja, I'd like a property quote.

@@ -73,7 +73,7 @@ final class HomeViewController: NinjaBaseViewController {
         contentStack.addArrangedSubview(sectionTitle("Services"))
         let mosquito = tappableCard(title: "Mosquito Control", detail: "Target resting and harborage areas around the property.", symbol: "drop.fill", page: "mosquito-control.html", titleForPage: "Mosquito Control")
         let ticks = tappableCard(title: "Tick Control", detail: "Focus on wooded edges, leaf litter, brush and transition zones.", symbol: "scope", page: "tick-control.html", titleForPage: "Tick Control")
-        let commercial = tappableCard(title: "Commercial", detail: "Outdoor service for business spaces, hospitality and event areas.", symbol: "building.2.fill", page: "commercial.html", titleForPage: "Commercial")
+        let commercial = tappableCard(title: "Commercial & Government", detail: "Business, hospitality, municipal and government-managed outdoor properties.", symbol: "building.2.fill", page: "commercial.html", titleForPage: "Commercial & Government")
         [mosquito, ticks, commercial].forEach(contentStack.addArrangedSubview)
 
         contentStack.addArrangedSubview(sectionTitle("Quick Actions"))
@@ -147,16 +147,25 @@ final class HomeViewController: NinjaBaseViewController {
         headline.minimumScaleFactor = 0.78
 
         let detail = UILabel()
-        detail.text = "Targeted mosquito & tick control for South Jersey outdoor spaces."
+        detail.text = "Targeted mosquito & tick control for South Jersey residential, commercial and government properties."
         detail.textColor = UIColor.white.withAlphaComponent(0.78)
         detail.font = .systemFont(ofSize: 14, weight: .medium)
         detail.numberOfLines = 0
+
+        let audience = UILabel()
+        audience.text = "RESIDENTIAL  \\u{2022}  COMMERCIAL  \\u{2022}  GOVERNMENT"
+        audience.textColor = NinjaPalette.green
+        audience.font = .systemFont(ofSize: 10, weight: .heavy)
+        audience.numberOfLines = 0
+        audience.adjustsFontSizeToFitWidth = true
+        audience.minimumScaleFactor = 0.78
 
         let stack = UIStackView(arrangedSubviews: [
             brand,
             eyebrow,
             headline,
-            detail
+            detail,
+            audience
         ])
 
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -217,7 +226,7 @@ final class HomeViewController: NinjaBaseViewController {
         date.numberOfLines = 0
 
         let service = UILabel()
-        service.text = appointment.service.rawValue
+        service.text = appointment.service.displayName
         service.textColor = NinjaPalette.muted
         service.font = .systemFont(ofSize: 14, weight: .medium)
 
@@ -309,6 +318,7 @@ final class HomeViewController: NinjaBaseViewController {
         titleLabel.text = title.uppercased()
         titleLabel.textColor = .white
         titleLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        titleLabel.numberOfLines = 0
         let detailLabel = UILabel()
         detailLabel.text = detail
         detailLabel.textColor = NinjaPalette.muted

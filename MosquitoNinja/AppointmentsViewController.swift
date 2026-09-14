@@ -106,7 +106,7 @@ final class AppointmentsViewController: NinjaBaseViewController {
         time.font = .systemFont(ofSize: 36, weight: .black)
 
         let service = UILabel()
-        service.text = appointment.service.rawValue.uppercased()
+        service.text = appointment.service.displayName.uppercased()
         service.textColor = .white
         service.font = .systemFont(ofSize: 14, weight: .bold)
 

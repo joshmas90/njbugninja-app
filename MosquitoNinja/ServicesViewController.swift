@@ -9,7 +9,7 @@ final class ServicesViewController: NinjaBaseViewController {
         contentStack.addArrangedSubview(body("Open a service for focused information without the marketing-site navigation."))
         addService("Mosquito Control", "Mosquito resting and harborage areas.", "drop.fill", "mosquito-control.html")
         addService("Tick Control", "Wooded edges, brush, leaf litter and transition zones.", "scope", "tick-control.html")
-        addService("Commercial", "Outdoor business, hospitality and event spaces.", "building.2.fill", "commercial.html")
+        addService("Commercial & Government", "Business, hospitality, municipal and government-managed outdoor properties.", "building.2.fill", "commercial.html")
         addService("Service Area", "Check South Jersey route availability.", "map.fill", "service-area.html")
         addService("FAQs", "Straight answers about quotes, service and expectations.", "questionmark.bubble.fill", "faq.html")
     }
