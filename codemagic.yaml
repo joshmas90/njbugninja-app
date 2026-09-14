@@ -1,0 +1,49 @@
+﻿workflows:
+  mosquito-ninja-ios:
+    name: Mosquito Ninja iOS
+
+    max_build_duration: 60
+
+    integrations:
+      app_store_connect: "Codemagic CI"
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.njbugninja.app
+
+      vars:
+        XCODE_PROJECT: "MosquitoNinja.xcodeproj"
+        XCODE_SCHEME: "MosquitoNinja"
+
+      xcode: 26.4
+
+    scripts:
+      - name: Verify bundled website
+        script: |
+          python3 scripts/verify_bundle.py
+
+      - name: Set build number
+        script: |
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleVersion $CM_BUILD_NUMBER" \
+            "$CM_BUILD_DIR/MosquitoNinja/Info.plist"
+
+      - name: Configure iOS signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Build Mosquito Ninja IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+    publishing:
+      app_store_connect:
+        auth: integration
