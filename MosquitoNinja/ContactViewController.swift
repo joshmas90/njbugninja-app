@@ -12,7 +12,7 @@ final class ContactViewController: NinjaBaseViewController {
         contentStack.addArrangedSubview(secondaryButton("Open ChatGPT", symbol: "sparkles", action: #selector(openChatGPT)))
         contentStack.addArrangedSubview(secondaryButton("Check Service Area", symbol: "map.fill", action: #selector(area)))
         contentStack.addArrangedSubview(secondaryButton("Privacy", symbol: "hand.raised.fill", action: #selector(privacy)))
-        contentStack.addArrangedSubview(card(title: "ChatGPT access", detail: "Open ChatGPT in your browser or installed app. ChatGPT account access and conversations stay with that service.", symbol: "sparkles", accent: NinjaPalette.green))
+        contentStack.addArrangedSubview(card(title: "ChatGPT access", detail: "Open the ChatGPT website in your browser. ChatGPT account access and conversations stay with that service.", symbol: "sparkles", accent: NinjaPalette.green))
         contentStack.addArrangedSubview(card(title: "Straightforward service", detail: "No account, subscription, or in-app purchase is required. Quote requests stay in your control, and appointment reminders are stored and scheduled on your device.", symbol: "checkmark.circle.fill", accent: NinjaPalette.red))
     }
 
