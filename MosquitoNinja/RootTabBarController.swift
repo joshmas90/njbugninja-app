@@ -1,10 +1,11 @@
 import UIKit
 
-final class RootTabBarController: UITabBarController {
+final class RootTabBarController: UITabBarController, UITabBarControllerDelegate {
     private let accent = UIColor(red: 0.878, green: 0.125, blue: 0.153, alpha: 1)
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        delegate = self
         configureAppearance()
         viewControllers = [
             makeNavigation(root: HomeViewController(), title: "Home", symbol: "house.fill"),
@@ -51,4 +52,12 @@ final class RootTabBarController: UITabBarController {
         UINavigationBar.appearance().compactAppearance = navAppearance
         UINavigationBar.appearance().tintColor = .white
     }
+
+    func tabBarController(
+        _ tabBarController: UITabBarController,
+        didSelect viewController: UIViewController
+    ) {
+        NinjaHaptics.selection()
+    }
+
 }

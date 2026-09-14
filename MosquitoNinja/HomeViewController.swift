@@ -193,7 +193,7 @@ final class HomeViewController: NinjaBaseViewController {
         return hero
     }
     private func nextAppointmentCard(_ appointment: ServiceAppointment) -> UIControl {
-        let control = UIControl()
+        let control = NinjaTouchControl()
         control.backgroundColor = NinjaPalette.panel
         control.layer.cornerRadius = 18
         control.layer.borderWidth = 1
@@ -247,7 +247,7 @@ final class HomeViewController: NinjaBaseViewController {
     }
 
     private func addAppointmentCard() -> UIControl {
-        let control = UIControl()
+        let control = NinjaTouchControl()
         control.backgroundColor = NinjaPalette.panel
         control.layer.cornerRadius = 18
         control.layer.borderWidth = 0.5
@@ -294,7 +294,7 @@ final class HomeViewController: NinjaBaseViewController {
     }
 
     private func tappableCard(title: String, detail: String, symbol: String, page: String, titleForPage: String) -> UIControl {
-        let control = UIControl()
+        let control = NinjaTouchControl()
         control.backgroundColor = NinjaPalette.panel
         control.layer.cornerRadius = 16
         control.layer.borderWidth = 0.5

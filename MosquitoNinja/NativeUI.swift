@@ -9,6 +9,215 @@ struct NinjaPalette {
     static let muted = UIColor.white.withAlphaComponent(0.68)
 }
 
+
+enum NinjaHaptics {
+    static func impact(
+        _ style: UIImpactFeedbackGenerator.FeedbackStyle = .light,
+        intensity: CGFloat = 0.72
+    ) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        generator.impactOccurred(intensity: intensity)
+    }
+
+    static func selection() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.prepare()
+        generator.selectionChanged()
+    }
+
+    static func success() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.success)
+    }
+
+    static func warning() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.warning)
+    }
+}
+
+final class NinjaTouchControl: UIControl {
+    private let feedback = UIImpactFeedbackGenerator(style: .light)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureInteraction()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configureInteraction()
+    }
+
+    private func configureInteraction() {
+        isExclusiveTouch = true
+        accessibilityTraits.insert(.button)
+
+        addTarget(
+            self,
+            action: #selector(pressBegan),
+            for: [.touchDown, .touchDragEnter]
+        )
+
+        addTarget(
+            self,
+            action: #selector(pressEnded),
+            for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit]
+        )
+
+        addTarget(
+            self,
+            action: #selector(successfulTap),
+            for: .touchUpInside
+        )
+    }
+
+    override func point(
+        inside point: CGPoint,
+        with event: UIEvent?
+    ) -> Bool {
+        let expanded = bounds.insetBy(dx: -5, dy: -7)
+        return expanded.contains(point)
+    }
+
+    override func hitTest(
+        _ point: CGPoint,
+        with event: UIEvent?
+    ) -> UIView? {
+        guard
+            !isHidden,
+            isUserInteractionEnabled,
+            alpha > 0.01,
+            point(inside: point, with: event)
+        else {
+            return nil
+        }
+
+        // This is an intentionally tappable card.
+        // Decorative labels/stacks must never steal the tap.
+        return self
+    }
+
+    @objc private func pressBegan() {
+        feedback.prepare()
+
+        UIView.animate(
+            withDuration: 0.08,
+            delay: 0,
+            options: [.allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.transform = CGAffineTransform(scaleX: 0.985, y: 0.985)
+            self.alpha = 0.88
+        }
+    }
+
+    @objc private func pressEnded() {
+        UIView.animate(
+            withDuration: 0.15,
+            delay: 0,
+            options: [.allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.transform = .identity
+            self.alpha = 1
+        }
+    }
+
+    @objc private func successfulTap() {
+        feedback.impactOccurred(intensity: 0.62)
+    }
+}
+
+final class NinjaButton: UIButton {
+    var hapticStyle: UIImpactFeedbackGenerator.FeedbackStyle = .light {
+        didSet {
+            feedback = nil
+        }
+    }
+
+    private var feedback: UIImpactFeedbackGenerator?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureInteraction()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configureInteraction()
+    }
+
+    private func configureInteraction() {
+        isExclusiveTouch = true
+
+        addTarget(
+            self,
+            action: #selector(pressBegan),
+            for: [.touchDown, .touchDragEnter]
+        )
+
+        addTarget(
+            self,
+            action: #selector(pressEnded),
+            for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit]
+        )
+
+        addTarget(
+            self,
+            action: #selector(successfulTap),
+            for: .touchUpInside
+        )
+    }
+
+    override func point(
+        inside point: CGPoint,
+        with event: UIEvent?
+    ) -> Bool {
+        let expanded = bounds.insetBy(dx: -4, dy: -6)
+        return expanded.contains(point)
+    }
+
+    @objc private func pressBegan() {
+        let generator = UIImpactFeedbackGenerator(style: hapticStyle)
+        generator.prepare()
+        feedback = generator
+
+        UIView.animate(
+            withDuration: 0.07,
+            delay: 0,
+            options: [.allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.transform = CGAffineTransform(scaleX: 0.975, y: 0.975)
+            self.alpha = 0.86
+        }
+    }
+
+    @objc private func pressEnded() {
+        UIView.animate(
+            withDuration: 0.14,
+            delay: 0,
+            options: [.allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.transform = .identity
+            self.alpha = 1
+        }
+    }
+
+    @objc private func successfulTap() {
+        if feedback == nil {
+            feedback = UIImpactFeedbackGenerator(style: hapticStyle)
+        }
+
+        feedback?.impactOccurred(
+            intensity: hapticStyle == .medium ? 0.82 : 0.60
+        )
+
+        feedback = nil
+    }
+}
+
 class NinjaBaseViewController: UIViewController {
     let scrollView = UIScrollView()
     let contentStack = UIStackView()
@@ -23,6 +232,8 @@ class NinjaBaseViewController: UIViewController {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.alwaysBounceVertical = true
         scrollView.keyboardDismissMode = .interactive
+        scrollView.delaysContentTouches = false
+        scrollView.canCancelContentTouches = true
         view.addSubview(scrollView)
 
         contentStack.translatesAutoresizingMaskIntoConstraints = false
@@ -91,8 +302,11 @@ class NinjaBaseViewController: UIViewController {
         config.cornerStyle = .small
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 18, bottom: 14, trailing: 18)
         if let symbol { config.image = UIImage(systemName: symbol); config.imagePadding = 8 }
-        let button = UIButton(configuration: config)
+        let button = NinjaButton(frame: .zero)
+        button.configuration = config
+        button.hapticStyle = .medium
         button.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 52).isActive = true
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
@@ -105,7 +319,10 @@ class NinjaBaseViewController: UIViewController {
         config.cornerStyle = .small
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 18, bottom: 14, trailing: 18)
         if let symbol { config.image = UIImage(systemName: symbol); config.imagePadding = 8 }
-        let button = UIButton(configuration: config)
+        let button = NinjaButton(frame: .zero)
+        button.configuration = config
+        button.hapticStyle = .light
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }

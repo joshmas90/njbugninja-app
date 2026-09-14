@@ -38,6 +38,11 @@ final class QuoteViewController: NinjaBaseViewController, UITextFieldDelegate, U
         service.selectedSegmentTintColor = NinjaPalette.red
         service.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
         service.setTitleTextAttributes([.foregroundColor: UIColor.white.withAlphaComponent(0.72)], for: .normal)
+        service.addTarget(
+            self,
+            action: #selector(serviceSelectionChanged),
+            for: .valueChanged
+        )
         contentStack.addArrangedSubview(service)
 
         style(nameField, placeholder: "Name", contentType: .name)
@@ -60,6 +65,10 @@ final class QuoteViewController: NinjaBaseViewController, UITextFieldDelegate, U
 
         contentStack.addArrangedSubview(primaryButton("Review & Send", symbol: "paperplane.fill", action: #selector(sendQuote)))
         contentStack.addArrangedSubview(body("No account is required. The app prepares the message on your device so you can review it before sending."))
+    }
+
+    @objc private func serviceSelectionChanged() {
+        NinjaHaptics.selection()
     }
 
     @objc private func sendQuote() {

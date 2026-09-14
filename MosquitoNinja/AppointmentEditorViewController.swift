@@ -36,6 +36,11 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         serviceControl.selectedSegmentTintColor = NinjaPalette.red
         serviceControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
         serviceControl.setTitleTextAttributes([.foregroundColor: UIColor.white.withAlphaComponent(0.70)], for: .normal)
+        serviceControl.addTarget(
+            self,
+            action: #selector(serviceSelectionChanged),
+            for: .valueChanged
+        )
         contentStack.addArrangedSubview(serviceControl)
 
         contentStack.addArrangedSubview(sectionTitle("Appointment time"))
@@ -69,6 +74,16 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         reminder1Switch.isOn = true
         reminder24Switch.onTintColor = NinjaPalette.red
         reminder1Switch.onTintColor = NinjaPalette.red
+        reminder24Switch.addTarget(
+            self,
+            action: #selector(reminderSwitchChanged),
+            for: .valueChanged
+        )
+        reminder1Switch.addTarget(
+            self,
+            action: #selector(reminderSwitchChanged),
+            for: .valueChanged
+        )
         contentStack.addArrangedSubview(switchRow(title: "24 hours before", detail: "A day-before service reminder.", toggle: reminder24Switch))
         contentStack.addArrangedSubview(switchRow(title: "1 hour before", detail: "A final reminder shortly before the appointment.", toggle: reminder1Switch))
 
@@ -157,6 +172,14 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         }
     }
 
+    @objc private func serviceSelectionChanged() {
+        NinjaHaptics.selection()
+    }
+
+    @objc private func reminderSwitchChanged() {
+        NinjaHaptics.selection()
+    }
+
     @objc private func saveAppointment() {
         view.endEditing(true)
 
@@ -196,6 +219,7 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
     }
 
     private func finishSave(_ appointment: ServiceAppointment, alertsEnabled: Bool) {
+        NinjaHaptics.success()
         AppointmentStore.shared.save(appointment)
         if (appointment.reminder24Hours || appointment.reminder1Hour) && !alertsEnabled {
             let alert = UIAlertController(
@@ -227,6 +251,7 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         )
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            NinjaHaptics.warning()
             AppointmentStore.shared.delete(appointment)
             self?.navigationController?.popViewController(animated: true)
         })

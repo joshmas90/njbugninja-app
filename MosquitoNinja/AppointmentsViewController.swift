@@ -132,7 +132,7 @@ final class AppointmentsViewController: NinjaBaseViewController {
     }
 
     private func compactAppointmentCard(_ appointment: ServiceAppointment) -> UIControl {
-        let control = UIControl()
+        let control = NinjaTouchControl()
         control.backgroundColor = NinjaPalette.panel
         control.layer.cornerRadius = 16
         control.layer.borderWidth = 0.5
