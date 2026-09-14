@@ -1,9 +1,11 @@
 import UIKit
+import PhotosUI
 
 final class QuoteViewController:
     NinjaBaseViewController,
     UITextFieldDelegate,
-    UITextViewDelegate
+    UITextViewDelegate,
+    PHPickerViewControllerDelegate
 {
     private let service =
         UISegmentedControl(
@@ -20,18 +22,25 @@ final class QuoteViewController:
     private let locationField = UITextField()
     private let notesView = UITextView()
 
+    private let photoPanel = UIView()
+    private let photoPreviewStack = UIStackView()
+    private let photoCountLabel = UILabel()
+    private let clearPhotosButton = NinjaButton(type: .system)
+    private let quoteMessageComposer = MessageComposer()
+
+    private var selectedPhotos: [UIImage] = []
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "Quote"
-
         buildUI()
+        updatePhotoUI()
     }
 
     func selectService(_ selection: NinjaService) {
         loadViewIfNeeded()
         service.selectedSegmentIndex = selection.rawValue
-        // Keep any name, phone, location and property notes already entered.
     }
 
     private func style(
@@ -41,53 +50,52 @@ final class QuoteViewController:
     ) {
         field.placeholder = placeholder
         field.textContentType = contentType
-
-        field.backgroundColor =
-            NinjaPalette.panel
-
+        field.backgroundColor = NinjaPalette.panel
         field.textColor = .white
         field.font = .preferredFont(forTextStyle: .body)
         field.adjustsFontForContentSizeCategory = true
         field.tintColor = NinjaPalette.red
-
         field.layer.cornerRadius = 12
         field.layer.cornerCurve = .continuous
-
         field.layer.borderWidth = 0.75
-
         field.layer.borderColor =
-            UIColor.white
-                .withAlphaComponent(0.12)
-                .cgColor
-
+            UIColor.white.withAlphaComponent(0.12).cgColor
         field.setLeftPadding(14)
-
         field.heightAnchor.constraint(
             greaterThanOrEqualToConstant: 52
         ).isActive = true
-
         field.delegate = self
-
-        let color =
-            UIColor.white.withAlphaComponent(0.64)
 
         field.attributedPlaceholder =
             NSAttributedString(
                 string: placeholder,
                 attributes: [
-                    .foregroundColor: color
+                    .foregroundColor:
+                        UIColor.white.withAlphaComponent(0.64)
                 ]
             )
     }
 
-    private func labeledField(_ field: UITextField, title: String) -> UIView {
+    private func labeledField(
+        _ field: UITextField,
+        title: String
+    ) -> UIView {
         let label = UILabel()
         label.text = title
         label.textColor = UIColor.white.withAlphaComponent(0.9)
-        label.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: .systemFont(ofSize: 14, weight: .semibold))
+        label.font =
+            UIFontMetrics(forTextStyle: .subheadline)
+                .scaledFont(
+                    for:
+                        .systemFont(
+                            ofSize: 14,
+                            weight: .semibold
+                        )
+                )
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         label.isAccessibilityElement = false
+
         field.accessibilityLabel = title
 
         let stack = UIStackView(arrangedSubviews: [label, field])
@@ -110,7 +118,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Add your details, then review and send your request right here in the app."
+                "Add your details, include property photos if they help, then review and send the request without leaving the app."
             )
         )
 
@@ -119,32 +127,21 @@ final class QuoteViewController:
         )
 
         service.selectedSegmentIndex = 0
-
-        service.selectedSegmentTintColor =
-            NinjaPalette.red
-
+        service.selectedSegmentTintColor = NinjaPalette.red
         service.setTitleTextAttributes(
-            [
-                .foregroundColor:
-                    UIColor.white
-            ],
+            [.foregroundColor: UIColor.white],
             for: .selected
         )
-
         service.setTitleTextAttributes(
             [
                 .foregroundColor:
-                    UIColor.white
-                        .withAlphaComponent(0.72)
+                    UIColor.white.withAlphaComponent(0.72)
             ],
             for: .normal
         )
-
         service.addTarget(
             self,
-            action: #selector(
-                serviceSelectionChanged
-            ),
+            action: #selector(serviceSelectionChanged),
             for: .valueChanged
         )
 
@@ -159,80 +156,82 @@ final class QuoteViewController:
             placeholder: "Your name",
             contentType: .name
         )
-
         style(
             phoneField,
             placeholder: "Best number to reach you",
             contentType: .telephoneNumber
         )
-
-        phoneField.keyboardType = .phonePad
-
         style(
             locationField,
             placeholder: "Town or ZIP code",
             contentType: .postalCode
         )
 
+        phoneField.keyboardType = .phonePad
         nameField.returnKeyType = .next
         locationField.returnKeyType = .done
 
         [
             labeledField(nameField, title: "Name"),
             labeledField(phoneField, title: "Phone"),
-            labeledField(locationField, title: "Town or ZIP code")
-        ].forEach(
-            contentStack.addArrangedSubview
-        )
+            labeledField(
+                locationField,
+                title: "Town or ZIP code"
+            )
+        ].forEach(contentStack.addArrangedSubview)
 
         contentStack.addArrangedSubview(
             sectionTitle("Property details")
         )
 
-        notesView.backgroundColor =
-            NinjaPalette.panel
-
+        notesView.backgroundColor = NinjaPalette.panel
         notesView.textColor = .white
         notesView.tintColor = NinjaPalette.red
-
         notesView.font = .preferredFont(forTextStyle: .body)
         notesView.adjustsFontForContentSizeCategory = true
         notesView.accessibilityLabel = "Property details"
-
         notesView.layer.cornerRadius = 12
-        notesView.layer.cornerCurve =
-            .continuous
-
+        notesView.layer.cornerCurve = .continuous
         notesView.layer.borderWidth = 0.75
-
         notesView.layer.borderColor =
-            UIColor.white
-                .withAlphaComponent(0.12)
-                .cgColor
-
+            UIColor.white.withAlphaComponent(0.12).cgColor
         notesView.heightAnchor.constraint(
             greaterThanOrEqualToConstant: 130
         ).isActive = true
-
         notesView.text =
             "Describe the property, where you notice activity, and any scheduling details."
-
         notesView.textColor =
             UIColor.white.withAlphaComponent(0.64)
-
         notesView.delegate = self
 
+        contentStack.addArrangedSubview(notesView)
+
         contentStack.addArrangedSubview(
-            notesView
+            sectionTitle("Property photos")
+        )
+
+        contentStack.addArrangedSubview(
+            body(
+                "Optional: attach up to three photos of the yard, vegetation, standing water, wooded edges, or the area where activity is worst."
+            )
+        )
+
+        configurePhotoPanel()
+        contentStack.addArrangedSubview(photoPanel)
+
+        contentStack.addArrangedSubview(
+            secondaryButton(
+                "Choose Property Photos",
+                symbol: "photo.on.rectangle.angled",
+                action: #selector(choosePhotos)
+            )
         )
 
         contentStack.addArrangedSubview(
             primaryButton(
                 "Review & Send",
-                symbol:
-                    "checkmark.bubble.fill",
-                action:
-                    #selector(reviewQuote)
+                symbol: "checkmark.bubble.fill",
+                action: #selector(reviewQuote)
             )
         )
 
@@ -240,18 +239,177 @@ final class QuoteViewController:
             card(
                 title: "You stay in control",
                 detail:
-                    "Review your prepared text in the sheet, then tap Send. You stay in the app. Replies arrive in Messages.",
-                symbol:
-                    "hand.tap.fill",
-                accent:
-                    NinjaPalette.green
+                    "Review the prepared request in Apple's Messages sheet, then tap Send. Nothing is sent automatically.",
+                symbol: "hand.tap.fill",
+                accent: NinjaPalette.green
             )
         )
     }
 
-    @objc private func
-        serviceSelectionChanged()
-    {
+    private func configurePhotoPanel() {
+        photoPanel.backgroundColor = NinjaPalette.panel
+        photoPanel.layer.cornerRadius = 16
+        photoPanel.layer.cornerCurve = .continuous
+        photoPanel.layer.borderWidth = 0.75
+        photoPanel.layer.borderColor =
+            UIColor.white.withAlphaComponent(0.10).cgColor
+
+        photoCountLabel.textColor = NinjaPalette.muted
+        photoCountLabel.font =
+            .preferredFont(forTextStyle: .subheadline)
+        photoCountLabel.adjustsFontForContentSizeCategory = true
+        photoCountLabel.numberOfLines = 0
+
+        var clearConfig = UIButton.Configuration.plain()
+        clearConfig.title = "CLEAR"
+        clearConfig.baseForegroundColor = NinjaPalette.red
+        clearConfig.image = UIImage(systemName: "xmark.circle.fill")
+        clearConfig.imagePadding = 6
+        clearConfig.contentInsets =
+            NSDirectionalEdgeInsets(
+                top: 8,
+                leading: 8,
+                bottom: 8,
+                trailing: 8
+            )
+
+        clearPhotosButton.configuration = clearConfig
+        clearPhotosButton.hapticStyle = .light
+        clearPhotosButton.addTarget(
+            self,
+            action: #selector(clearPhotos),
+            for: .touchUpInside
+        )
+
+        let header = UIStackView(
+            arrangedSubviews: [
+                photoCountLabel,
+                clearPhotosButton
+            ]
+        )
+        header.axis = .horizontal
+        header.alignment = .center
+        header.distribution = .fill
+        header.spacing = 8
+
+        photoPreviewStack.axis = .horizontal
+        photoPreviewStack.alignment = .center
+        photoPreviewStack.spacing = 10
+
+        let previewScroll = UIScrollView()
+        previewScroll.translatesAutoresizingMaskIntoConstraints = false
+        previewScroll.showsHorizontalScrollIndicator = false
+        previewScroll.addSubview(photoPreviewStack)
+        photoPreviewStack.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            photoPreviewStack.topAnchor.constraint(
+                equalTo: previewScroll.contentLayoutGuide.topAnchor
+            ),
+            photoPreviewStack.leadingAnchor.constraint(
+                equalTo: previewScroll.contentLayoutGuide.leadingAnchor
+            ),
+            photoPreviewStack.trailingAnchor.constraint(
+                equalTo: previewScroll.contentLayoutGuide.trailingAnchor
+            ),
+            photoPreviewStack.bottomAnchor.constraint(
+                equalTo: previewScroll.contentLayoutGuide.bottomAnchor
+            ),
+            photoPreviewStack.heightAnchor.constraint(
+                equalTo: previewScroll.frameLayoutGuide.heightAnchor
+            ),
+            previewScroll.heightAnchor.constraint(
+                equalToConstant: 78
+            )
+        ])
+
+        let stack = UIStackView(
+            arrangedSubviews: [
+                header,
+                previewScroll
+            ]
+        )
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.spacing = 12
+
+        photoPanel.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(
+                equalTo: photoPanel.topAnchor,
+                constant: 15
+            ),
+            stack.leadingAnchor.constraint(
+                equalTo: photoPanel.leadingAnchor,
+                constant: 15
+            ),
+            stack.trailingAnchor.constraint(
+                equalTo: photoPanel.trailingAnchor,
+                constant: -15
+            ),
+            stack.bottomAnchor.constraint(
+                equalTo: photoPanel.bottomAnchor,
+                constant: -15
+            )
+        ])
+    }
+
+    private func updatePhotoUI() {
+        photoPreviewStack.arrangedSubviews.forEach {
+            photoPreviewStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        switch selectedPhotos.count {
+        case 0:
+            photoCountLabel.text = "No photos selected"
+            clearPhotosButton.isHidden = true
+
+            let placeholder = UILabel()
+            placeholder.text =
+                "Photos are optional. Choose images only if they help show the property or pest activity."
+            placeholder.textColor =
+                UIColor.white.withAlphaComponent(0.52)
+            placeholder.font =
+                .preferredFont(forTextStyle: .footnote)
+            placeholder.adjustsFontForContentSizeCategory = true
+            placeholder.numberOfLines = 0
+            placeholder.widthAnchor.constraint(
+                lessThanOrEqualToConstant: 330
+            ).isActive = true
+            photoPreviewStack.addArrangedSubview(placeholder)
+
+        default:
+            photoCountLabel.text =
+                "\(selectedPhotos.count) of 3 photos selected"
+            clearPhotosButton.isHidden = false
+
+            for (index, image) in selectedPhotos.enumerated() {
+                let preview = UIImageView(image: image)
+                preview.contentMode = .scaleAspectFill
+                preview.clipsToBounds = true
+                preview.layer.cornerRadius = 12
+                preview.layer.cornerCurve = .continuous
+                preview.layer.borderWidth = 1
+                preview.layer.borderColor =
+                    UIColor.white.withAlphaComponent(0.12).cgColor
+                preview.translatesAutoresizingMaskIntoConstraints = false
+                preview.widthAnchor.constraint(
+                    equalToConstant: 78
+                ).isActive = true
+                preview.heightAnchor.constraint(
+                    equalToConstant: 78
+                ).isActive = true
+                preview.isAccessibilityElement = true
+                preview.accessibilityLabel =
+                    "Selected property photo \(index + 1)"
+                photoPreviewStack.addArrangedSubview(preview)
+            }
+        }
+    }
+
+    @objc private func serviceSelectionChanged() {
         NinjaHaptics.selection()
     }
 
@@ -262,47 +420,135 @@ final class QuoteViewController:
             locationField
         ].forEach { field in
             field.layer.borderColor =
-                UIColor.white
-                    .withAlphaComponent(0.12)
-                    .cgColor
+                UIColor.white.withAlphaComponent(0.12).cgColor
+            field.layer.borderWidth = 0.75
         }
     }
 
-    private func markInvalid(
-        _ field: UITextField
-    ) {
+    private func markInvalid(_ field: UITextField) {
         field.layer.borderColor =
-            NinjaPalette.red
-                .withAlphaComponent(0.88)
-                .cgColor
-
+            NinjaPalette.red.withAlphaComponent(0.88).cgColor
         field.layer.borderWidth = 1.25
+    }
+
+    @objc private func choosePhotos() {
+        var configuration =
+            PHPickerConfiguration(photoLibrary: .shared())
+        configuration.filter = .images
+        configuration.selectionLimit = 3
+        configuration.preferredAssetRepresentationMode = .current
+
+        let picker =
+            PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+
+        present(picker, animated: true)
+    }
+
+    @objc private func clearPhotos() {
+        guard !selectedPhotos.isEmpty else { return }
+
+        selectedPhotos.removeAll()
+        updatePhotoUI()
+
+        showFeedback(
+            title: "Photos Cleared",
+            detail:
+                "The quote request will be sent without photos unless you choose new ones.",
+            kind: .info,
+            duration: 1.2
+        )
+    }
+
+    func picker(
+        _ picker: PHPickerViewController,
+        didFinishPicking results: [PHPickerResult]
+    ) {
+        picker.dismiss(animated: true)
+
+        guard !results.isEmpty else { return }
+
+        let limitedResults = Array(results.prefix(3))
+        let group = DispatchGroup()
+        let lock = NSLock()
+
+        var ordered:
+            [(index: Int, image: UIImage)] = []
+
+        for (index, result) in limitedResults.enumerated() {
+            guard
+                result.itemProvider.canLoadObject(
+                    ofClass: UIImage.self
+                )
+            else { continue }
+
+            group.enter()
+
+            result.itemProvider.loadObject(
+                ofClass: UIImage.self
+            ) { object, _ in
+                defer { group.leave() }
+
+                guard let image = object as? UIImage else {
+                    return
+                }
+
+                lock.lock()
+                ordered.append((index, image))
+                lock.unlock()
+            }
+        }
+
+        group.notify(queue: .main) { [weak self] in
+            guard let self else { return }
+
+            self.selectedPhotos =
+                ordered
+                    .sorted { $0.index < $1.index }
+                    .map(\.image)
+
+            self.updatePhotoUI()
+
+            if self.selectedPhotos.isEmpty {
+                self.showFeedback(
+                    title: "Photos Couldn't Load",
+                    detail:
+                        "Try choosing the property photos again.",
+                    kind: .warning,
+                    duration: 1.6
+                )
+            } else {
+                self.showFeedback(
+                    title: "Photos Ready",
+                    detail:
+                        "\(self.selectedPhotos.count) photo\(self.selectedPhotos.count == 1 ? "" : "s") will be included with the quote request.",
+                    kind: .success,
+                    duration: 1.5
+                )
+            }
+        }
     }
 
     @objc private func reviewQuote() {
         view.endEditing(true)
-
         resetValidation()
 
         let name =
             nameField.text?
                 .trimmingCharacters(
-                    in:
-                        .whitespacesAndNewlines
+                    in: .whitespacesAndNewlines
                 ) ?? ""
 
         let phone =
             phoneField.text?
                 .trimmingCharacters(
-                    in:
-                        .whitespacesAndNewlines
+                    in: .whitespacesAndNewlines
                 ) ?? ""
 
         let location =
             locationField.text?
                 .trimmingCharacters(
-                    in:
-                        .whitespacesAndNewlines
+                    in: .whitespacesAndNewlines
                 ) ?? ""
 
         var issues: [String] = []
@@ -319,9 +565,7 @@ final class QuoteViewController:
                 count,
                 character in
 
-                if character.wholeNumberValue
-                    != nil
-                {
+                if character.wholeNumberValue != nil {
                     count += 1
                 }
             }
@@ -334,10 +578,7 @@ final class QuoteViewController:
                 firstInvalid = phoneField
             }
         } else if digitCount < 10 {
-            issues.append(
-                "a complete phone number"
-            )
-
+            issues.append("a complete phone number")
             markInvalid(phoneField)
 
             if firstInvalid == nil {
@@ -346,10 +587,7 @@ final class QuoteViewController:
         }
 
         if location.isEmpty {
-            issues.append(
-                "your town or ZIP code"
-            )
-
+            issues.append("your town or ZIP code")
             markInvalid(locationField)
 
             if firstInvalid == nil {
@@ -358,23 +596,17 @@ final class QuoteViewController:
         }
 
         guard issues.isEmpty else {
-            let missing =
-                issues.joined(
-                    separator: ", "
-                )
+            let missing = issues.joined(separator: ", ")
 
             showFeedback(
-                title:
-                    "More Information Needed",
+                title: "More Information Needed",
                 detail:
                     "Please add \(missing) before reviewing your quote request.",
                 kind: .warning,
                 duration: 2.1
             )
 
-            firstInvalid?
-                .becomeFirstResponder()
-
+            firstInvalid?.becomeFirstResponder()
             return
         }
 
@@ -383,28 +615,23 @@ final class QuoteViewController:
             ? "Commercial / Government"
             : (
                 service.titleForSegment(
-                    at:
-                        service
-                            .selectedSegmentIndex
+                    at: service.selectedSegmentIndex
                 )
                 ?? "Mosquito"
             )
 
         let notes =
-            notesView.text.hasPrefix(
-                "Describe the property"
-            )
+            notesView.text.hasPrefix("Describe the property")
             ? ""
             : (
                 notesView.text?
                     .trimmingCharacters(
-                        in:
-                            .whitespacesAndNewlines
+                        in: .whitespacesAndNewlines
                     )
                 ?? ""
             )
 
-        let message = """
+        var message = """
         Hi Mosquito Ninja, I'd like a property quote.
 
         Name: \(name)
@@ -414,17 +641,24 @@ final class QuoteViewController:
         Property: \(notes)
         """
 
-        composeMessage(body: message, kind: .quote)
+        if !selectedPhotos.isEmpty {
+            message +=
+                "\nProperty photos attached: \(selectedPhotos.count)"
+        }
+
+        quoteMessageComposer.present(
+            from: self,
+            body: message,
+            kind: .quote,
+            images: selectedPhotos
+        )
     }
 
     func textFieldDidBeginEditing(
         _ textField: UITextField
     ) {
         textField.layer.borderColor =
-            UIColor.white
-                .withAlphaComponent(0.12)
-                .cgColor
-
+            UIColor.white.withAlphaComponent(0.12).cgColor
         textField.layer.borderWidth = 0.75
     }
 
@@ -443,20 +677,15 @@ final class QuoteViewController:
     func textViewDidBeginEditing(
         _ textView: UITextView
     ) {
-        if textView.text.hasPrefix(
-            "Describe the property"
-        ) {
+        if textView.text.hasPrefix("Describe the property") {
             textView.text = ""
             textView.textColor = .white
         }
     }
 }
 
-
 private extension UITextField {
-    func setLeftPadding(
-        _ amount: CGFloat
-    ) {
+    func setLeftPadding(_ amount: CGFloat) {
         let padding =
             UIView(
                 frame:
