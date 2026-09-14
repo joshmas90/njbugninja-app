@@ -216,8 +216,7 @@ final class NinjaButton: UIButton {
         feedback = nil
     }
 }
-
-private final class NinjaScrollView: UIScrollView {
+final class NinjaScrollView: UIScrollView {
     override func touchesShouldCancel(in view: UIView) -> Bool {
         if view is UIControl {
             return true
