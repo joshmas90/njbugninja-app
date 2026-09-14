@@ -1,6 +1,86 @@
 workflows:
+  mosquito-ninja-ios-build-only:
+    name: Mosquito Ninja iOS - Build Only
+
+    max_build_duration: 60
+
+    integrations:
+      app_store_connect: "Codemagic CI"
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.njbugninja.app
+
+      vars:
+        XCODE_PROJECT: "MosquitoNinja.xcodeproj"
+        XCODE_SCHEME: "MosquitoNinja"
+
+      xcode: 26.4
+
+    scripts:
+      - name: Verify bundled website
+        script: |
+          python3 scripts/verify_bundle.py
+
+      - name: Set build number
+        script: |
+          set -e
+          PLIST="$CM_BUILD_DIR/MosquitoNinja/Info.plist"
+
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleVersion $BUILD_NUMBER" \
+            "$PLIST"
+
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleShortVersionString 1.0" \
+            "$PLIST"
+
+          echo "Source CFBundleVersion:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST"
+
+          echo "Source CFBundleShortVersionString:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST"
+
+      - name: Configure iOS signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Build Mosquito Ninja IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+      - name: Verify built IPA version metadata
+        script: |
+          set -e
+
+          IPA=$(find "$CM_BUILD_DIR/build/ios/ipa" -name '*.ipa' -type f | head -n 1)
+          test -n "$IPA"
+
+          TMP_DIR=$(mktemp -d)
+          unzip -q "$IPA" -d "$TMP_DIR"
+
+          APP=$(find "$TMP_DIR/Payload" -maxdepth 1 -name '*.app' -type d | head -n 1)
+          test -n "$APP"
+
+          BUNDLE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")
+          SHORT_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")
+
+          echo "Built CFBundleVersion: $BUNDLE_VERSION"
+          echo "Built CFBundleShortVersionString: $SHORT_VERSION"
+
+          test -n "$BUNDLE_VERSION"
+          test -n "$SHORT_VERSION"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
   mosquito-ninja-ios:
-    name: Mosquito Ninja iOS
+    name: Mosquito Ninja iOS + App Store
 
     max_build_duration: 60
 
