@@ -366,7 +366,7 @@ final class HomeViewController: NinjaBaseViewController {
         if isCheckingServiceArea {
             titleText = "CHECKING YOUR LOCATION..."
             detailText =
-                "Finding your county and ZIP, then checking the latest service-area rules."
+                "Finding your county and ZIP and checking current coverage. This can take a few seconds."
             symbol = "location.fill"
             accent = NinjaPalette.green
 
@@ -421,14 +421,29 @@ final class HomeViewController: NinjaBaseViewController {
 
         control.accessibilityTraits = .button
         control.accessibilityLabel = titleText
+        control.accessibilityValue =
+            isCheckingServiceArea
+            ? "Checking current location and service coverage"
+            : detailText
+        control.isUserInteractionEnabled =
+            !isCheckingServiceArea
 
-        let icon = UIImageView(
-            image: UIImage(systemName: symbol)
-        )
+        let leadingView: UIView
 
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        icon.tintColor = accent
-        icon.contentMode = .scaleAspectFit
+        if isCheckingServiceArea {
+            let loader = NinjaActivityIndicator(frame: .zero)
+            loader.translatesAutoresizingMaskIntoConstraints = false
+            loader.startAnimating()
+            leadingView = loader
+        } else {
+            let icon = UIImageView(
+                image: UIImage(systemName: symbol)
+            )
+            icon.translatesAutoresizingMaskIntoConstraints = false
+            icon.tintColor = accent
+            icon.contentMode = .scaleAspectFit
+            leadingView = icon
+        }
 
         let title = UILabel()
         title.text = titleText
@@ -459,10 +474,11 @@ final class HomeViewController: NinjaBaseViewController {
         chevron.translatesAutoresizingMaskIntoConstraints = false
         chevron.tintColor =
             UIColor.white.withAlphaComponent(0.42)
+        chevron.isHidden = isCheckingServiceArea
 
         let row = UIStackView(
             arrangedSubviews: [
-                icon,
+                leadingView,
                 labels,
                 chevron
             ]
@@ -476,11 +492,11 @@ final class HomeViewController: NinjaBaseViewController {
         control.addSubview(row)
 
         NSLayoutConstraint.activate([
-            icon.widthAnchor.constraint(
+            leadingView.widthAnchor.constraint(
                 equalToConstant: 28
             ),
 
-            icon.heightAnchor.constraint(
+            leadingView.heightAnchor.constraint(
                 equalToConstant: 28
             ),
 
@@ -541,18 +557,33 @@ final class HomeViewController: NinjaBaseViewController {
             case .success(let areaResult):
                 self.serviceAreaResult = areaResult
 
+                self.refresh()
+
                 switch areaResult.coverage {
                 case .covered:
-                    NinjaHaptics.success()
+                    self.showFeedback(
+                        title: "Coverage Confirmed",
+                        detail: "Your current location is inside our normal service area.",
+                        kind: .success,
+                        duration: 1.65
+                    )
 
                 case .confirm:
-                    NinjaHaptics.selection()
+                    self.showFeedback(
+                        title: "Route Confirmation Needed",
+                        detail: "This location may be serviceable. Contact Mosquito Ninja so we can confirm the route and schedule.",
+                        kind: .info,
+                        duration: 2.0
+                    )
 
                 case .outside:
-                    NinjaHaptics.warning()
+                    self.showFeedback(
+                        title: "Outside Normal Coverage",
+                        detail: "This location is outside our normal service area. Contact us if you would like us to review the route.",
+                        kind: .warning,
+                        duration: 2.0
+                    )
                 }
-
-                self.refresh()
 
             case .failure(let error):
                 self.serviceAreaResult = nil
@@ -588,7 +619,7 @@ final class HomeViewController: NinjaBaseViewController {
         let alert = UIAlertController(
             title: "Location Access Is Off",
             message:
-                "Mosquito Ninja uses your location only when you choose to check the service area. Your precise coordinates are not stored by Mosquito Ninja.",
+                "Mosquito Ninja uses your location only when you choose to check the service area. To continue, open Settings, allow Location While Using the App, then return and tap Check My Service Area again. Your precise coordinates are not stored by Mosquito Ninja.",
             preferredStyle: .alert
         )
 
@@ -622,16 +653,27 @@ final class HomeViewController: NinjaBaseViewController {
         _ message: String
     ) {
         let alert = UIAlertController(
-            title: "Service Area Check",
-            message: message,
+            title: "Service Area Check Didn't Finish",
+            message:
+                message +
+                "\n\nCheck your connection and location availability, then try again.",
             preferredStyle: .alert
         )
 
         alert.addAction(
             UIAlertAction(
-                title: "OK",
-                style: .default
+                title: "Cancel",
+                style: .cancel
             )
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Try Again",
+                style: .default
+            ) { [weak self] _ in
+                self?.checkServiceArea()
+            }
         )
 
         present(alert, animated: true)
