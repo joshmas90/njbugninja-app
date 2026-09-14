@@ -29,6 +29,9 @@ final class HomeViewController: NinjaBaseViewController {
         return formatter
     }()
 
+    private var isCheckingServiceArea = false
+    private var serviceAreaResult: ServiceAreaResult?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Mosquito Ninja"
@@ -60,6 +63,7 @@ final class HomeViewController: NinjaBaseViewController {
 
     private func buildUI() {
         contentStack.addArrangedSubview(ninjaHero())
+        contentStack.addArrangedSubview(serviceAreaCard())
 
         if let appointment = AppointmentStore.shared.nextAppointment {
             contentStack.addArrangedSubview(nextAppointmentCard(appointment))
@@ -345,6 +349,292 @@ final class HomeViewController: NinjaBaseViewController {
             self?.navigationController?.pushViewController(WebViewController(page: page, title: titleForPage), animated: true)
         }, for: .touchUpInside)
         return control
+    }
+
+    private func serviceAreaCard() -> UIControl {
+        let control = NinjaTouchControl()
+
+        control.backgroundColor = NinjaPalette.panel
+        control.layer.cornerRadius = 18
+        control.layer.borderWidth = 1
+
+        let titleText: String
+        let detailText: String
+        let symbol: String
+        let accent: UIColor
+
+        if isCheckingServiceArea {
+            titleText = "CHECKING YOUR LOCATION..."
+            detailText =
+                "Finding your county and ZIP, then checking the latest service-area rules."
+            symbol = "location.fill"
+            accent = NinjaPalette.green
+
+        } else if let result = serviceAreaResult {
+            switch result.coverage {
+            case .covered:
+                titleText = "YOU'RE IN OUR SERVICE AREA"
+                symbol = "checkmark.seal.fill"
+                accent = NinjaPalette.green
+
+            case .confirm:
+                titleText = "ROUTE CONFIRMATION NEEDED"
+                symbol = "location.circle.fill"
+                accent = NinjaPalette.green
+
+            case .outside:
+                titleText = "OUTSIDE OUR CURRENT SERVICE AREA"
+                symbol = "xmark.circle.fill"
+                accent = NinjaPalette.red
+            }
+
+            let locationText = [
+                result.county,
+                result.postalCode
+            ]
+            .compactMap { value -> String? in
+                guard let value = value, !value.isEmpty else {
+                    return nil
+                }
+
+                return value
+            }
+            .joined(separator: " | ")
+
+            if locationText.isEmpty {
+                detailText = result.message
+            } else {
+                detailText =
+                    locationText + "\n" + result.message
+            }
+
+        } else {
+            titleText = "CHECK MY SERVICE AREA"
+            detailText =
+                "Use your current location for an instant county and ZIP coverage check."
+            symbol = "location.circle.fill"
+            accent = NinjaPalette.green
+        }
+
+        control.layer.borderColor =
+            accent.withAlphaComponent(0.42).cgColor
+
+        control.accessibilityTraits = .button
+        control.accessibilityLabel = titleText
+
+        let icon = UIImageView(
+            image: UIImage(systemName: symbol)
+        )
+
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.tintColor = accent
+        icon.contentMode = .scaleAspectFit
+
+        let title = UILabel()
+        title.text = titleText
+        title.textColor = .white
+        title.font = .systemFont(
+            ofSize: 14,
+            weight: .heavy
+        )
+        title.numberOfLines = 0
+
+        let detail = UILabel()
+        detail.text = detailText
+        detail.textColor = NinjaPalette.muted
+        detail.font = .systemFont(ofSize: 13)
+        detail.numberOfLines = 0
+
+        let labels = UIStackView(
+            arrangedSubviews: [title, detail]
+        )
+
+        labels.axis = .vertical
+        labels.spacing = 5
+
+        let chevron = UIImageView(
+            image: UIImage(systemName: "chevron.right")
+        )
+
+        chevron.translatesAutoresizingMaskIntoConstraints = false
+        chevron.tintColor =
+            UIColor.white.withAlphaComponent(0.42)
+
+        let row = UIStackView(
+            arrangedSubviews: [
+                icon,
+                labels,
+                chevron
+            ]
+        )
+
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 14
+
+        control.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            icon.widthAnchor.constraint(
+                equalToConstant: 28
+            ),
+
+            icon.heightAnchor.constraint(
+                equalToConstant: 28
+            ),
+
+            chevron.widthAnchor.constraint(
+                equalToConstant: 12
+            ),
+
+            row.topAnchor.constraint(
+                equalTo: control.topAnchor,
+                constant: 16
+            ),
+
+            row.leadingAnchor.constraint(
+                equalTo: control.leadingAnchor,
+                constant: 16
+            ),
+
+            row.trailingAnchor.constraint(
+                equalTo: control.trailingAnchor,
+                constant: -16
+            ),
+
+            row.bottomAnchor.constraint(
+                equalTo: control.bottomAnchor,
+                constant: -16
+            )
+        ])
+
+        control.addAction(
+            UIAction { [weak self] _ in
+                self?.checkServiceArea()
+            },
+            for: .touchUpInside
+        )
+
+        return control
+    }
+
+    private func checkServiceArea() {
+        guard !isCheckingServiceArea else {
+            return
+        }
+
+        serviceAreaResult = nil
+        isCheckingServiceArea = true
+        refresh()
+
+        ServiceAreaManager.shared.checkCurrentLocation {
+            [weak self] result in
+
+            guard let self = self else {
+                return
+            }
+
+            self.isCheckingServiceArea = false
+
+            switch result {
+            case .success(let areaResult):
+                self.serviceAreaResult = areaResult
+
+                switch areaResult.coverage {
+                case .covered:
+                    NinjaHaptics.success()
+
+                case .confirm:
+                    NinjaHaptics.selection()
+
+                case .outside:
+                    NinjaHaptics.warning()
+                }
+
+                self.refresh()
+
+            case .failure(let error):
+                self.serviceAreaResult = nil
+                self.refresh()
+
+                if let serviceError =
+                    error as? ServiceAreaError {
+
+                    switch serviceError {
+                    case .permissionDenied:
+                        NinjaHaptics.warning()
+                        self.showLocationSettingsAlert()
+
+                    case .locationUnavailable,
+                         .geocodingFailed:
+                        NinjaHaptics.warning()
+                        self.showServiceAreaError(
+                            serviceError.localizedDescription
+                        )
+                    }
+
+                } else {
+                    NinjaHaptics.warning()
+                    self.showServiceAreaError(
+                        error.localizedDescription
+                    )
+                }
+            }
+        }
+    }
+
+    private func showLocationSettingsAlert() {
+        let alert = UIAlertController(
+            title: "Location Access Is Off",
+            message:
+                "Mosquito Ninja uses your location only when you choose to check the service area. Your precise coordinates are not stored by Mosquito Ninja.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Not Now",
+                style: .cancel
+            )
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Open Settings",
+                style: .default
+            ) { _ in
+                guard let url = URL(
+                    string:
+                        UIApplication.openSettingsURLString
+                ) else {
+                    return
+                }
+
+                UIApplication.shared.open(url)
+            }
+        )
+
+        present(alert, animated: true)
+    }
+
+    private func showServiceAreaError(
+        _ message: String
+    ) {
+        let alert = UIAlertController(
+            title: "Service Area Check",
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "OK",
+                style: .default
+            )
+        )
+
+        present(alert, animated: true)
     }
 
     @objc private func openQuote() { tabBarController?.selectedIndex = 3 }
