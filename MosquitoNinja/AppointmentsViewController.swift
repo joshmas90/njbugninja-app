@@ -86,6 +86,7 @@ final class AppointmentsViewController: NinjaBaseViewController {
         let container = UIView()
         container.backgroundColor = NinjaPalette.panel
         container.layer.cornerRadius = 20
+        container.layer.cornerCurve = .continuous
         container.layer.borderWidth = 1
         container.layer.borderColor = NinjaPalette.red.withAlphaComponent(0.42).cgColor
 
@@ -135,6 +136,7 @@ final class AppointmentsViewController: NinjaBaseViewController {
         let control = NinjaTouchControl()
         control.backgroundColor = NinjaPalette.panel
         control.layer.cornerRadius = 16
+        control.layer.cornerCurve = .continuous
         control.layer.borderWidth = 0.5
         control.layer.borderColor = UIColor.white.withAlphaComponent(0.10).cgColor
 
@@ -185,60 +187,243 @@ final class AppointmentsViewController: NinjaBaseViewController {
 
     private func alertStatusCard() -> UIView {
         let container = UIView()
-        container.backgroundColor = NinjaPalette.panel
-        container.layer.cornerRadius = 16
-        container.layer.borderWidth = 0.5
-        container.layer.borderColor = UIColor.white.withAlphaComponent(0.10).cgColor
 
-        let icon = UIImageView(image: UIImage(systemName: "bell.fill"))
-        icon.tintColor = NinjaPalette.green
-        icon.translatesAutoresizingMaskIntoConstraints = false
+        container.backgroundColor =
+            NinjaPalette.panel
+
+        container.layer.cornerRadius = 16
+        container.layer.cornerCurve =
+            .continuous
+
+        container.layer.borderWidth = 0.75
+
+        container.layer.borderColor =
+            UIColor.white
+                .withAlphaComponent(0.10)
+                .cgColor
+
+        let iconHolder = UIView()
+
+        iconHolder.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        let loader =
+            NinjaActivityIndicator(
+                frame: .zero
+            )
+
+        loader.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        loader.startAnimating()
+
+        let icon =
+            UIImageView(
+                image:
+                    UIImage(
+                        systemName:
+                            "bell.fill"
+                    )
+            )
+
+        icon.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        icon.tintColor =
+            NinjaPalette.green
+
+        icon.alpha = 0
+
+        iconHolder.addSubview(loader)
+        iconHolder.addSubview(icon)
 
         let title = UILabel()
-        title.text = "CHECKING ALERT STATUS…"
+
+        title.text =
+            "CHECKING ALERT STATUS…"
+
         title.textColor = .white
-        title.font = .systemFont(ofSize: 14, weight: .bold)
+
+        title.font =
+            .systemFont(
+                ofSize: 14,
+                weight: .bold
+            )
 
         let detail = UILabel()
-        detail.text = "24-hour and 1-hour reminders are available for saved appointments."
-        detail.textColor = NinjaPalette.muted
-        detail.font = .systemFont(ofSize: 13)
+
+        detail.text =
+            "Checking whether 24-hour and 1-hour appointment reminders are available."
+
+        detail.textColor =
+            NinjaPalette.muted
+
+        detail.font =
+            .systemFont(ofSize: 13)
+
         detail.numberOfLines = 0
 
-        let labels = UIStackView(arrangedSubviews: [title, detail])
+        let labels =
+            UIStackView(
+                arrangedSubviews: [
+                    title,
+                    detail
+                ]
+            )
+
         labels.axis = .vertical
         labels.spacing = 4
 
-        let row = UIStackView(arrangedSubviews: [icon, labels])
-        row.translatesAutoresizingMaskIntoConstraints = false
+        let row =
+            UIStackView(
+                arrangedSubviews: [
+                    iconHolder,
+                    labels
+                ]
+            )
+
+        row.translatesAutoresizingMaskIntoConstraints =
+            false
+
         row.axis = .horizontal
         row.alignment = .top
         row.spacing = 14
+
         container.addSubview(row)
+
         NSLayoutConstraint.activate([
-            icon.widthAnchor.constraint(equalToConstant: 24),
-            icon.heightAnchor.constraint(equalToConstant: 24),
-            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
-            row.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
-            row.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
-            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16)
+            iconHolder.widthAnchor.constraint(
+                equalToConstant: 26
+            ),
+
+            iconHolder.heightAnchor.constraint(
+                equalToConstant: 26
+            ),
+
+            loader.topAnchor.constraint(
+                equalTo: iconHolder.topAnchor
+            ),
+
+            loader.leadingAnchor.constraint(
+                equalTo: iconHolder.leadingAnchor
+            ),
+
+            loader.trailingAnchor.constraint(
+                equalTo: iconHolder.trailingAnchor
+            ),
+
+            loader.bottomAnchor.constraint(
+                equalTo: iconHolder.bottomAnchor
+            ),
+
+            icon.centerXAnchor.constraint(
+                equalTo:
+                    iconHolder.centerXAnchor
+            ),
+
+            icon.centerYAnchor.constraint(
+                equalTo:
+                    iconHolder.centerYAnchor
+            ),
+
+            icon.widthAnchor.constraint(
+                equalToConstant: 24
+            ),
+
+            icon.heightAnchor.constraint(
+                equalToConstant: 24
+            ),
+
+            row.topAnchor.constraint(
+                equalTo:
+                    container.topAnchor,
+                constant: 16
+            ),
+
+            row.leadingAnchor.constraint(
+                equalTo:
+                    container.leadingAnchor,
+                constant: 16
+            ),
+
+            row.trailingAnchor.constraint(
+                equalTo:
+                    container.trailingAnchor,
+                constant: -16
+            ),
+
+            row.bottomAnchor.constraint(
+                equalTo:
+                    container.bottomAnchor,
+                constant: -16
+            )
         ])
 
-        AppointmentNotificationManager.shared.authorizationStatus { status in
-            switch status {
-            case .authorized, .provisional, .ephemeral:
-                title.text = "APPOINTMENT ALERTS ON"
-                icon.tintColor = NinjaPalette.green
-            case .denied:
-                title.text = "APPOINTMENT ALERTS OFF"
-                icon.tintColor = NinjaPalette.red
-            case .notDetermined:
-                title.text = "APPOINTMENT ALERTS AVAILABLE"
-                icon.tintColor = NinjaPalette.green
-            @unknown default:
-                title.text = "APPOINTMENT ALERT STATUS"
+        AppointmentNotificationManager
+            .shared
+            .authorizationStatus {
+                status in
+
+                DispatchQueue.main.async {
+                    loader.stopAnimating()
+
+                    switch status {
+                    case .authorized,
+                         .provisional,
+                         .ephemeral:
+
+                        title.text =
+                            "APPOINTMENT ALERTS ON"
+
+                        detail.text =
+                            "Notification access is available for saved appointment reminders."
+
+                        icon.tintColor =
+                            NinjaPalette.green
+
+                    case .denied:
+
+                        title.text =
+                            "APPOINTMENT ALERTS OFF"
+
+                        detail.text =
+                            "Notification permission is off. Open Notification Settings to enable reminders."
+
+                        icon.tintColor =
+                            NinjaPalette.red
+
+                    case .notDetermined:
+
+                        title.text =
+                            "APPOINTMENT ALERTS AVAILABLE"
+
+                        detail.text =
+                            "Enable reminders when you save an appointment or open Notification Settings below."
+
+                        icon.tintColor =
+                            NinjaPalette.green
+
+                    @unknown default:
+
+                        title.text =
+                            "APPOINTMENT ALERT STATUS"
+
+                        detail.text =
+                            "Use Notification Settings below to review reminder access."
+
+                        icon.tintColor =
+                            NinjaPalette.red
+                    }
+
+                    UIView.animate(
+                        withDuration: 0.20
+                    ) {
+                        loader.alpha = 0
+                        icon.alpha = 1
+                    }
+                }
             }
-        }
+
         return container
     }
 
@@ -252,14 +437,133 @@ final class AppointmentsViewController: NinjaBaseViewController {
     }
 
     @objc private func notificationSettings() {
-        AppointmentNotificationManager.shared.authorizationStatus { [weak self] status in
-            guard let self else { return }
-            if status == .notDetermined {
-                AppointmentNotificationManager.shared.requestAuthorization { _ in self.refresh() }
-            } else if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url)
+        AppointmentNotificationManager
+            .shared
+            .authorizationStatus {
+                [weak self] status in
+
+                DispatchQueue.main.async {
+                    guard let self else {
+                        return
+                    }
+
+                    switch status {
+                    case .notDetermined:
+
+                        self.showFeedback(
+                            title:
+                                "Notification Permission",
+                            detail:
+                                "iOS will ask whether Mosquito Ninja can show appointment reminders.",
+                            kind: .info,
+                            duration: 0.65
+                        )
+
+                        AppointmentNotificationManager
+                            .shared
+                            .requestAuthorization {
+                                [weak self] granted in
+
+                                DispatchQueue.main.async {
+                                    guard let self else {
+                                        return
+                                    }
+
+                                    self.refresh()
+
+                                    if granted {
+                                        self.showFeedback(
+                                            title:
+                                                "Appointment Alerts On",
+                                            detail:
+                                                "Notification permission is enabled for appointment reminders.",
+                                            kind: .success,
+                                            duration: 1.5
+                                        )
+                                    } else {
+                                        self.showFeedback(
+                                            title:
+                                                "Appointment Alerts Off",
+                                            detail:
+                                                "Permission was not enabled. You can change this later in iPhone Settings.",
+                                            kind: .warning,
+                                            duration: 1.8
+                                        )
+                                    }
+                                }
+                            }
+
+                    case .denied:
+
+                        NinjaHaptics.warning()
+
+                        let alert =
+                            UIAlertController(
+                                title:
+                                    "Notification Access Is Off",
+                                message:
+                                    "To receive appointment reminders, open Settings, choose Notifications, and allow notifications for Mosquito Ninja.",
+                                preferredStyle:
+                                    .alert
+                            )
+
+                        alert.addAction(
+                            UIAlertAction(
+                                title: "Not Now",
+                                style: .cancel
+                            ) { _ in
+                                NinjaHaptics.selection()
+                            }
+                        )
+
+                        alert.addAction(
+                            UIAlertAction(
+                                title: "Open Settings",
+                                style: .default
+                            ) { [weak self] _ in
+                                self?.openExternal(
+                                    UIApplication
+                                        .openSettingsURLString
+                                )
+                            }
+                        )
+
+                        self.present(
+                            alert,
+                            animated: true
+                        )
+
+                    case .authorized,
+                         .provisional,
+                         .ephemeral:
+
+                        self.showFeedback(
+                            title:
+                                "Opening Settings",
+                            detail:
+                                "Notification access is already enabled. Opening iPhone Settings for additional controls.",
+                            kind: .info,
+                            duration: 0.55
+                        ) { [weak self] in
+                            self?.openExternal(
+                                UIApplication
+                                    .openSettingsURLString
+                            )
+                        }
+
+                    @unknown default:
+
+                        self.showFeedback(
+                            title:
+                                "Notification Status Unavailable",
+                            detail:
+                                "Please try again or review Mosquito Ninja permissions in iPhone Settings.",
+                            kind: .error,
+                            duration: 1.8
+                        )
+                    }
+                }
             }
-        }
     }
 
     @objc private func openPrep() {

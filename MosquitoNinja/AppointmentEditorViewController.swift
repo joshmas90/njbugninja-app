@@ -61,6 +61,7 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         notesView.tintColor = NinjaPalette.red
         notesView.font = .systemFont(ofSize: 16)
         notesView.layer.cornerRadius = 12
+        notesView.layer.cornerCurve = .continuous
         notesView.layer.borderWidth = 0.5
         notesView.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
         notesView.heightAnchor.constraint(greaterThanOrEqualToConstant: 110).isActive = true
@@ -109,6 +110,7 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         field.textColor = .white
         field.tintColor = NinjaPalette.red
         field.layer.cornerRadius = 12
+        field.layer.cornerCurve = .continuous
         field.layer.borderWidth = 0.5
         field.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
         field.heightAnchor.constraint(equalToConstant: 52).isActive = true
@@ -126,6 +128,7 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
         let container = UIView()
         container.backgroundColor = NinjaPalette.panel
         container.layer.cornerRadius = 14
+        container.layer.cornerCurve = .continuous
         container.layer.borderWidth = 0.5
         container.layer.borderColor = UIColor.white.withAlphaComponent(0.10).cgColor
 
@@ -183,79 +186,293 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
     @objc private func saveAppointment() {
         view.endEditing(true)
 
-        let serviceIndex = min(max(serviceControl.selectedSegmentIndex, 0), ServiceAppointment.Service.allCases.count - 1)
-        let service = ServiceAppointment.Service.allCases[serviceIndex]
-        let notes = notesView.text == "Optional appointment notes" ? "" : (notesView.text ?? "")
+        guard
+            datePicker.date >=
+                Date()
+                    .addingTimeInterval(-60)
+        else {
+            showFeedback(
+                title:
+                    "Choose a Valid Time",
+                detail:
+                    "Select the confirmed service date and time before saving this appointment.",
+                kind: .warning,
+                duration: 1.8
+            )
 
-        var updated = appointment ?? ServiceAppointment(service: service, startDate: datePicker.date)
+            return
+        }
+
+        let serviceIndex =
+            min(
+                max(
+                    serviceControl
+                        .selectedSegmentIndex,
+                    0
+                ),
+                ServiceAppointment
+                    .Service
+                    .allCases
+                    .count - 1
+            )
+
+        let service =
+            ServiceAppointment
+                .Service
+                .allCases[
+                    serviceIndex
+                ]
+
+        let notes =
+            notesView.text ==
+                "Optional appointment notes"
+            ? ""
+            : (
+                notesView.text
+                ?? ""
+            )
+
+        var updated =
+            appointment
+            ?? ServiceAppointment(
+                service: service,
+                startDate:
+                    datePicker.date
+            )
+
         updated.service = service
-        updated.startDate = datePicker.date
-        updated.propertyLabel = propertyField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        updated.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        updated.reminder24Hours = reminder24Switch.isOn
-        updated.reminder1Hour = reminder1Switch.isOn
+
+        updated.startDate =
+            datePicker.date
+
+        updated.propertyLabel =
+            propertyField.text?
+                .trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+            ?? ""
+
+        updated.notes =
+            notes.trimmingCharacters(
+                in:
+                    .whitespacesAndNewlines
+            )
+
+        updated.reminder24Hours =
+            reminder24Switch.isOn
+
+        updated.reminder1Hour =
+            reminder1Switch.isOn
+
         appointment = updated
 
-        let wantsReminders = updated.reminder24Hours || updated.reminder1Hour
+        let wantsReminders =
+            updated.reminder24Hours
+            || updated.reminder1Hour
+
         if wantsReminders {
-            AppointmentNotificationManager.shared.authorizationStatus { [weak self] status in
-                guard let self else { return }
-                switch status {
-                case .authorized, .provisional, .ephemeral:
-                    self.finishSave(updated, alertsEnabled: true)
-                case .notDetermined:
-                    AppointmentNotificationManager.shared.requestAuthorization { granted in
-                        self.finishSave(updated, alertsEnabled: granted)
+            AppointmentNotificationManager
+                .shared
+                .authorizationStatus {
+                    [weak self] status in
+
+                    guard let self else {
+                        return
                     }
-                case .denied:
-                    self.finishSave(updated, alertsEnabled: false)
-                @unknown default:
-                    self.finishSave(updated, alertsEnabled: false)
+
+                    switch status {
+                    case .authorized,
+                         .provisional,
+                         .ephemeral:
+
+                        self.finishSave(
+                            updated,
+                            alertsEnabled: true
+                        )
+
+                    case .notDetermined:
+
+                        AppointmentNotificationManager
+                            .shared
+                            .requestAuthorization {
+                                granted in
+
+                                self.finishSave(
+                                    updated,
+                                    alertsEnabled:
+                                        granted
+                                )
+                            }
+
+                    case .denied:
+
+                        self.finishSave(
+                            updated,
+                            alertsEnabled: false
+                        )
+
+                    @unknown default:
+
+                        self.finishSave(
+                            updated,
+                            alertsEnabled: false
+                        )
+                    }
                 }
-            }
         } else {
-            finishSave(updated, alertsEnabled: false)
+            finishSave(
+                updated,
+                alertsEnabled: false
+            )
         }
     }
 
-    private func finishSave(_ appointment: ServiceAppointment, alertsEnabled: Bool) {
-        NinjaHaptics.success()
-        AppointmentStore.shared.save(appointment)
-        if (appointment.reminder24Hours || appointment.reminder1Hour) && !alertsEnabled {
-            let alert = UIAlertController(
-                title: "Appointment Saved",
-                message: "The appointment is saved, but notification permission is off. You can enable alerts in iPhone Settings at any time.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "Done", style: .default) { [weak self] _ in
-                self?.navigationController?.popViewController(animated: true)
-            })
-            alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { [weak self] _ in
-                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsURL)
+    private func finishSave(
+        _ appointment: ServiceAppointment,
+        alertsEnabled: Bool
+    ) {
+        AppointmentStore.shared.save(
+            appointment
+        )
+
+        let wantsReminders =
+            appointment.reminder24Hours
+            || appointment.reminder1Hour
+
+        if wantsReminders
+            && !alertsEnabled
+        {
+            NinjaHaptics.success()
+
+            let alert =
+                UIAlertController(
+                    title:
+                        "Appointment Saved",
+                    message:
+                        "The appointment is saved on this device. Reminder permission is currently off, so alerts will not appear until notifications are enabled in Settings.",
+                    preferredStyle:
+                        .alert
+                )
+
+            alert.addAction(
+                UIAlertAction(
+                    title: "Done",
+                    style: .default
+                ) { [weak self] _ in
+                    self?
+                        .navigationController?
+                        .popViewController(
+                            animated: true
+                        )
                 }
-                self?.navigationController?.popViewController(animated: true)
-            })
-            present(alert, animated: true)
-        } else {
-            navigationController?.popViewController(animated: true)
+            )
+
+            alert.addAction(
+                UIAlertAction(
+                    title: "Open Settings",
+                    style: .default
+                ) { [weak self] _ in
+                    self?.openExternal(
+                        UIApplication
+                            .openSettingsURLString
+                    )
+
+                    self?
+                        .navigationController?
+                        .popViewController(
+                            animated: true
+                        )
+                }
+            )
+
+            present(
+                alert,
+                animated: true
+            )
+
+            return
+        }
+
+        let detail =
+            wantsReminders
+            ? "The appointment and reminder preferences were saved on this device."
+            : "The appointment was saved on this device with reminders turned off."
+
+        showFeedback(
+            title: "Appointment Saved",
+            detail: detail,
+            kind: .success,
+            duration: 1.15
+        ) { [weak self] in
+            self?
+                .navigationController?
+                .popViewController(
+                    animated: true
+                )
         }
     }
 
     @objc private func deleteAppointment() {
-        guard let appointment else { return }
-        let alert = UIAlertController(
-            title: "Delete Appointment?",
-            message: "This removes the appointment and its scheduled reminders from this device.",
-            preferredStyle: .alert
+        guard let appointment else {
+            return
+        }
+
+        let alert =
+            UIAlertController(
+                title:
+                    "Delete Appointment?",
+                message:
+                    "This removes the appointment and its scheduled reminders from this device.",
+                preferredStyle:
+                    .alert
+            )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Keep Appointment",
+                style: .cancel
+            ) { _ in
+                NinjaHaptics.selection()
+            }
         )
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
-            NinjaHaptics.warning()
-            AppointmentStore.shared.delete(appointment)
-            self?.navigationController?.popViewController(animated: true)
-        })
-        present(alert, animated: true)
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Delete",
+                style: .destructive
+            ) { [weak self] _ in
+                guard let self else {
+                    return
+                }
+
+                AppointmentStore
+                    .shared
+                    .delete(
+                        appointment
+                    )
+
+                self.showFeedback(
+                    title:
+                        "Appointment Deleted",
+                    detail:
+                        "The appointment and its reminders were removed from this device.",
+                    kind: .success,
+                    duration: 1.0
+                ) { [weak self] in
+                    self?
+                        .navigationController?
+                        .popViewController(
+                            animated: true
+                        )
+                }
+            }
+        )
+
+        present(
+            alert,
+            animated: true
+        )
     }
 
     func textViewDidBeginEditing(_ textView: UITextView) {

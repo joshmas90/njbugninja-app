@@ -399,10 +399,11 @@ class NinjaBaseViewController: UIViewController {
         config.title = title.uppercased()
         config.baseBackgroundColor = NinjaPalette.red
         config.baseForegroundColor = .white
-        config.cornerStyle = .small
+        config.cornerStyle = .medium
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 18, bottom: 14, trailing: 18)
         if let symbol { config.image = UIImage(systemName: symbol); config.imagePadding = 8 }
         let button = NinjaButton(frame: .zero)
+        button.layer.cornerCurve = .continuous
         button.configuration = config
         button.hapticStyle = .medium
         button.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
@@ -416,10 +417,11 @@ class NinjaBaseViewController: UIViewController {
         config.title = title.uppercased()
         config.baseBackgroundColor = NinjaPalette.panel
         config.baseForegroundColor = .white
-        config.cornerStyle = .small
+        config.cornerStyle = .medium
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 18, bottom: 14, trailing: 18)
         if let symbol { config.image = UIImage(systemName: symbol); config.imagePadding = 8 }
         let button = NinjaButton(frame: .zero)
+        button.layer.cornerCurve = .continuous
         button.configuration = config
         button.hapticStyle = .light
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true

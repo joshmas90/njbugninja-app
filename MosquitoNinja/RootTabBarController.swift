@@ -31,26 +31,138 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
     }
 
     private func configureAppearance() {
-        view.backgroundColor = .black
+        view.backgroundColor = NinjaPalette.ink
+
         tabBar.tintColor = accent
-        tabBar.unselectedItemTintColor = UIColor.white.withAlphaComponent(0.58)
 
-        let tabAppearance = UITabBarAppearance()
-        tabAppearance.configureWithOpaqueBackground()
-        tabAppearance.backgroundColor = UIColor(red: 0.025, green: 0.03, blue: 0.027, alpha: 1)
-        tabAppearance.shadowColor = UIColor.white.withAlphaComponent(0.08)
-        tabBar.standardAppearance = tabAppearance
-        if #available(iOS 15.0, *) { tabBar.scrollEdgeAppearance = tabAppearance }
+        tabBar.unselectedItemTintColor =
+            UIColor.white
+                .withAlphaComponent(0.52)
 
-        let navAppearance = UINavigationBarAppearance()
-        navAppearance.configureWithOpaqueBackground()
-        navAppearance.backgroundColor = UIColor(red: 0.025, green: 0.03, blue: 0.027, alpha: 1)
-        navAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        navAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-        UINavigationBar.appearance().standardAppearance = navAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
-        UINavigationBar.appearance().compactAppearance = navAppearance
-        UINavigationBar.appearance().tintColor = .white
+        tabBar.isTranslucent = false
+
+        let tabAppearance =
+            UITabBarAppearance()
+
+        tabAppearance
+            .configureWithOpaqueBackground()
+
+        tabAppearance.backgroundColor =
+            NinjaPalette.ink
+
+        tabAppearance.shadowColor =
+            UIColor.white
+                .withAlphaComponent(0.07)
+
+        let itemAppearances = [
+            tabAppearance
+                .stackedLayoutAppearance,
+            tabAppearance
+                .inlineLayoutAppearance,
+            tabAppearance
+                .compactInlineLayoutAppearance
+        ]
+
+        for itemAppearance
+            in itemAppearances
+        {
+            itemAppearance
+                .normal
+                .iconColor =
+                    UIColor.white
+                        .withAlphaComponent(
+                            0.50
+                        )
+
+            itemAppearance
+                .normal
+                .titleTextAttributes = [
+                    .foregroundColor:
+                        UIColor.white
+                            .withAlphaComponent(
+                                0.52
+                            ),
+                    .font:
+                        UIFont.systemFont(
+                            ofSize: 10,
+                            weight: .semibold
+                        )
+                ]
+
+            itemAppearance
+                .selected
+                .iconColor =
+                    accent
+
+            itemAppearance
+                .selected
+                .titleTextAttributes = [
+                    .foregroundColor:
+                        UIColor.white,
+                    .font:
+                        UIFont.systemFont(
+                            ofSize: 10,
+                            weight: .bold
+                        )
+                ]
+        }
+
+        tabBar.standardAppearance =
+            tabAppearance
+
+        if #available(iOS 15.0, *) {
+            tabBar.scrollEdgeAppearance =
+                tabAppearance
+        }
+
+        let navAppearance =
+            UINavigationBarAppearance()
+
+        navAppearance
+            .configureWithOpaqueBackground()
+
+        navAppearance.backgroundColor =
+            NinjaPalette.ink
+
+        navAppearance.shadowColor =
+            UIColor.white
+                .withAlphaComponent(0.06)
+
+        navAppearance.titleTextAttributes = [
+            .foregroundColor:
+                UIColor.white,
+            .font:
+                UIFont.systemFont(
+                    ofSize: 17,
+                    weight: .bold
+                )
+        ]
+
+        navAppearance
+            .largeTitleTextAttributes = [
+                .foregroundColor:
+                    UIColor.white
+            ]
+
+        UINavigationBar
+            .appearance()
+            .standardAppearance =
+                navAppearance
+
+        UINavigationBar
+            .appearance()
+            .scrollEdgeAppearance =
+                navAppearance
+
+        UINavigationBar
+            .appearance()
+            .compactAppearance =
+                navAppearance
+
+        UINavigationBar
+            .appearance()
+            .tintColor =
+                UIColor.white
     }
 
     func tabBarController(
