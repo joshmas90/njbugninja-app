@@ -25,7 +25,7 @@ private final class NinjaGradientView: UIView {
 final class HomeViewController: NinjaBaseViewController {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, MMM d â€¢ h:mm a"
+        formatter.dateFormat = "EEE, MMM d \\u{2022} h:mm a"
         return formatter
     }()
 

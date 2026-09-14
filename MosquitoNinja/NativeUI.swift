@@ -84,20 +84,20 @@ final class NinjaTouchControl: UIControl {
     }
 
     override func hitTest(
-        _ point: CGPoint,
+        _ location: CGPoint,
         with event: UIEvent?
     ) -> UIView? {
         guard
             !isHidden,
             isUserInteractionEnabled,
             alpha > 0.01,
-            point(inside: point, with: event)
+            self.point(inside: location, with: event)
         else {
             return nil
         }
 
-        // This is an intentionally tappable card.
-        // Decorative labels/stacks must never steal the tap.
+        // The entire visible card is one touch target.
+        // Labels, icons and chevrons never steal the gesture.
         return self
     }
 
@@ -126,7 +126,7 @@ final class NinjaTouchControl: UIControl {
     }
 
     @objc private func successfulTap() {
-        feedback.impactOccurred(intensity: 0.62)
+        feedback.impactOccurred(intensity: 0.80)
     }
 }
 
@@ -211,7 +211,7 @@ final class NinjaButton: UIButton {
         }
 
         feedback?.impactOccurred(
-            intensity: hapticStyle == .medium ? 0.82 : 0.60
+            intensity: hapticStyle == .medium ? 0.90 : 0.72
         )
 
         feedback = nil
