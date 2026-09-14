@@ -79,8 +79,7 @@ final class NinjaTouchControl: UIControl {
         inside point: CGPoint,
         with event: UIEvent?
     ) -> Bool {
-        let expanded = bounds.insetBy(dx: -5, dy: -7)
-        return expanded.contains(point)
+        return bounds.contains(point)
     }
 
     override func hitTest(
@@ -218,8 +217,18 @@ final class NinjaButton: UIButton {
     }
 }
 
+private final class NinjaScrollView: UIScrollView {
+    override func touchesShouldCancel(in view: UIView) -> Bool {
+        if view is UIControl {
+            return true
+        }
+
+        return super.touchesShouldCancel(in: view)
+    }
+}
+
 class NinjaBaseViewController: UIViewController {
-    let scrollView = UIScrollView()
+    let scrollView = NinjaScrollView()
     let contentStack = UIStackView()
 
     override func viewDidLoad() {
@@ -232,8 +241,9 @@ class NinjaBaseViewController: UIViewController {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.alwaysBounceVertical = true
         scrollView.keyboardDismissMode = .interactive
-        scrollView.delaysContentTouches = false
+        scrollView.delaysContentTouches = true
         scrollView.canCancelContentTouches = true
+        scrollView.decelerationRate = .normal
         view.addSubview(scrollView)
 
         contentStack.translatesAutoresizingMaskIntoConstraints = false

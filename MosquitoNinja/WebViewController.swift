@@ -44,6 +44,9 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKUIDeleg
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         webView.scrollView.keyboardDismissMode = .interactive
+        webView.scrollView.delaysContentTouches = true
+        webView.scrollView.canCancelContentTouches = true
+        webView.scrollView.decelerationRate = .normal
         webView.isOpaque = false
         webView.backgroundColor = NinjaPalette.ink
         webView.scrollView.backgroundColor = NinjaPalette.ink
