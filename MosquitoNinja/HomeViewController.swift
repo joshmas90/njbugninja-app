@@ -1,9 +1,31 @@
 import UIKit
 
+private final class NinjaGradientView: UIView {
+    override class var layerClass: AnyClass { CAGradientLayer.self }
+
+    var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        gradientLayer.colors = [
+            UIColor.black.withAlphaComponent(0.88).cgColor,
+            UIColor.black.withAlphaComponent(0.42).cgColor,
+            UIColor.clear.cgColor
+        ]
+
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 final class HomeViewController: NinjaBaseViewController {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, MMM d • h:mm a"
+        formatter.dateFormat = "EEE, MMM d â€¢ h:mm a"
         return formatter
     }()
 
@@ -37,9 +59,7 @@ final class HomeViewController: NinjaBaseViewController {
     }
 
     private func buildUI() {
-        contentStack.addArrangedSubview(eyebrow("South Jersey mosquito & tick control"))
-        contentStack.addArrangedSubview(headline("Your outdoor space.\nProtected."))
-        contentStack.addArrangedSubview(body("Fast access to service, appointment reminders, property guidance, quote requests and treatment-day information."))
+        contentStack.addArrangedSubview(ninjaHero())
 
         if let appointment = AppointmentStore.shared.nextAppointment {
             contentStack.addArrangedSubview(nextAppointmentCard(appointment))
@@ -70,6 +90,108 @@ final class HomeViewController: NinjaBaseViewController {
         contentStack.addArrangedSubview(card(title: "Owner-operated", detail: "Your quote and treatment stay with one point of contact from the first conversation through service.", symbol: "person.crop.circle.badge.checkmark", accent: NinjaPalette.red))
     }
 
+    private func ninjaHero() -> UIView {
+        let hero = UIView()
+        hero.translatesAutoresizingMaskIntoConstraints = false
+        hero.backgroundColor = .black
+        hero.layer.cornerRadius = 24
+        hero.layer.masksToBounds = true
+        hero.layer.borderWidth = 1
+        hero.layer.borderColor = UIColor.white.withAlphaComponent(0.09).cgColor
+
+        hero.heightAnchor.constraint(equalToConstant: 340).isActive = true
+
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+
+        if let root = Bundle.main.resourceURL {
+            let images = [
+                root.appendingPathComponent("Web/assets/hero-v20.webp"),
+                root.appendingPathComponent("Web/assets/hero-ninja.webp")
+            ]
+
+            for url in images {
+                if let image = UIImage(contentsOfFile: url.path) {
+                    imageView.image = image
+                    break
+                }
+            }
+        }
+
+        let gradient = NinjaGradientView()
+        gradient.translatesAutoresizingMaskIntoConstraints = false
+        gradient.isUserInteractionEnabled = false
+
+        let brand = UILabel()
+        brand.text = "  MOSQUITO NINJA  "
+        brand.textColor = .white
+        brand.backgroundColor = NinjaPalette.red
+        brand.font = .systemFont(ofSize: 11, weight: .black)
+        brand.layer.cornerRadius = 4
+        brand.layer.masksToBounds = true
+
+        let eyebrow = UILabel()
+        eyebrow.text = "MOSQUITOES. TICKS. CONSIDER THEM WARNED."
+        eyebrow.textColor = NinjaPalette.red
+        eyebrow.font = .systemFont(ofSize: 10, weight: .heavy)
+        eyebrow.numberOfLines = 0
+
+        let headline = UILabel()
+        headline.text = "THEY WON’T\nSEE US COMING."
+        headline.textColor = .white
+        headline.font = .systemFont(ofSize: 38, weight: .black)
+        headline.numberOfLines = 0
+        headline.adjustsFontSizeToFitWidth = true
+        headline.minimumScaleFactor = 0.78
+
+        let detail = UILabel()
+        detail.text = "Targeted mosquito & tick control for South Jersey outdoor spaces."
+        detail.textColor = UIColor.white.withAlphaComponent(0.78)
+        detail.font = .systemFont(ofSize: 14, weight: .medium)
+        detail.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [
+            brand,
+            eyebrow,
+            headline,
+            detail
+        ])
+
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.alignment = .leading
+        stack.spacing = 10
+
+        hero.addSubview(imageView)
+        hero.addSubview(gradient)
+        hero.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: hero.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
+
+            gradient.topAnchor.constraint(equalTo: hero.topAnchor),
+            gradient.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
+            gradient.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
+            gradient.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
+
+            stack.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(
+                lessThanOrEqualTo: hero.trailingAnchor,
+                constant: -90
+            ),
+            stack.bottomAnchor.constraint(
+                equalTo: hero.bottomAnchor,
+                constant: -22
+            )
+        ])
+
+        return hero
+    }
     private func nextAppointmentCard(_ appointment: ServiceAppointment) -> UIControl {
         let control = UIControl()
         control.backgroundColor = NinjaPalette.panel
