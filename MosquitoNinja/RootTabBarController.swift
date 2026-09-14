@@ -24,8 +24,9 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
     }
 
     private func makeNavigation(root: UIViewController, title: String, symbol: String) -> UINavigationController {
-        root.tabBarItem = UITabBarItem(title: title, image: UIImage(systemName: symbol), selectedImage: nil)
         let nav = UINavigationController(rootViewController: root)
+        // The tab caption must not inherit changes to the root screen's title.
+        nav.tabBarItem = UITabBarItem(title: title, image: UIImage(systemName: symbol), selectedImage: nil)
         nav.navigationBar.prefersLargeTitles = false
         return nav
     }

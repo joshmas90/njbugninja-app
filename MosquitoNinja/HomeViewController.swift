@@ -9,10 +9,11 @@ private final class NinjaGradientView: UIView {
         super.init(frame: frame)
 
         gradientLayer.colors = [
-            UIColor.black.withAlphaComponent(0.88).cgColor,
-            UIColor.black.withAlphaComponent(0.42).cgColor,
-            UIColor.clear.cgColor
+            UIColor.black.withAlphaComponent(0.94).cgColor,
+            UIColor.black.withAlphaComponent(0.72).cgColor,
+            UIColor.black.withAlphaComponent(0.22).cgColor
         ]
+        gradientLayer.locations = [0, 0.7, 1]
 
         gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
         gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
@@ -25,7 +26,7 @@ private final class NinjaGradientView: UIView {
 final class HomeViewController: NinjaBaseViewController {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, MMM d \u{2022} h:mm a"
+        formatter.dateFormat = "EEE, MMM d 'at' h:mm a"
         return formatter
     }()
 
@@ -35,6 +36,8 @@ final class HomeViewController: NinjaBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Mosquito Ninja"
+        navigationItem.backButtonTitle = "Home"
+        contentStack.layoutMargins.top = 12
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(refresh),
@@ -46,7 +49,14 @@ final class HomeViewController: NinjaBaseViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
         refresh()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Detail screens still need their title and Back button.
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
     deinit {
@@ -81,8 +91,10 @@ final class HomeViewController: NinjaBaseViewController {
         [mosquito, ticks, commercial].forEach(contentStack.addArrangedSubview)
 
         contentStack.addArrangedSubview(sectionTitle("Quick Actions"))
+        contentStack.addArrangedSubview(
+            secondaryButton("Appointments", symbol: "calendar.badge.clock", action: #selector(openAppointments))
+        )
         let actions = UIStackView(arrangedSubviews: [
-            secondaryButton("Appointments", symbol: "calendar.badge.clock", action: #selector(openAppointments)),
             secondaryButton("Call", symbol: "phone.fill", action: #selector(call)),
             secondaryButton("Text", symbol: "message.fill", action: #selector(text))
         ])
@@ -104,12 +116,17 @@ final class HomeViewController: NinjaBaseViewController {
         hero.layer.borderWidth = 1
         hero.layer.borderColor = UIColor.white.withAlphaComponent(0.09).cgColor
 
-        hero.heightAnchor.constraint(equalToConstant: 340).isActive = true
+        hero.heightAnchor.constraint(greaterThanOrEqualToConstant: 400).isActive = true
+        let preferredHeight = hero.heightAnchor.constraint(equalToConstant: 400)
+        preferredHeight.priority = .defaultLow
+        preferredHeight.isActive = true
 
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
+        // Text determines expansion; the artwork's pixel height must not size the card.
+        imageView.setContentCompressionResistancePriority(.fittingSizeLevel, for: .vertical)
 
         if let root = Bundle.main.resourceURL {
             let images = [
@@ -139,31 +156,38 @@ final class HomeViewController: NinjaBaseViewController {
 
         let eyebrow = UILabel()
         eyebrow.text = "MOSQUITOES. TICKS. CONSIDER THEM WARNED."
-        eyebrow.textColor = NinjaPalette.red
-        eyebrow.font = .systemFont(ofSize: 10, weight: .heavy)
+        eyebrow.textColor = UIColor.white.withAlphaComponent(0.85)
+        eyebrow.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 12, weight: .bold))
+        eyebrow.adjustsFontForContentSizeCategory = true
         eyebrow.numberOfLines = 0
 
         let headline = UILabel()
         headline.text = "THEY WON’T\nSEE US COMING."
         headline.textColor = .white
-        headline.font = .systemFont(ofSize: 38, weight: .black)
+        headline.font = UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: .systemFont(ofSize: 34, weight: .black))
+        headline.adjustsFontForContentSizeCategory = true
         headline.numberOfLines = 0
-        headline.adjustsFontSizeToFitWidth = true
-        headline.minimumScaleFactor = 0.78
 
         let detail = UILabel()
         detail.text = "Targeted mosquito & tick control for South Jersey residential, commercial and government properties."
-        detail.textColor = UIColor.white.withAlphaComponent(0.78)
-        detail.font = .systemFont(ofSize: 14, weight: .medium)
+        detail.textColor = UIColor.white.withAlphaComponent(0.88)
+        detail.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: .systemFont(ofSize: 15, weight: .medium))
+        detail.adjustsFontForContentSizeCategory = true
         detail.numberOfLines = 0
 
         let audience = UILabel()
-        audience.text = "RESIDENTIAL  \u{2022}  COMMERCIAL  \u{2022}  GOVERNMENT"
+        audience.text = "RESIDENTIAL - COMMERCIAL - GOVERNMENT"
         audience.textColor = NinjaPalette.green
-        audience.font = .systemFont(ofSize: 10, weight: .heavy)
-        audience.numberOfLines = 0
+        audience.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 11, weight: .bold), maximumPointSize: 14)
+        audience.adjustsFontForContentSizeCategory = true
+        audience.numberOfLines = 1
         audience.adjustsFontSizeToFitWidth = true
-        audience.minimumScaleFactor = 0.78
+        audience.minimumScaleFactor = 0.5
+        audience.accessibilityLabel = "Residential, Commercial, Government"
+
+        [brand, eyebrow, headline, detail, audience].forEach {
+            $0.setContentCompressionResistancePriority(.required, for: .vertical)
+        }
 
         let stack = UIStackView(arrangedSubviews: [
             brand,
@@ -176,13 +200,18 @@ final class HomeViewController: NinjaBaseViewController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
         stack.alignment = .leading
-        stack.spacing = 10
+        stack.spacing = 12
 
         hero.addSubview(imageView)
         hero.addSubview(gradient)
         hero.addSubview(stack)
 
+        // Use the available phone width; keep tablet text comfortably readable.
+        let preferredTrailing = stack.trailingAnchor.constraint(equalTo: hero.trailingAnchor, constant: -24)
+        preferredTrailing.priority = .defaultHigh
+
         NSLayoutConstraint.activate([
+            audience.widthAnchor.constraint(equalTo: stack.widthAnchor),
             imageView.topAnchor.constraint(equalTo: hero.topAnchor),
             imageView.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
@@ -193,14 +222,17 @@ final class HomeViewController: NinjaBaseViewController {
             gradient.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
             gradient.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
 
-            stack.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 20),
+            stack.topAnchor.constraint(greaterThanOrEqualTo: hero.topAnchor, constant: 24),
+            stack.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 24),
+            stack.widthAnchor.constraint(lessThanOrEqualToConstant: 480),
+            preferredTrailing,
             stack.trailingAnchor.constraint(
                 lessThanOrEqualTo: hero.trailingAnchor,
-                constant: -90
+                constant: -24
             ),
             stack.bottomAnchor.constraint(
                 equalTo: hero.bottomAnchor,
-                constant: -22
+                constant: -24
             )
         ])
 

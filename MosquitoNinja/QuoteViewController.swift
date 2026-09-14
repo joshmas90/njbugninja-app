@@ -40,6 +40,8 @@ final class QuoteViewController:
             NinjaPalette.panel
 
         field.textColor = .white
+        field.font = .preferredFont(forTextStyle: .body)
+        field.adjustsFontForContentSizeCategory = true
         field.tintColor = NinjaPalette.red
 
         field.layer.cornerRadius = 12
@@ -55,13 +57,13 @@ final class QuoteViewController:
         field.setLeftPadding(14)
 
         field.heightAnchor.constraint(
-            equalToConstant: 52
+            greaterThanOrEqualToConstant: 52
         ).isActive = true
 
         field.delegate = self
 
         let color =
-            UIColor.white.withAlphaComponent(0.42)
+            UIColor.white.withAlphaComponent(0.64)
 
         field.attributedPlaceholder =
             NSAttributedString(
@@ -70,6 +72,22 @@ final class QuoteViewController:
                     .foregroundColor: color
                 ]
             )
+    }
+
+    private func labeledField(_ field: UITextField, title: String) -> UIView {
+        let label = UILabel()
+        label.text = title
+        label.textColor = UIColor.white.withAlphaComponent(0.9)
+        label.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: .systemFont(ofSize: 14, weight: .semibold))
+        label.adjustsFontForContentSizeCategory = true
+        label.numberOfLines = 0
+        label.isAccessibilityElement = false
+        field.accessibilityLabel = title
+
+        let stack = UIStackView(arrangedSubviews: [label, field])
+        stack.axis = .vertical
+        stack.spacing = 8
+        return stack
     }
 
     private func buildUI() {
@@ -132,13 +150,13 @@ final class QuoteViewController:
 
         style(
             nameField,
-            placeholder: "Name",
+            placeholder: "Your name",
             contentType: .name
         )
 
         style(
             phoneField,
-            placeholder: "Phone",
+            placeholder: "Best number to reach you",
             contentType: .telephoneNumber
         )
 
@@ -154,9 +172,9 @@ final class QuoteViewController:
         locationField.returnKeyType = .done
 
         [
-            nameField,
-            phoneField,
-            locationField
+            labeledField(nameField, title: "Name"),
+            labeledField(phoneField, title: "Phone"),
+            labeledField(locationField, title: "Town or ZIP code")
         ].forEach(
             contentStack.addArrangedSubview
         )
@@ -171,8 +189,9 @@ final class QuoteViewController:
         notesView.textColor = .white
         notesView.tintColor = NinjaPalette.red
 
-        notesView.font =
-            .systemFont(ofSize: 16)
+        notesView.font = .preferredFont(forTextStyle: .body)
+        notesView.adjustsFontForContentSizeCategory = true
+        notesView.accessibilityLabel = "Property details"
 
         notesView.layer.cornerRadius = 12
         notesView.layer.cornerCurve =
@@ -193,7 +212,7 @@ final class QuoteViewController:
             "Describe the property, where you notice activity, and any scheduling details."
 
         notesView.textColor =
-            UIColor.white.withAlphaComponent(0.42)
+            UIColor.white.withAlphaComponent(0.64)
 
         notesView.delegate = self
 
