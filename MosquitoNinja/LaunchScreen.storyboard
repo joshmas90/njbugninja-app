@@ -27,5 +27,5 @@
             </objects>
         </scene>
     </scenes>
-    <resources><image name="LaunchMark" width="512" height="512"/></resources>
+    <resources><image name="LaunchMark" width="256" height="256"/></resources>
 </document>

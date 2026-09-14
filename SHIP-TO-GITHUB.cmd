@@ -11,11 +11,11 @@ git remote add origin https://github.com/joshmas90/njbugninja-app.git
 if errorlevel 1 goto failed
 git fetch origin
 if errorlevel 1 goto failed
-git reset --mixed be791f273bb1c59fff9ad8e9c0f7ef3fb95412b8
+git reset --mixed 8718424aa9790dc89f078865bc1c111a24f78db1
 if errorlevel 1 goto failed
 git add -A
 if errorlevel 1 goto failed
-git commit -m "Bring stronger service education into the native app"
+git commit -m "Use throwing-star logo for app icon and launch screen"
 if errorlevel 1 goto failed
 git rebase origin/main
 if errorlevel 1 goto failed
