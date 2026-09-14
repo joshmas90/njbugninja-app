@@ -45,12 +45,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationC
     }
 }
 
-
 private final class NinjaLaunchOverlay: UIView {
-    private let leftClip = UIView()
-    private let rightClip = UIView()
-    private let leftMark = UIImageView(image: UIImage(named: "LaunchMark"))
-    private let rightMark = UIImageView(image: UIImage(named: "LaunchMark"))
+    private let mark = UIImageView(image: UIImage(named: "LaunchMark"))
     private let brand = UILabel()
     private let detail = UILabel()
     private let slash = CAShapeLayer()
@@ -61,14 +57,9 @@ private final class NinjaLaunchOverlay: UIView {
         super.init(frame: frame)
 
         backgroundColor = UIColor(red: 0.025, green: 0.03, blue: 0.027, alpha: 1)
-        leftClip.clipsToBounds = true
-        rightClip.clipsToBounds = true
-        leftMark.contentMode = .scaleAspectFit
-        rightMark.contentMode = .scaleAspectFit
-        leftClip.addSubview(leftMark)
-        rightClip.addSubview(rightMark)
-        addSubview(leftClip)
-        addSubview(rightClip)
+
+        mark.contentMode = .scaleAspectFit
+        addSubview(mark)
 
         brand.text = "MOSQUITO NINJA"
         brand.textAlignment = .center
@@ -84,20 +75,25 @@ private final class NinjaLaunchOverlay: UIView {
         detail.alpha = 0
         addSubview(detail)
 
+        let red = UIColor(red: 0.878, green: 0.125, blue: 0.153, alpha: 1)
+
         glow.fillColor = UIColor.clear.cgColor
-        glow.strokeColor = UIColor(red: 0.878, green: 0.125, blue: 0.153, alpha: 0.48).cgColor
-        glow.lineWidth = 9
+        glow.strokeColor = red.withAlphaComponent(0.62).cgColor
+        glow.lineWidth = 16
         glow.lineCap = .round
-        glow.shadowColor = UIColor.red.cgColor
-        glow.shadowOpacity = 0.8
-        glow.shadowRadius = 12
+        glow.shadowColor = red.cgColor
+        glow.shadowOpacity = 0.95
+        glow.shadowRadius = 18
         glow.strokeEnd = 0
         layer.addSublayer(glow)
 
         slash.fillColor = UIColor.clear.cgColor
-        slash.strokeColor = UIColor.white.cgColor
-        slash.lineWidth = 2
+        slash.strokeColor = red.cgColor
+        slash.lineWidth = 5
         slash.lineCap = .round
+        slash.shadowColor = red.cgColor
+        slash.shadowOpacity = 0.55
+        slash.shadowRadius = 5
         slash.strokeEnd = 0
         layer.addSublayer(slash)
 
@@ -111,20 +107,18 @@ private final class NinjaLaunchOverlay: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        let size = min(bounds.width * 0.43, 184)
+
+        let size = min(bounds.width * 0.645, 276)
         let top = bounds.midY - (size * 0.58)
         let left = bounds.midX - (size / 2)
 
-        leftClip.frame = CGRect(x: left, y: top, width: size / 2, height: size)
-        rightClip.frame = CGRect(x: bounds.midX, y: top, width: size / 2, height: size)
-        leftMark.frame = CGRect(x: 0, y: 0, width: size, height: size)
-        rightMark.frame = CGRect(x: -(size / 2), y: 0, width: size, height: size)
+        mark.frame = CGRect(x: left, y: top, width: size, height: size)
         brand.frame = CGRect(x: 24, y: top + size + 21, width: bounds.width - 48, height: 26)
         detail.frame = CGRect(x: 24, y: brand.frame.maxY + 5, width: bounds.width - 48, height: 18)
 
         let path = UIBezierPath()
-        path.move(to: CGPoint(x: bounds.midX - 78, y: top + size - 24))
-        path.addLine(to: CGPoint(x: bounds.midX + 78, y: top + 24))
+        path.move(to: CGPoint(x: bounds.midX - (size * 0.72), y: top + (size * 0.92)))
+        path.addLine(to: CGPoint(x: bounds.midX + (size * 0.72), y: top + (size * 0.08)))
         glow.path = path.cgPath
         slash.path = path.cgPath
     }
@@ -137,6 +131,8 @@ private final class NinjaLaunchOverlay: UIView {
         if UIAccessibility.isReduceMotionEnabled {
             brand.alpha = 1
             detail.alpha = 1
+            glow.strokeEnd = 1
+            slash.strokeEnd = 1
             UIView.animate(withDuration: 0.35, delay: 0.28, options: [.curveEaseOut]) {
                 self.alpha = 0
             } completion: { _ in
@@ -145,15 +141,26 @@ private final class NinjaLaunchOverlay: UIView {
             return
         }
 
-        UIView.animate(withDuration: 0.22, animations: {
+        mark.alpha = 0
+        mark.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
+
+        UIView.animate(
+            withDuration: 0.36,
+            delay: 0,
+            usingSpringWithDamping: 0.78,
+            initialSpringVelocity: 0.42,
+            options: [.curveEaseOut]
+        ) {
+            self.mark.alpha = 1
+            self.mark.transform = .identity
             self.brand.alpha = 1
             self.detail.alpha = 1
-        })
+        }
 
         let glowAnimation = CABasicAnimation(keyPath: "strokeEnd")
         glowAnimation.fromValue = 0
         glowAnimation.toValue = 1
-        glowAnimation.duration = 0.28
+        glowAnimation.duration = 0.34
         glowAnimation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         glow.strokeEnd = 1
         glow.add(glowAnimation, forKey: "slashGlow")
@@ -161,23 +168,13 @@ private final class NinjaLaunchOverlay: UIView {
         let slashAnimation = CABasicAnimation(keyPath: "strokeEnd")
         slashAnimation.fromValue = 0
         slashAnimation.toValue = 1
-        slashAnimation.duration = 0.24
+        slashAnimation.duration = 0.30
         slashAnimation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         slash.strokeEnd = 1
         slash.add(slashAnimation, forKey: "slash")
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
-            NinjaHaptics.impact(.medium, intensity: 0.86)
-            UIView.animate(
-                withDuration: 0.36,
-                delay: 0,
-                usingSpringWithDamping: 0.82,
-                initialSpringVelocity: 0.4,
-                options: [.curveEaseOut]
-            ) {
-                self.leftClip.transform = CGAffineTransform(translationX: -16, y: 5).rotated(by: -0.025)
-                self.rightClip.transform = CGAffineTransform(translationX: 16, y: -5).rotated(by: 0.025)
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+            NinjaHaptics.impact(.medium, intensity: 0.90)
         }
 
         UIView.animate(
