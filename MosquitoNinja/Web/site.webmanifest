@@ -1,0 +1,19 @@
+{
+  "name": "Mosquito Ninja",
+  "short_name": "Mosquito Ninja",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080a09",
+  "theme_color": "#080a09",
+  "description": "Owner-operated mosquito and tick control for South Jersey homes and commercial outdoor spaces.",
+  "icons": [
+    {
+      "src": "/assets/mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

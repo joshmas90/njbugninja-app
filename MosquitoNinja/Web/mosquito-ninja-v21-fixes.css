@@ -1,0 +1,113 @@
+/* Mosquito Ninja V21 — corrective accessibility, conversion, and interaction pass.
+   Preserves the approved V20 visual system and only overrides live rules that
+   need readability, motion, or interaction fixes. */
+
+:root{
+  --mn-muted-paper:#5a615b;
+  --mn-muted-ink:#9aa39c;
+  --mn-red-link:#c81d24;
+  --mn-green-paper:#4f7316;
+  --mn-label:.75rem;
+  --mn-small:.8125rem;
+  --mn-body:clamp(.9375rem,.92rem + .08vw,1rem);
+}
+
+/* Motion and anchored navigation */
+html{scroll-behavior:auto}
+[id]{scroll-margin-top:6rem}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+/* Keep the conversion path reachable without changing hero composition. */
+.site-header{position:fixed;top:0;left:0;right:0}
+.site-header.is-stuck{
+  background:rgba(5,7,6,.92);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+.site-header .nav-wrap,.site-header .brand img{
+  transition:min-height .2s ease,width .2s ease,height .2s ease
+}
+.site-header.is-stuck .nav-wrap{min-height:64px}
+.site-header.is-stuck .brand img{width:40px;height:40px}
+
+/* Readability: preserve compact labels, remove micro-type from actual content. */
+.brand-copy small{font-size:.6875rem}
+.nav{font-size:.8125rem}
+.eyebrow{font-size:var(--mn-label)}
+.hero-lede{font-size:1rem;line-height:1.65}
+.hero-meta{font-size:.6875rem}
+.trust-grid small{font-size:var(--mn-small);line-height:1.35;color:var(--mn-muted-ink)}
+.section-copy>p:last-child{font-size:var(--mn-body);line-height:1.7;color:var(--mn-muted-paper)}
+
+.card{min-height:0;display:grid;grid-template-rows:auto auto 1fr auto}
+.card p{min-height:0;font-size:var(--mn-body);line-height:1.65;color:var(--mn-muted-paper)}
+.card a{font-size:var(--mn-label)}
+.card:not(.dark-card) a{color:var(--mn-red-link)}
+.dark-card p{color:#b4bcb5}
+
+.steps p{font-size:.875rem;line-height:1.6}
+.green-link{font-size:var(--mn-label)}
+.faq-home .green-link{color:var(--mn-green-paper)}
+.body-copy{font-size:var(--mn-body);line-height:1.7;color:var(--mn-muted-paper)}
+.benefits p{font-size:.875rem;line-height:1.6;color:var(--mn-muted-paper)}
+.area-section p{font-size:var(--mn-body);line-height:1.65}
+.property-panel p{font-size:.875rem}
+.property-panel li{font-size:var(--mn-small)}
+.property-panel small{font-size:var(--mn-label);line-height:1.5;color:var(--mn-muted-ink)}
+.faq-home>div>div:first-child>p:not(.eyebrow){font-size:var(--mn-body);line-height:1.65;color:var(--mn-muted-paper)}
+.faq-list details p{font-size:var(--mn-body);line-height:1.65;color:var(--mn-muted-paper)}
+.quote-section>div>div:first-child>p:not(.eyebrow){font-size:var(--mn-body);line-height:1.65}
+.callout small{font-size:.6875rem}
+.quote-form label{font-size:var(--mn-label)}
+.form-note,.quote-status{font-size:var(--mn-label);line-height:1.5;color:var(--mn-muted-ink)}
+.quote-status{margin:.75rem 0 0;text-align:center;min-height:1.5em}
+.footer-brand p{font-size:var(--mn-small);line-height:1.55;color:var(--mn-muted-ink)}
+.footer h4{font-size:.6875rem;color:var(--mn-muted-ink)}
+.footer-grid>div:not(:first-child){font-size:var(--mn-small)}
+.footer-bottom{font-size:var(--mn-label);color:var(--mn-muted-ink)}
+.eyebrow.dark{color:var(--mn-muted-paper)}
+.btn{font-size:var(--mn-label)}
+
+/* Interaction polish without gratuitous animation. */
+.btn,.nav a,.card,.faq-list summary,.green-link{
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.btn.primary:hover{transform:translateY(-1px)}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(18,23,20,.08)}
+.faq-list summary span{display:inline-block;transform-origin:center;transition:transform .22s ease}
+
+/* Strong, consistent keyboard focus. */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
+  outline:2px solid var(--green);
+  outline-offset:4px;
+}
+
+/* Modern wrapping where supported. */
+h1,h2{text-wrap:balance}
+p,li{text-wrap:pretty}
+
+@media(max-width:980px){
+  .site-header.is-stuck .nav-wrap{min-height:70px}
+  .site-header.is-stuck .brand img{width:40px;height:40px}
+}
+
+@media(max-width:640px){
+  .brand-copy small{font-size:.625rem}
+  .eyebrow{font-size:.6875rem}
+  .hero-meta{font-size:.625rem}
+  .btn,.green-link,.card a,.quote-form label,.form-note,.quote-status{font-size:.6875rem}
+  .mobile-bar{font-size:.6875rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .hero-art{animation:none!important;transform:none!important}
+  .btn.primary:hover,.card:hover{transform:none!important}
+  *,*::before,*::after{
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}

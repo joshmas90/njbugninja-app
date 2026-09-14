@@ -1,0 +1,65 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000001 /* AppDelegate.swift */; };
+		A00000000000000000000002 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000002 /* WebViewController.swift */; };
+		A00000000000000000000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000004 /* Assets.xcassets */; };
+		A00000000000000000000004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000005 /* LaunchScreen.storyboard */; };
+		A00000000000000000000005 /* Web in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* Web */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B00000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B00000000000000000000002 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B00000000000000000000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B00000000000000000000005 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B00000000000000000000006 /* Web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Web; sourceTree = "<group>"; };
+		B00000000000000000000007 /* MosquitoNinja.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MosquitoNinja.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C00000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* MosquitoNinja */, D00000000000000000000003 /* Products */); sourceTree = "<group>"; };
+		D00000000000000000000002 /* MosquitoNinja */ = {isa = PBXGroup; path = MosquitoNinja; sourceTree = "<group>"; children = (B00000000000000000000001 /* AppDelegate.swift */, B00000000000000000000002 /* WebViewController.swift */, B00000000000000000000003 /* Info.plist */, B00000000000000000000004 /* Assets.xcassets */, B00000000000000000000005 /* LaunchScreen.storyboard */, B00000000000000000000006 /* Web */); };
+		D00000000000000000000003 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000007 /* MosquitoNinja.app */); name = Products; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E00000000000000000000001 /* MosquitoNinja */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000002 /* Build configuration list for PBXNativeTarget "MosquitoNinja" */; buildPhases = (C00000000000000000000003 /* Sources */, C00000000000000000000001 /* Frameworks */, C00000000000000000000002 /* Resources */); buildRules = (); dependencies = (); name = MosquitoNinja; productName = MosquitoNinja; productReference = B00000000000000000000007 /* MosquitoNinja.app */; productType = "com.apple.product-type.application"; };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E00000000000000000000002 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 1600; LastUpgradeCheck = 1600; TargetAttributes = {E00000000000000000000001 = {CreatedOnToolsVersion = 16.0;};};}; buildConfigurationList = F00000000000000000000001 /* Build configuration list for PBXProject "MosquitoNinja" */; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = D00000000000000000000001; productRefGroup = D00000000000000000000003 /* Products */; projectDirPath = ""; projectRoot = ""; targets = (E00000000000000000000001 /* MosquitoNinja */); };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C00000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000003 /* Assets.xcassets in Resources */, A00000000000000000000004 /* LaunchScreen.storyboard in Resources */, A00000000000000000000005 /* Web in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C00000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001 /* AppDelegate.swift in Sources */, A00000000000000000000002 /* WebViewController.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		G00000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_OPTIMIZATION_LEVEL = 0; IPHONEOS_DEPLOYMENT_TARGET = 15.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; SWIFT_OPTIMIZATION_LEVEL = "-Onone";}; name = Debug; };
+		G00000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; GCC_C_LANGUAGE_STANDARD = gnu17; IPHONEOS_DEPLOYMENT_TARGET = 15.0; MTL_ENABLE_DEBUG_INFO = NO; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_OPTIMIZATION_LEVEL = "-O"; VALIDATE_PRODUCT = YES;}; name = Release; };
+		G00000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = MosquitoNinja/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 15.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.njbugninja.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug; };
+		G00000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = MosquitoNinja/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 15.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.njbugninja.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F00000000000000000000001 /* Build configuration list for PBXProject "MosquitoNinja" */ = {isa = XCConfigurationList; buildConfigurations = (G00000000000000000000001 /* Debug */, G00000000000000000000002 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		F00000000000000000000002 /* Build configuration list for PBXNativeTarget "MosquitoNinja" */ = {isa = XCConfigurationList; buildConfigurations = (G00000000000000000000003 /* Debug */, G00000000000000000000004 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = E00000000000000000000002 /* Project object */;
+}

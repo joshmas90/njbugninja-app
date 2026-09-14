@@ -1,0 +1,4 @@
+/* Native iOS shell adjustments. */
+.mobile-bar{display:none!important}
+@media(max-width:640px){.footer-bottom{padding-bottom:24px!important}}
+html{-webkit-text-size-adjust:100%}

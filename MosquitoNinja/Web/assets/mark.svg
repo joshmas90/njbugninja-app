@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title">
+  <title id="title">Mosquito Ninja — crossed-out mosquito</title>
+  <circle cx="50" cy="50" r="44" fill="#fff"/>
+  <g fill="none" stroke="#080a09" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M46 44 31 42 21 51M45 52 30 55 24 68M47 61 36 69 34 80"/>
+    <path d="M54 44 69 42 79 51M55 52 70 55 76 68M53 61 64 69 66 80"/>
+    <path d="M50 26V15M47 29 40 23M53 29 60 23"/>
+  </g>
+  <g fill="#fff" stroke="#080a09" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M47 43C39 29 23 23 22 31S34 46 47 47Z"/>
+    <path d="M53 43C61 29 77 23 78 31S66 46 53 47Z"/>
+  </g>
+  <g fill="#080a09">
+    <circle cx="50" cy="32" r="5.5"/>
+    <ellipse cx="50" cy="45" rx="6" ry="10"/>
+    <path d="M45 51C42 62 46 75 50 81 54 75 58 62 55 51Z"/>
+  </g>
+  <path d="M20 80 80 20" stroke="#fff" stroke-width="14"/>
+  <path d="M20 80 80 20" stroke="#e02027" stroke-width="9"/>
+  <circle cx="50" cy="50" r="44" fill="none" stroke="#e02027" stroke-width="10"/>
+</svg>
