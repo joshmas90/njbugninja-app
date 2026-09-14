@@ -11,6 +11,17 @@
 		A00000000000000000000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000004 /* Assets.xcassets */; };
 		A00000000000000000000004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000005 /* LaunchScreen.storyboard */; };
 		A00000000000000000000005 /* Web in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* Web */; };
+		A00000000000000000000006 /* RootTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000008 /* RootTabBarController.swift */; };
+		A00000000000000000000007 /* NativeUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000009 /* NativeUI.swift */; };
+		A00000000000000000000008 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000010 /* HomeViewController.swift */; };
+		A00000000000000000000009 /* ServicesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000011 /* ServicesViewController.swift */; };
+		A00000000000000000000010 /* QuoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000012 /* QuoteViewController.swift */; };
+		A00000000000000000000011 /* PrepViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000013 /* PrepViewController.swift */; };
+		A00000000000000000000012 /* ContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000014 /* ContactViewController.swift */; };
+		A00000000000000000000013 /* Appointment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000015 /* Appointment.swift */; };
+		A00000000000000000000014 /* AppointmentNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000016 /* AppointmentNotificationManager.swift */; };
+		A00000000000000000000015 /* AppointmentsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000017 /* AppointmentsViewController.swift */; };
+		A00000000000000000000016 /* AppointmentEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000018 /* AppointmentEditorViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +32,17 @@
 		B00000000000000000000005 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B00000000000000000000006 /* Web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Web; sourceTree = "<group>"; };
 		B00000000000000000000007 /* MosquitoNinja.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MosquitoNinja.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B00000000000000000000008 /* RootTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabBarController.swift; sourceTree = "<group>"; };
+		B00000000000000000000009 /* NativeUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeUI.swift; sourceTree = "<group>"; };
+		B00000000000000000000010 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000011 /* ServicesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000012 /* QuoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000013 /* PrepViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000014 /* ContactViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000015 /* Appointment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Appointment.swift; sourceTree = "<group>"; };
+		B00000000000000000000016 /* AppointmentNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentNotificationManager.swift; sourceTree = "<group>"; };
+		B00000000000000000000017 /* AppointmentsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentsViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000018 /* AppointmentEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentEditorViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,7 +51,7 @@
 
 /* Begin PBXGroup section */
 		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* MosquitoNinja */, D00000000000000000000003 /* Products */); sourceTree = "<group>"; };
-		D00000000000000000000002 /* MosquitoNinja */ = {isa = PBXGroup; path = MosquitoNinja; sourceTree = "<group>"; children = (B00000000000000000000001 /* AppDelegate.swift */, B00000000000000000000002 /* WebViewController.swift */, B00000000000000000000003 /* Info.plist */, B00000000000000000000004 /* Assets.xcassets */, B00000000000000000000005 /* LaunchScreen.storyboard */, B00000000000000000000006 /* Web */); };
+		D00000000000000000000002 /* MosquitoNinja */ = {isa = PBXGroup; path = MosquitoNinja; sourceTree = "<group>"; children = (B00000000000000000000001 /* AppDelegate.swift */, B00000000000000000000002 /* WebViewController.swift */, B00000000000000000000008 /* RootTabBarController.swift */, B00000000000000000000009 /* NativeUI.swift */, B00000000000000000000010 /* HomeViewController.swift */, B00000000000000000000011 /* ServicesViewController.swift */, B00000000000000000000012 /* QuoteViewController.swift */, B00000000000000000000013 /* PrepViewController.swift */, B00000000000000000000014 /* ContactViewController.swift */, B00000000000000000000015 /* Appointment.swift */, B00000000000000000000016 /* AppointmentNotificationManager.swift */, B00000000000000000000017 /* AppointmentsViewController.swift */, B00000000000000000000018 /* AppointmentEditorViewController.swift */, B00000000000000000000003 /* Info.plist */, B00000000000000000000004 /* Assets.xcassets */, B00000000000000000000005 /* LaunchScreen.storyboard */, B00000000000000000000006 /* Web */); };
 		D00000000000000000000003 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000007 /* MosquitoNinja.app */); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -46,7 +68,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		C00000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001 /* AppDelegate.swift in Sources */, A00000000000000000000002 /* WebViewController.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001 /* AppDelegate.swift in Sources */, A00000000000000000000002 /* WebViewController.swift in Sources */, A00000000000000000000006 /* RootTabBarController.swift in Sources */, A00000000000000000000007 /* NativeUI.swift in Sources */, A00000000000000000000008 /* HomeViewController.swift in Sources */, A00000000000000000000009 /* ServicesViewController.swift in Sources */, A00000000000000000000010 /* QuoteViewController.swift in Sources */, A00000000000000000000011 /* PrepViewController.swift in Sources */, A00000000000000000000012 /* ContactViewController.swift in Sources */, A00000000000000000000013 /* Appointment.swift in Sources */, A00000000000000000000014 /* AppointmentNotificationManager.swift in Sources */, A00000000000000000000015 /* AppointmentsViewController.swift in Sources */, A00000000000000000000016 /* AppointmentEditorViewController.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */

@@ -7,8 +7,10 @@
 - Minimum iOS: **15.0**
 - Devices: **iPhone + iPad**
 - Encryption declaration: non-exempt encryption = **No**
-- Protected permissions requested: **none**
-- Push Notifications: **not enabled**
+- Notification permission: requested **only when the customer enables appointment reminders**
+- Appointment reminders: **local notifications only** (24-hour and 1-hour)
+- Location permission / tracking: **not used**
+- Push Notifications entitlement: **not enabled**
 - Associated Domains: **not enabled**
 
-Before submission, test the Call, Text, quote form, every navigation page, rotation, iPad layout, and external links on a physical device. Review the App Privacy answers against the final production build and any third-party resources used by the bundled site (the current web design requests Google-hosted fonts when network access is available).
+Before submission, test Call, Text, quote flow, appointment add/edit/delete, 24-hour and 1-hour notification scheduling, notification-denied behavior, every navigation page, rotation, iPad layout, and external links on a physical device. Review the App Privacy answers against the final production build. The appointment feature stores appointment details on-device and uses local iOS notifications; it does not use location tracking or server-side appointment storage in this build.

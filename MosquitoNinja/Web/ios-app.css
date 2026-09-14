@@ -1,4 +1,21 @@
-/* Native iOS shell adjustments. */
-.mobile-bar{display:none!important}
-@media(max-width:640px){.footer-bottom{padding-bottom:24px!important}}
-html{-webkit-text-size-adjust:100%}
+/* Mosquito Ninja iOS: bundled web pages are supporting detail content, not the app shell. */
+html{-webkit-text-size-adjust:100%;background:#080a09}
+body{padding-top:0!important}
+.site-header,.mobile-bar{display:none!important}
+.footer{display:none!important}
+.page-hero{padding-top:44px!important}
+.page-hero .breadcrumbs{display:none!important}
+.content{padding-bottom:48px!important}
+.cta{display:none!important}
+@media(max-width:640px){
+  .page-hero{padding:34px 0 26px!important}
+  .page-hero h1{font-size:clamp(2.2rem,12vw,3.7rem)!important}
+  .page-hero p{font-size:1rem!important;line-height:1.65!important}
+  .content{padding-top:34px!important}
+  .content-grid{display:block!important}
+  .content-grid>div:first-child{margin-bottom:18px!important}
+  .prose{font-size:1rem!important;line-height:1.7!important}
+}
+
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif!important}
+h1,h2,h3,.eyebrow,.btn{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif!important}
