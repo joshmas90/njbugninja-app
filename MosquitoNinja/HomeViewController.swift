@@ -25,7 +25,7 @@ private final class NinjaGradientView: UIView {
 final class HomeViewController: NinjaBaseViewController {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, MMM d \\u{2022} h:mm a"
+        formatter.dateFormat = "EEE, MMM d \u{2022} h:mm a"
         return formatter
     }()
 
@@ -158,7 +158,7 @@ final class HomeViewController: NinjaBaseViewController {
         detail.numberOfLines = 0
 
         let audience = UILabel()
-        audience.text = "RESIDENTIAL  \\u{2022}  COMMERCIAL  \\u{2022}  GOVERNMENT"
+        audience.text = "RESIDENTIAL  \u{2022}  COMMERCIAL  \u{2022}  GOVERNMENT"
         audience.textColor = NinjaPalette.green
         audience.font = .systemFont(ofSize: 10, weight: .heavy)
         audience.numberOfLines = 0
