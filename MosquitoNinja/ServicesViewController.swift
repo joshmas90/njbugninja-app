@@ -70,17 +70,23 @@ final class ServicesViewController:
             accent: NinjaPalette.red
         )
 
+        contentStack.addArrangedSubview(secondaryButton("Before & after service", symbol: "checklist", action: #selector(openPrep)))
+
         contentStack.addArrangedSubview(
             card(
-                title: "Designed for clarity",
+                title: "One point of contact",
                 detail:
-                    "Every service page now shows loading, progress, failure and retry states so the app never leaves you wondering whether it responded.",
+                    "Your quote and treatment stay with Josh. Discuss the property, confirm the route and agree on the visit directly.",
                 symbol:
                     "bolt.shield.fill",
                 accent:
                     NinjaPalette.green
             )
         )
+    }
+
+    @objc private func openPrep() {
+        navigationController?.pushViewController(PrepViewController(), animated: true)
     }
 
     private func addService(
@@ -301,14 +307,13 @@ final class ServicesViewController:
                     return
                 }
 
-                self.navigationController?
-                    .pushViewController(
-                        WebViewController(
-                            page: page,
-                            title: title
-                        ),
-                        animated: true
-                    )
+                let destination: UIViewController
+                if let service = NinjaService(page: page) {
+                    destination = ServiceDetailViewController(service: service)
+                } else {
+                    destination = WebViewController(page: page, title: title)
+                }
+                self.navigationController?.pushViewController(destination, animated: true)
             },
             for: .touchUpInside
         )

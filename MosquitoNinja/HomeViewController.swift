@@ -382,7 +382,13 @@ final class HomeViewController: NinjaBaseViewController {
             row.bottomAnchor.constraint(equalTo: control.bottomAnchor, constant: -16)
         ])
         control.addAction(UIAction { [weak self] _ in
-            self?.navigationController?.pushViewController(WebViewController(page: page, title: titleForPage), animated: true)
+            let destination: UIViewController
+            if let service = NinjaService(page: page) {
+                destination = ServiceDetailViewController(service: service)
+            } else {
+                destination = WebViewController(page: page, title: titleForPage)
+            }
+            self?.navigationController?.pushViewController(destination, animated: true)
         }, for: .touchUpInside)
         return control
     }
@@ -716,7 +722,7 @@ final class HomeViewController: NinjaBaseViewController {
         present(alert, animated: true)
     }
 
-    @objc private func openQuote() { tabBarController?.selectedIndex = 3 }
+    @objc private func openQuote() { (tabBarController as? RootTabBarController)?.showQuote() }
     @objc private func openAppointments() { (tabBarController as? RootTabBarController)?.showAppointments() }
     @objc private func call() { openExternal("tel:+16093136317") }
     @objc private func text() { composeMessage() }

@@ -371,7 +371,8 @@ class NinjaBaseViewController: UIViewController {
         let label = UILabel()
         label.text = text.uppercased()
         label.textColor = .white
-        label.font = .systemFont(ofSize: size, weight: .black)
+        label.font = UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: .systemFont(ofSize: size, weight: .black))
+        label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         label.adjustsFontSizeToFitWidth = false
         return label
@@ -381,7 +382,8 @@ class NinjaBaseViewController: UIViewController {
         let label = UILabel()
         label.text = text
         label.textColor = NinjaPalette.muted
-        label.font = .systemFont(ofSize: 16, weight: .regular)
+        label.font = .preferredFont(forTextStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         return label
     }
@@ -390,7 +392,8 @@ class NinjaBaseViewController: UIViewController {
         let label = UILabel()
         label.text = text.uppercased()
         label.textColor = .white
-        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.font = UIFontMetrics(forTextStyle: .headline).scaledFont(for: .systemFont(ofSize: 18, weight: .bold))
+        label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         return label
     }
@@ -446,13 +449,15 @@ class NinjaBaseViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.text = title.uppercased()
         titleLabel.textColor = .white
-        titleLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        titleLabel.font = UIFontMetrics(forTextStyle: .headline).scaledFont(for: .systemFont(ofSize: 15, weight: .bold))
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
 
         let detailLabel = UILabel()
         detailLabel.text = detail
         detailLabel.textColor = NinjaPalette.muted
-        detailLabel.font = .systemFont(ofSize: 14)
+        detailLabel.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: .systemFont(ofSize: 14))
+        detailLabel.adjustsFontForContentSizeCategory = true
         detailLabel.numberOfLines = 0
 
         let textStack = UIStackView(arrangedSubviews: [titleLabel, detailLabel])

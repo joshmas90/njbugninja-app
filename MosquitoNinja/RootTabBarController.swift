@@ -16,10 +16,13 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         ]
     }
 
-    func showQuote() {
+    func showQuote(service: NinjaService? = nil) {
         selectedIndex = 3
         if let nav = selectedViewController as? UINavigationController {
             nav.popToRootViewController(animated: false)
+            if let service, let quote = nav.viewControllers.first as? QuoteViewController {
+                quote.selectService(service)
+            }
         }
     }
 

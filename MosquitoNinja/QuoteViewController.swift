@@ -28,6 +28,12 @@ final class QuoteViewController:
         buildUI()
     }
 
+    func selectService(_ selection: NinjaService) {
+        loadViewIfNeeded()
+        service.selectedSegmentIndex = selection.rawValue
+        // Keep any name, phone, location and property notes already entered.
+    }
+
     private func style(
         _ field: UITextField,
         placeholder: String,

@@ -635,6 +635,14 @@ final class WebViewController:
         )
     }
 
+    private func routeNativeServiceURL(_ url: URL) -> Bool {
+        guard url.isFileURL || ["njbugninja.com", "www.njbugninja.com"].contains(url.host?.lowercased() ?? ""),
+              let service = NinjaService(page: url.lastPathComponent),
+              let navigationController else { return false }
+        navigationController.pushViewController(ServiceDetailViewController(service: service), animated: true)
+        return true
+    }
+
     private func routeQuoteURL(_ url: URL) -> Bool {
         guard url.fragment == "quote",
               url.isFileURL || ["njbugninja.com", "www.njbugninja.com"].contains(url.host?.lowercased() ?? ""),
@@ -734,7 +742,7 @@ final class WebViewController:
             return
         }
 
-        if routeQuoteURL(url) {
+        if routeQuoteURL(url) || routeNativeServiceURL(url) {
             decisionHandler(.cancel)
             return
         }
@@ -786,7 +794,7 @@ final class WebViewController:
         if let url =
             navigationAction.request.url
         {
-            if routeQuoteURL(url) { return nil }
+            if routeQuoteURL(url) || routeNativeServiceURL(url) { return nil }
             if url.isFileURL {
                 webView.load(
                     navigationAction.request

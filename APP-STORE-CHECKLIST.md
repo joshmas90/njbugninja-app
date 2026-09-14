@@ -9,7 +9,7 @@
 - Encryption declaration: non-exempt encryption = **No**
 - Notification permission: requested **only when the customer enables appointment reminders**
 - Appointment reminders: **local notifications only** (24-hour and 1-hour)
-- Location permission / tracking: **not used**
+- Location permission: **optional, requested for an on-demand service-area check**. No background location tracking; review the existing iOS geocoding and public rule downloads in App Privacy answers.
 - Push Notifications entitlement: **not enabled**
 - Associated Domains: **not enabled**
 
