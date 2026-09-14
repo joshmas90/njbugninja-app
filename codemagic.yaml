@@ -1,4 +1,4 @@
-﻿workflows:
+workflows:
   mosquito-ninja-ios:
     name: Mosquito Ninja iOS
 
@@ -25,9 +25,22 @@
 
       - name: Set build number
         script: |
+          set -e
+          PLIST="$CM_BUILD_DIR/MosquitoNinja/Info.plist"
+
           /usr/libexec/PlistBuddy \
-            -c "Set :CFBundleVersion $CM_BUILD_NUMBER" \
-            "$CM_BUILD_DIR/MosquitoNinja/Info.plist"
+            -c "Set :CFBundleVersion $BUILD_NUMBER" \
+            "$PLIST"
+
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleShortVersionString 1.0" \
+            "$PLIST"
+
+          echo "Source CFBundleVersion:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST"
+
+          echo "Source CFBundleShortVersionString:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST"
 
       - name: Configure iOS signing
         script: |
@@ -38,6 +51,28 @@
           xcode-project build-ipa \
             --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
+
+      - name: Verify built IPA version metadata
+        script: |
+          set -e
+
+          IPA=$(find "$CM_BUILD_DIR/build/ios/ipa" -name '*.ipa' -type f | head -n 1)
+          test -n "$IPA"
+
+          TMP_DIR=$(mktemp -d)
+          unzip -q "$IPA" -d "$TMP_DIR"
+
+          APP=$(find "$TMP_DIR/Payload" -maxdepth 1 -name '*.app' -type d | head -n 1)
+          test -n "$APP"
+
+          BUNDLE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")
+          SHORT_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")
+
+          echo "Built CFBundleVersion: $BUNDLE_VERSION"
+          echo "Built CFBundleShortVersionString: $SHORT_VERSION"
+
+          test -n "$BUNDLE_VERSION"
+          test -n "$SHORT_VERSION"
 
     artifacts:
       - build/ios/ipa/*.ipa
