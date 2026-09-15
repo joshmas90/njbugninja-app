@@ -52,6 +52,77 @@ final class ServicesViewController:
             accent: NinjaPalette.red
         )
 
+        contentStack.addArrangedSubview(
+            eyebrow("Professional products")
+        )
+
+        contentStack.addArrangedSubview(
+            headline(
+                "Right product. Right target.",
+                size: 30
+            )
+        )
+
+        contentStack.addArrangedSubview(
+            body(
+                "Our core liquid products are OneGuard Multi MoA and Demand CS. We also use professional larval-control tools for standing water that cannot simply be removed. Product choice follows the pest, habitat, site conditions and the current product label."
+            )
+        )
+
+        contentStack.addArrangedSubview(
+            card(
+                title: "OneGuard Multi MoA",
+                detail:
+                    "A multi-action concentrate for mosquito-focused outdoor treatment, combining adult control, quick knockdown, a synergist and an insect growth regulator in one formulation.",
+                symbol:
+                    "drop.fill",
+                accent:
+                    NinjaPalette.red
+            )
+        )
+
+        contentStack.addArrangedSubview(
+            card(
+                title: "Demand CS",
+                detail:
+                    "A microencapsulated lambda-cyhalothrin residual option for labeled mosquito and tick treatment sites, including foliage, shrubs, perimeter areas and transition zones.",
+                symbol:
+                    "shield.fill",
+                accent:
+                    NinjaPalette.green
+            )
+        )
+
+        contentStack.addArrangedSubview(
+            card(
+                title: "Bti Larvicides",
+                detail:
+                    "Biological granules or briquets can be used in label-permitted standing water that cannot be eliminated, targeting mosquito larvae before they emerge as adults.",
+                symbol:
+                    "leaf.fill",
+                accent:
+                    NinjaPalette.red
+            )
+        )
+
+        contentStack.addArrangedSubview(
+            card(
+                title: "IGR Larvicide Granules",
+                detail:
+                    "Methoprene-based granular larvicides are another professional tool for suitable standing-water habitats when longer-duration larval control is appropriate.",
+                symbol:
+                    "clock.fill",
+                accent:
+                    NinjaPalette.green
+            )
+        )
+
+        contentStack.addArrangedSubview(
+            body(
+                "Not every product is used on every visit. Application sites, rates, PPE and re-entry instructions follow the current product label and applicable requirements."
+            )
+        )
+
         addService(
             "Service Area",
             "Review South Jersey coverage and route availability.",
