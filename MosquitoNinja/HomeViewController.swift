@@ -8,12 +8,14 @@ private final class NinjaGradientView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
+        // Keep enough contrast behind the copy while allowing substantially
+        // more of the hero artwork to read on an iPhone display.
         gradientLayer.colors = [
-            UIColor.black.withAlphaComponent(0.94).cgColor,
-            UIColor.black.withAlphaComponent(0.72).cgColor,
-            UIColor.black.withAlphaComponent(0.22).cgColor
+            UIColor.black.withAlphaComponent(0.86).cgColor,
+            UIColor.black.withAlphaComponent(0.58).cgColor,
+            UIColor.black.withAlphaComponent(0.10).cgColor
         ]
-        gradientLayer.locations = [0, 0.7, 1]
+        gradientLayer.locations = [0, 0.62, 1]
 
         gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
         gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
@@ -23,6 +25,7 @@ private final class NinjaGradientView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
 final class HomeViewController: NinjaBaseViewController {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -156,7 +159,7 @@ final class HomeViewController: NinjaBaseViewController {
 
         let eyebrow = UILabel()
         eyebrow.text = "MOSQUITOES. TICKS. CONSIDER THEM WARNED."
-        eyebrow.textColor = UIColor.white.withAlphaComponent(0.85)
+        eyebrow.textColor = UIColor.white.withAlphaComponent(0.90)
         eyebrow.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 12, weight: .bold))
         eyebrow.adjustsFontForContentSizeCategory = true
         eyebrow.numberOfLines = 0
@@ -167,22 +170,29 @@ final class HomeViewController: NinjaBaseViewController {
         headline.font = UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: .systemFont(ofSize: 34, weight: .black))
         headline.adjustsFontForContentSizeCategory = true
         headline.numberOfLines = 0
+        headline.layer.shadowColor = UIColor.black.cgColor
+        headline.layer.shadowOpacity = 0.55
+        headline.layer.shadowRadius = 5
+        headline.layer.shadowOffset = .zero
 
         let detail = UILabel()
         detail.text = "Targeted mosquito & tick control for South Jersey residential, commercial and government properties."
-        detail.textColor = UIColor.white.withAlphaComponent(0.88)
+        detail.textColor = UIColor.white.withAlphaComponent(0.92)
         detail.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: .systemFont(ofSize: 15, weight: .medium))
         detail.adjustsFontForContentSizeCategory = true
         detail.numberOfLines = 0
+        detail.layer.shadowColor = UIColor.black.cgColor
+        detail.layer.shadowOpacity = 0.42
+        detail.layer.shadowRadius = 4
+        detail.layer.shadowOffset = .zero
 
         let audience = UILabel()
-        audience.text = "RESIDENTIAL - COMMERCIAL - GOVERNMENT"
+        audience.text = "RESIDENTIAL   COMMERCIAL   GOVERNMENT"
         audience.textColor = NinjaPalette.green
         audience.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 11, weight: .bold), maximumPointSize: 14)
         audience.adjustsFontForContentSizeCategory = true
-        audience.numberOfLines = 1
-        audience.adjustsFontSizeToFitWidth = true
-        audience.minimumScaleFactor = 0.5
+        audience.numberOfLines = 0
+        audience.lineBreakMode = .byWordWrapping
         audience.accessibilityLabel = "Residential, Commercial, Government"
 
         [brand, eyebrow, headline, detail, audience].forEach {
@@ -238,6 +248,7 @@ final class HomeViewController: NinjaBaseViewController {
 
         return hero
     }
+
     private func nextAppointmentCard(_ appointment: ServiceAppointment) -> UIControl {
         let control = NinjaTouchControl()
         control.backgroundColor = NinjaPalette.panel
@@ -368,13 +379,17 @@ final class HomeViewController: NinjaBaseViewController {
         chevron.tintColor = UIColor.white.withAlphaComponent(0.45)
 
         let text = UIStackView(arrangedSubviews: [titleLabel, detailLabel])
-        text.axis = .vertical; text.spacing = 4
+        text.axis = .vertical
+        text.spacing = 4
         let row = UIStackView(arrangedSubviews: [icon, text, chevron])
         row.translatesAutoresizingMaskIntoConstraints = false
-        row.axis = .horizontal; row.alignment = .center; row.spacing = 14
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 14
         control.addSubview(row)
         NSLayoutConstraint.activate([
-            icon.widthAnchor.constraint(equalToConstant: 26), icon.heightAnchor.constraint(equalToConstant: 26),
+            icon.widthAnchor.constraint(equalToConstant: 26),
+            icon.heightAnchor.constraint(equalToConstant: 26),
             chevron.widthAnchor.constraint(equalToConstant: 12),
             row.topAnchor.constraint(equalTo: control.topAnchor, constant: 16),
             row.leadingAnchor.constraint(equalTo: control.leadingAnchor, constant: 16),
