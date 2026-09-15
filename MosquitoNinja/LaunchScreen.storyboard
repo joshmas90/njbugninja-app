@@ -11,12 +11,12 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchMark" translatesAutoresizingMaskIntoConstraints="NO" id="IMAGE">
-                                <rect key="frame" x="121.5" y="351" width="150" height="150"/>
-                                <constraints><constraint firstAttribute="width" constant="150" id="IW"/><constraint firstAttribute="height" constant="150" id="IH"/></constraints>
+                                <rect key="frame" x="61.5" y="291" width="270" height="270"/>
+                                <constraints><constraint firstAttribute="width" constant="270" id="IW"/><constraint firstAttribute="height" constant="270" id="IH"/></constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="SAFE"/>
-                        <color key="backgroundColor" red="0.031" green="0.039" blue="0.035" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.008" green="0.016" blue="0.012" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="IMAGE" firstAttribute="centerX" secondItem="VIEW" secondAttribute="centerX" id="CX"/>
                             <constraint firstItem="IMAGE" firstAttribute="centerY" secondItem="VIEW" secondAttribute="centerY" id="CY"/>
@@ -27,5 +27,5 @@
             </objects>
         </scene>
     </scenes>
-    <resources><image name="LaunchMark" width="256" height="256"/></resources>
+    <resources><image name="LaunchMark" width="768" height="768"/></resources>
 </document>

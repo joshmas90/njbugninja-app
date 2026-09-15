@@ -6,7 +6,9 @@ A native UIKit customer-service app for Mosquito Ninja. The app uses native Home
 
 - Native service dashboard and navigation.
 - Native quote request flow with a single in-app review/send sheet and feedback after iOS reports the result.
+- Optional property-photo attachments with previews and preserved quote-form state.
 - **Appointments center** with confirmed service date/time, service type, property label, notes, and service-day tools.
+- **My Service dashboard** with premium appointment status and local service history.
 - **Privacy-first local appointment alerts** at 24 hours and 1 hour before service.
 - Appointment notification permission is requested only when the customer chooses reminders.
 - Appointment information is stored on the customer’s device using `UserDefaults`.
@@ -14,6 +16,7 @@ A native UIKit customer-service app for Mosquito Ninja. The app uses native Home
 - Native service-prep guide.
 - Text buttons and bundled `sms:` links use Apple's in-app message composer. `tel:` and `mailto:` links open the appropriate iOS app.
 - Bundled service/reference pages remain available offline.
+- Website-matched theatrical launch overlay with the transparent `MOSQUITO NINJA / BITE BACK!` lockup, an accurately aligned animated strike, and Reduce Motion support.
 - iPhone and iPad support, iOS 15+.
 - No Push Notifications entitlement, Associated Domains, camera, microphone, or location capability is required for the current local-reminder implementation.
 
