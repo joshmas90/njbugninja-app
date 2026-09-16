@@ -9,23 +9,12 @@
                     <view key="view" contentMode="scaleToFill" id="VIEW">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchMark" translatesAutoresizingMaskIntoConstraints="NO" id="IMAGE">
-                                <rect key="frame" x="61.5" y="291" width="270" height="270"/>
-                                <constraints><constraint firstAttribute="width" constant="270" id="IW"/><constraint firstAttribute="height" constant="270" id="IH"/></constraints>
-                            </imageView>
-                        </subviews>
                         <viewLayoutGuide key="safeArea" id="SAFE"/>
                         <color key="backgroundColor" red="0.008" green="0.016" blue="0.012" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="IMAGE" firstAttribute="centerX" secondItem="VIEW" secondAttribute="centerX" id="CX"/>
-                            <constraint firstItem="IMAGE" firstAttribute="centerY" secondItem="VIEW" secondAttribute="centerY" id="CY"/>
-                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FR" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
     </scenes>
-    <resources><image name="LaunchMark" width="768" height="768"/></resources>
 </document>

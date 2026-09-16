@@ -165,16 +165,21 @@ private final class NinjaWebsiteHeaderView: UIView {
         callButton.setTitle("CALL  •  609-313-6317", for: .normal)
         callButton.setTitleColor(.white, for: .normal)
         callButton.setImage(UIImage(systemName: "phone.fill"), for: .normal)
-        callButton.tintColor = .white
+        callButton.tintColor = NinjaPalette.red
         callButton.titleLabel?.font = .systemFont(ofSize: 11, weight: .heavy)
-        callButton.backgroundColor = NinjaPalette.red
+        callButton.backgroundColor = UIColor(
+            red: 0.035,
+            green: 0.055,
+            blue: 0.043,
+            alpha: 0.96
+        )
         callButton.layer.borderWidth = 1
-        callButton.layer.borderColor = UIColor.white.withAlphaComponent(0.24).cgColor
+        callButton.layer.borderColor = NinjaPalette.red.withAlphaComponent(0.48).cgColor
         callButton.layer.cornerRadius = 12
         callButton.layer.cornerCurve = .continuous
         callButton.layer.shadowColor = NinjaPalette.red.cgColor
-        callButton.layer.shadowOpacity = 0.28
-        callButton.layer.shadowRadius = 11
+        callButton.layer.shadowOpacity = 0.20
+        callButton.layer.shadowRadius = 13
         callButton.layer.shadowOffset = CGSize(width: 0, height: 5)
         callButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
         callButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 5)

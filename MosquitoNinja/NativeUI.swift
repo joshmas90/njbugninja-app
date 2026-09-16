@@ -194,6 +194,12 @@ final class NinjaTouchControl: UIControl {
     @objc private func pressBegan() {
         feedback.prepare()
 
+        if UIAccessibility.isReduceMotionEnabled {
+            transform = .identity
+            alpha = 0.90
+            return
+        }
+
         UIView.animate(
             withDuration: 0.08,
             delay: 0,
@@ -205,6 +211,12 @@ final class NinjaTouchControl: UIControl {
     }
 
     @objc private func pressEnded() {
+        if UIAccessibility.isReduceMotionEnabled {
+            transform = .identity
+            alpha = 1
+            return
+        }
+
         UIView.animate(
             withDuration: 0.15,
             delay: 0,
@@ -274,6 +286,12 @@ final class NinjaButton: UIButton {
         generator.prepare()
         feedback = generator
 
+        if UIAccessibility.isReduceMotionEnabled {
+            transform = .identity
+            alpha = 0.90
+            return
+        }
+
         UIView.animate(
             withDuration: 0.07,
             delay: 0,
@@ -285,6 +303,12 @@ final class NinjaButton: UIButton {
     }
 
     @objc private func pressEnded() {
+        if UIAccessibility.isReduceMotionEnabled {
+            transform = .identity
+            alpha = 1
+            return
+        }
+
         UIView.animate(
             withDuration: 0.14,
             delay: 0,
