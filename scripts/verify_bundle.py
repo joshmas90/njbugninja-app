@@ -32,10 +32,21 @@ for asset in required_splash_assets:
         errors.append(f'missing splash asset: {asset.relative_to(root)}')
 
 storyboard = (root/'MosquitoNinja'/'LaunchScreen.storyboard').read_text(encoding='utf-8')
-if 'image="LaunchMark"' not in storyboard:
-    errors.append('LaunchScreen.storyboard does not reference LaunchMark')
-if 'constant="270"' not in storyboard:
-    errors.append('LaunchScreen.storyboard does not contain the premium 270-point mark')
+if 'image="LaunchMark"' in storyboard or '<imageView' in storyboard:
+    errors.append('LaunchScreen.storyboard must remain artwork-free for a clean black handoff')
+if 'red="0.008" green="0.016" blue="0.012"' not in storyboard:
+    errors.append('LaunchScreen.storyboard does not use the required launch-black background')
+
+app_delegate = (root/'MosquitoNinja'/'AppDelegate.swift').read_text(encoding='utf-8')
+overlay_mount = app_delegate.find('window.addSubview(launchOverlay)')
+window_reveal = app_delegate.find('window.makeKeyAndVisible()')
+if overlay_mount == -1 or window_reveal == -1 or overlay_mount > window_reveal:
+    errors.append('native launch overlay must mount before the app window becomes visible')
+
+home = (root/'MosquitoNinja'/'HomeViewController.swift').read_text(encoding='utf-8')
+for marker in ('spring-ember', 'spring-edge-sweep', 'isReduceMotionEnabled'):
+    if marker not in home:
+        errors.append(f'missing native Spring CTA motion safeguard: {marker}')
 if errors:
     print('\n'.join(errors)); sys.exit(1)
 print('PASS: bundled website references, asset metadata and splash assets verified.')

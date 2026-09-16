@@ -30,6 +30,9 @@ private final class SpringBookingCardView: UIView {
     override class var layerClass: AnyClass { CAGradientLayer.self }
 
     private var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
+    private let emberLayer = CAShapeLayer()
+    private let edgeSweep = CAGradientLayer()
+    private var lastLayoutSize = CGSize.zero
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -49,10 +52,161 @@ private final class SpringBookingCardView: UIView {
         layer.shadowOpacity = 0.28
         layer.shadowRadius = 18
         layer.shadowOffset = CGSize(width: 0, height: 10)
+        layer.masksToBounds = false
+
+        emberLayer.fillColor = NinjaPalette.red.withAlphaComponent(0.10).cgColor
+        emberLayer.shadowColor = NinjaPalette.red.cgColor
+        emberLayer.shadowOpacity = 0.62
+        emberLayer.shadowRadius = 24
+        emberLayer.shadowOffset = .zero
+        emberLayer.opacity = 0.58
+        gradientLayer.insertSublayer(emberLayer, at: 0)
+
+        edgeSweep.colors = [
+            UIColor.clear.cgColor,
+            NinjaPalette.red.withAlphaComponent(0.68).cgColor,
+            UIColor(red: 1, green: 0.42, blue: 0.44, alpha: 1).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.62).cgColor,
+            UIColor.clear.cgColor
+        ]
+        edgeSweep.locations = [0, 0.28, 0.52, 0.74, 1]
+        edgeSweep.startPoint = CGPoint(x: 0, y: 0.5)
+        edgeSweep.endPoint = CGPoint(x: 1, y: 0.5)
+        edgeSweep.shadowColor = NinjaPalette.red.cgColor
+        edgeSweep.shadowOpacity = 0.72
+        edgeSweep.shadowRadius = 7
+        edgeSweep.opacity = 0
+        gradientLayer.addSublayer(edgeSweep)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reduceMotionStatusChanged),
+            name: UIAccessibility.reduceMotionStatusDidChangeNotification,
+            object: nil
+        )
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
+        emberLayer.frame = bounds
+        let glowHeight = min(86, max(54, bounds.height * 0.27))
+        let glowRect = CGRect(
+            x: bounds.width * 0.06,
+            y: bounds.height - glowHeight * 0.70,
+            width: bounds.width * 0.88,
+            height: glowHeight
+        )
+        let glowPath = UIBezierPath(ovalIn: glowRect).cgPath
+        emberLayer.path = glowPath
+        emberLayer.shadowPath = glowPath
+
+        let sizeChanged = lastLayoutSize != bounds.size
+        let sweepWidth = max(118, bounds.width * 0.36)
+        edgeSweep.bounds = CGRect(x: 0, y: 0, width: sweepWidth, height: 1.5)
+
+        if sizeChanged {
+            edgeSweep.position = CGPoint(x: -sweepWidth / 2, y: 0.75)
+            lastLayoutSize = bounds.size
+            updateAmbientMotion()
+        }
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+
+        if window == nil {
+            emberLayer.removeAllAnimations()
+            edgeSweep.removeAllAnimations()
+        } else {
+            setNeedsLayout()
+            layoutIfNeeded()
+            updateAmbientMotion()
+        }
+    }
+
+    @objc private func reduceMotionStatusChanged() {
+        updateAmbientMotion()
+    }
+
+    private func updateAmbientMotion() {
+        guard bounds.width > 0, window != nil else { return }
+
+        emberLayer.removeAllAnimations()
+        edgeSweep.removeAllAnimations()
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        emberLayer.transform = CATransform3DIdentity
+
+        if UIAccessibility.isReduceMotionEnabled {
+            emberLayer.opacity = 0.42
+            edgeSweep.opacity = 0.62
+            edgeSweep.position.x = 22 + edgeSweep.bounds.width / 2
+            CATransaction.commit()
+            return
+        }
+
+        emberLayer.opacity = 0.58
+        edgeSweep.opacity = 0
+        edgeSweep.position.x = -edgeSweep.bounds.width / 2
+        CATransaction.commit()
+
+        let emberScale = CAKeyframeAnimation(keyPath: "transform.scale")
+        emberScale.values = [0.94, 1.03, 0.98, 1.05]
+        emberScale.keyTimes = [0, 0.36, 0.68, 1]
+
+        let emberDrift = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        emberDrift.values = [-8, 3, 9, -3]
+        emberDrift.keyTimes = [0, 0.36, 0.68, 1]
+
+        let emberOpacity = CAKeyframeAnimation(keyPath: "opacity")
+        emberOpacity.values = [0.38, 0.64, 0.46, 0.68]
+        emberOpacity.keyTimes = [0, 0.36, 0.68, 1]
+
+        let emberGroup = CAAnimationGroup()
+        emberGroup.animations = [emberScale, emberDrift, emberOpacity]
+        emberGroup.duration = 6.8
+        emberGroup.autoreverses = true
+        emberGroup.repeatCount = .infinity
+        emberGroup.timingFunction = CAMediaTimingFunction(
+            controlPoints: 0.45,
+            0,
+            0.20,
+            1
+        )
+        emberLayer.add(emberGroup, forKey: "spring-ember")
+
+        let sweepPosition = CABasicAnimation(keyPath: "position.x")
+        sweepPosition.fromValue = -edgeSweep.bounds.width / 2
+        sweepPosition.toValue = bounds.width + edgeSweep.bounds.width / 2
+        sweepPosition.duration = 6.4
+
+        let sweepOpacity = CAKeyframeAnimation(keyPath: "opacity")
+        sweepOpacity.values = [0, 0, 0.9, 0.9, 0, 0]
+        sweepOpacity.keyTimes = [0, 0.14, 0.23, 0.64, 0.76, 1]
+        sweepOpacity.duration = 6.4
+
+        let sweepGroup = CAAnimationGroup()
+        sweepGroup.animations = [sweepPosition, sweepOpacity]
+        sweepGroup.duration = 6.4
+        sweepGroup.repeatCount = .infinity
+        sweepGroup.timingFunction = CAMediaTimingFunction(
+            controlPoints: 0.35,
+            0,
+            0.25,
+            1
+        )
+        edgeSweep.add(sweepGroup, forKey: "spring-edge-sweep")
     }
 }
 

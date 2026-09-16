@@ -2,6 +2,14 @@
 
 A native UIKit customer-service app for Mosquito Ninja. The app uses native Home, Services, Appointments, Quote, Prep, and Contact experiences, with bundled website pages used only for deeper reference content.
 
+## Premium native motion sync
+
+- Uses an artwork-free, launch-black storyboard and mounts the native cinematic overlay before the app window becomes visible, preventing the Home screen or a static logo from flashing first.
+- Enlarges the theatrical mark and wordmark staging on iPad while preserving a screen-filling but proportional iPhone presentation.
+- Adds a slow Core Animation ember glow and upper-edge light sweep to the Spring 2027 booking card, with a static treatment under Reduce Motion.
+- Refines the iPad call control into a dark premium surface with a red icon, edge and restrained glow.
+- Keeps haptics while removing button/card scale movement when Reduce Motion is enabled.
+
 ## Spring 2027 premium conversion update
 
 - Adds an app-native Spring 2027 scheduling card immediately beneath the Home hero, with Request, Call, and Text actions.
