@@ -26,6 +26,36 @@ private final class NinjaGradientView: UIView {
     }
 }
 
+private final class SpringBookingCardView: UIView {
+    override class var layerClass: AnyClass { CAGradientLayer.self }
+
+    private var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        gradientLayer.colors = [
+            UIColor(red: 0.075, green: 0.09, blue: 0.078, alpha: 1).cgColor,
+            UIColor(red: 0.035, green: 0.042, blue: 0.037, alpha: 1).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+
+        layer.cornerRadius = 22
+        layer.cornerCurve = .continuous
+        layer.borderWidth = 1
+        layer.borderColor = NinjaPalette.red.withAlphaComponent(0.36).cgColor
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.28
+        layer.shadowRadius = 18
+        layer.shadowOffset = CGSize(width: 0, height: 10)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 final class HomeViewController: NinjaBaseViewController {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -76,6 +106,7 @@ final class HomeViewController: NinjaBaseViewController {
 
     private func buildUI() {
         contentStack.addArrangedSubview(ninjaHero())
+        contentStack.addArrangedSubview(springBookingCard())
         contentStack.addArrangedSubview(serviceAreaCard())
 
         if let appointment = AppointmentStore.shared.nextAppointment {
@@ -93,20 +124,137 @@ final class HomeViewController: NinjaBaseViewController {
         let commercial = tappableCard(title: "Commercial & Government", detail: "Business, hospitality, municipal and government-managed outdoor properties.", symbol: "building.2.fill", page: "commercial.html", titleForPage: "Commercial & Government")
         [mosquito, ticks, commercial].forEach(contentStack.addArrangedSubview)
 
-        contentStack.addArrangedSubview(sectionTitle("Quick Actions"))
+        contentStack.addArrangedSubview(sectionTitle("Customer Tools"))
         contentStack.addArrangedSubview(
             secondaryButton("Appointments", symbol: "calendar.badge.clock", action: #selector(openAppointments))
         )
-        let actions = UIStackView(arrangedSubviews: [
-            secondaryButton("Call", symbol: "phone.fill", action: #selector(call)),
-            secondaryButton("Text", symbol: "message.fill", action: #selector(text))
-        ])
-        actions.axis = .horizontal
-        actions.distribution = .fillEqually
-        actions.spacing = 8
-        contentStack.addArrangedSubview(actions)
 
         contentStack.addArrangedSubview(card(title: "Owner-operated", detail: "Your quote and treatment stay with one point of contact from the first conversation through service.", symbol: "person.crop.circle.badge.checkmark", accent: NinjaPalette.red))
+    }
+
+    private func springBookingCard() -> UIView {
+        let panel = SpringBookingCardView()
+        panel.translatesAutoresizingMaskIntoConstraints = false
+
+        let accent = UIView()
+        accent.translatesAutoresizingMaskIntoConstraints = false
+        accent.backgroundColor = NinjaPalette.red
+        accent.layer.cornerRadius = 2
+        accent.layer.shadowColor = NinjaPalette.red.cgColor
+        accent.layer.shadowOpacity = 0.65
+        accent.layer.shadowRadius = 7
+
+        let signal = UIView()
+        signal.translatesAutoresizingMaskIntoConstraints = false
+        signal.backgroundColor = NinjaPalette.green
+        signal.layer.cornerRadius = 4
+        signal.layer.shadowColor = NinjaPalette.green.cgColor
+        signal.layer.shadowOpacity = 0.55
+        signal.layer.shadowRadius = 6
+
+        let kicker = UILabel()
+        kicker.text = "NOW ACCEPTING EARLY REQUESTS"
+        kicker.textColor = NinjaPalette.green
+        kicker.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(
+            for: .systemFont(ofSize: 11, weight: .heavy),
+            maximumPointSize: 14
+        )
+        kicker.adjustsFontForContentSizeCategory = true
+        kicker.numberOfLines = 0
+
+        let status = UIStackView(arrangedSubviews: [signal, kicker])
+        status.axis = .horizontal
+        status.alignment = .center
+        status.spacing = 9
+
+        let title = UILabel()
+        title.text = "SPRING 2027\nSCHEDULING IS OPEN"
+        title.textColor = .white
+        title.font = UIFontMetrics(forTextStyle: .title1).scaledFont(
+            for: .systemFont(ofSize: 28, weight: .black),
+            maximumPointSize: 38
+        )
+        title.adjustsFontForContentSizeCategory = true
+        title.numberOfLines = 0
+        title.accessibilityTraits = .header
+
+        let detail = UILabel()
+        detail.text = "Plan ahead for the first mosquito & tick season routes. Send an early scheduling request now and confirm the property details directly."
+        detail.textColor = UIColor.white.withAlphaComponent(0.72)
+        detail.font = .preferredFont(forTextStyle: .subheadline)
+        detail.adjustsFontForContentSizeCategory = true
+        detail.numberOfLines = 0
+
+        let request = primaryButton(
+            "Request Spring Service",
+            symbol: "calendar.badge.plus",
+            action: #selector(openSpringQuote)
+        )
+
+        let divider = UIView()
+        divider.backgroundColor = UIColor.white.withAlphaComponent(0.10)
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
+
+        let contactLabel = UILabel()
+        contactLabel.text = "CALL OR TEXT DIRECTLY"
+        contactLabel.textColor = UIColor.white.withAlphaComponent(0.56)
+        contactLabel.font = .systemFont(ofSize: 10, weight: .heavy)
+
+        let phone = UILabel()
+        phone.text = "609-313-6317"
+        phone.textColor = .white
+        phone.font = UIFontMetrics(forTextStyle: .title2).scaledFont(
+            for: .systemFont(ofSize: 22, weight: .black),
+            maximumPointSize: 30
+        )
+        phone.adjustsFontForContentSizeCategory = true
+        phone.accessibilityLabel = "609-313-6317"
+
+        let phoneStack = UIStackView(arrangedSubviews: [contactLabel, phone])
+        phoneStack.axis = .vertical
+        phoneStack.spacing = 3
+
+        let contactActions = UIStackView(arrangedSubviews: [
+            secondaryButton("Call Now", symbol: "phone.fill", action: #selector(call)),
+            secondaryButton("Text Us", symbol: "message.fill", action: #selector(text))
+        ])
+        contactActions.axis = .horizontal
+        contactActions.distribution = .fillEqually
+        contactActions.spacing = 10
+
+        let stack = UIStackView(arrangedSubviews: [
+            status,
+            title,
+            detail,
+            request,
+            divider,
+            phoneStack,
+            contactActions
+        ])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.spacing = 14
+
+        panel.addSubview(accent)
+        panel.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            signal.widthAnchor.constraint(equalToConstant: 8),
+            signal.heightAnchor.constraint(equalToConstant: 8),
+
+            accent.topAnchor.constraint(equalTo: panel.topAnchor, constant: 20),
+            accent.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
+            accent.widthAnchor.constraint(equalToConstant: 4),
+            accent.heightAnchor.constraint(equalToConstant: 48),
+
+            stack.topAnchor.constraint(equalTo: panel.topAnchor, constant: 22),
+            stack.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 22),
+            stack.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -22),
+            stack.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -22)
+        ])
+
+        panel.accessibilityIdentifier = "spring-2027-booking-card"
+        return panel
     }
 
     private func ninjaHero() -> UIView {
@@ -738,6 +886,7 @@ final class HomeViewController: NinjaBaseViewController {
     }
 
     @objc private func openQuote() { (tabBarController as? RootTabBarController)?.showQuote() }
+    @objc private func openSpringQuote() { (tabBarController as? RootTabBarController)?.showQuote(spring2027: true) }
     @objc private func openAppointments() { (tabBarController as? RootTabBarController)?.showAppointments() }
     @objc private func call() { openExternal("tel:+16093136317") }
     @objc private func text() { composeMessage() }

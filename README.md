@@ -2,6 +2,14 @@
 
 A native UIKit customer-service app for Mosquito Ninja. The app uses native Home, Services, Appointments, Quote, Prep, and Contact experiences, with bundled website pages used only for deeper reference content.
 
+## Spring 2027 premium conversion update
+
+- Adds an app-native Spring 2027 scheduling card immediately beneath the Home hero, with Request, Call, and Text actions.
+- Carries Spring 2027 intent into the existing native quote flow while preserving any customer-entered property notes.
+- Removes the duplicate lower Home Call/Text row and keeps Appointments under a clearer Customer Tools heading.
+- Upgrades the iPad header phone control with a high-contrast red treatment while preserving its direct-call behavior.
+- Keeps the app’s native UIKit identity and separate repository; no website layout or shared UI code is imported.
+
 ## Native iOS features
 
 - Native service dashboard and navigation.
