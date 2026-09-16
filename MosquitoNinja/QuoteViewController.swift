@@ -43,6 +43,30 @@ final class QuoteViewController:
         service.selectedSegmentIndex = selection.rawValue
     }
 
+    func prepareForSpring2027Request() {
+        loadViewIfNeeded()
+
+        let springNote = "I’m interested in early Spring 2027 scheduling."
+        let currentNotes = notesView.text.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        if currentNotes.isEmpty || currentNotes.hasPrefix("Describe the property") {
+            notesView.text = springNote + " "
+            notesView.textColor = .white
+        } else if !currentNotes.localizedCaseInsensitiveContains("spring 2027") {
+            notesView.text = springNote + "\n" + currentNotes
+            notesView.textColor = .white
+        }
+
+        showFeedback(
+            title: "Spring 2027 Request",
+            detail: "The scheduling preference is included. Add your property details, then review and send the request.",
+            kind: .success,
+            duration: 2.0
+        )
+    }
+
     private func style(
         _ field: UITextField,
         placeholder: String,

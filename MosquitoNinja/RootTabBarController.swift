@@ -162,15 +162,22 @@ private final class NinjaWebsiteHeaderView: UIView {
 
         let callButton = NinjaButton(type: .system)
         callButton.translatesAutoresizingMaskIntoConstraints = false
-        callButton.setTitle("609-313-6317", for: .normal)
+        callButton.setTitle("CALL  •  609-313-6317", for: .normal)
         callButton.setTitleColor(.white, for: .normal)
-        callButton.titleLabel?.font = .systemFont(ofSize: 11, weight: .bold)
-        callButton.backgroundColor = .clear
+        callButton.setImage(UIImage(systemName: "phone.fill"), for: .normal)
+        callButton.tintColor = .white
+        callButton.titleLabel?.font = .systemFont(ofSize: 11, weight: .heavy)
+        callButton.backgroundColor = NinjaPalette.red
         callButton.layer.borderWidth = 1
-        callButton.layer.borderColor = UIColor.white.withAlphaComponent(0.28).cgColor
-        callButton.layer.cornerRadius = 2
+        callButton.layer.borderColor = UIColor.white.withAlphaComponent(0.24).cgColor
+        callButton.layer.cornerRadius = 12
         callButton.layer.cornerCurve = .continuous
-        callButton.contentEdgeInsets = UIEdgeInsets(top: 9, left: 13, bottom: 9, right: 13)
+        callButton.layer.shadowColor = NinjaPalette.red.cgColor
+        callButton.layer.shadowOpacity = 0.28
+        callButton.layer.shadowRadius = 11
+        callButton.layer.shadowOffset = CGSize(width: 0, height: 5)
+        callButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
+        callButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 5)
         callButton.accessibilityLabel = "Call Mosquito Ninja at 609-313-6317"
         callButton.addAction(UIAction { [weak self] _ in
             self?.onCall?()
@@ -260,7 +267,10 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         configureWebsiteStyleHeaderIfNeeded()
     }
 
-    func showQuote(service: NinjaService? = nil) {
+    func showQuote(
+        service: NinjaService? = nil,
+        spring2027: Bool = false
+    ) {
         selectedIndex = 3
         syncWebsiteHeaderSelection()
 
@@ -270,6 +280,11 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
             if let service,
                let quote = nav.viewControllers.first as? QuoteViewController {
                 quote.selectService(service)
+            }
+
+            if spring2027,
+               let quote = nav.viewControllers.first as? QuoteViewController {
+                quote.prepareForSpring2027Request()
             }
         }
     }
