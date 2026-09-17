@@ -2,6 +2,13 @@
 
 A native UIKit customer-service app for Mosquito Ninja. The app uses native Home, Services, Appointments, Quote, Prep, and Contact experiences, with bundled website pages used only for deeper reference content.
 
+## Adaptive iPad navigation
+
+- Shows the full header navigation and call button whenever their measured widths fit, including spacing and a small reserve of breathing room.
+- Switches to the menu as the window narrows, and restores the full navigation when rotation or window resizing creates enough space.
+- Keeps the logo and menu accessible in narrow Split View windows; menu actions and selected-tab state remain the same.
+- Preserves the iPhone's native tab bar. Verify iPad portrait, landscape and Split View in the next simulator/device build.
+
 ## Spring 2027 theatrical CTA interaction
 
 - Makes every non-button area of the Spring 2027 booking card open the existing Spring Service quote flow while preserving the dedicated Request, Call and Text controls.
