@@ -21,7 +21,7 @@ final class ServicesViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Select a service for focused treatment information, expectations and next steps."
+                "Mosquito and tick control remain the core services. Outdoor fly control is available as a targeted nuisance-pest service when the property and source conditions make it appropriate."
             )
         )
 
@@ -41,6 +41,15 @@ final class ServicesViewController:
             "tick-control.html",
             kicker: "PERIMETER DEFENSE",
             accent: NinjaPalette.green
+        )
+
+        addService(
+            "Outdoor Fly Control",
+            "Target house-fly and nuisance-fly pressure around exterior source, resting and activity zones.",
+            "ant.fill",
+            "fly-control.html",
+            kicker: "NUISANCE FLY SERVICE",
+            accent: NinjaPalette.red
         )
 
         addService(
