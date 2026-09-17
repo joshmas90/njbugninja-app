@@ -5,9 +5,17 @@ A native UIKit customer-service app for Mosquito Ninja. The app uses native Home
 ## Adaptive iPad navigation
 
 - Shows the full header navigation and call button whenever their measured widths fit, including spacing and a small reserve of breathing room.
+- Uses a tighter inline layout with a 44-point call icon at intermediate widths, so the links remain visible on more iPad window sizes.
 - Switches to the menu as the window narrows, and restores the full navigation when rotation or window resizing creates enough space.
 - Keeps the logo and menu accessible in narrow Split View windows; menu actions and selected-tab state remain the same.
 - Preserves the iPhone's native tab bar. Verify iPad portrait, landscape and Split View in the next simulator/device build.
+
+## Brighter hero and responsive polish
+
+- Replaces the heavy 86%/58% horizontal black overlay with a lighter 44%/16% fade on wide hero cards. Narrow cards keep the upper artwork clear and fade only toward the copy at the bottom.
+- Gives the hero more image space, a clearer edge, and local text shadows for readability.
+- Centers content within a maximum 1,120-point column on wide screens and respects horizontal safe areas.
+- Uses consistent, scalable button typography and service-card text, plus accessible heading traits.
 
 ## Spring 2027 theatrical CTA interaction
 
