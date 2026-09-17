@@ -26,12 +26,15 @@ private final class NinjaGradientView: UIView {
     }
 }
 
-private final class SpringBookingCardView: UIView {
+private final class SpringBookingCardView: UIControl {
     override class var layerClass: AnyClass { CAGradientLayer.self }
 
     private var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
     private let emberLayer = CAShapeLayer()
+    private let energySweep = CAGradientLayer()
+    private let rimPulse = CAShapeLayer()
     private let edgeSweep = CAGradientLayer()
+    private let feedback = UIImpactFeedbackGenerator(style: .medium)
     private var lastLayoutSize = CGSize.zero
 
     override init(frame: CGRect) {
@@ -47,36 +50,72 @@ private final class SpringBookingCardView: UIView {
         layer.cornerRadius = 22
         layer.cornerCurve = .continuous
         layer.borderWidth = 1
-        layer.borderColor = NinjaPalette.red.withAlphaComponent(0.36).cgColor
+        layer.borderColor = NinjaPalette.red.withAlphaComponent(0.52).cgColor
         layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.28
-        layer.shadowRadius = 18
-        layer.shadowOffset = CGSize(width: 0, height: 10)
+        layer.shadowOpacity = 0.38
+        layer.shadowRadius = 22
+        layer.shadowOffset = CGSize(width: 0, height: 12)
         layer.masksToBounds = false
 
-        emberLayer.fillColor = NinjaPalette.red.withAlphaComponent(0.10).cgColor
+        emberLayer.fillColor = NinjaPalette.red.withAlphaComponent(0.16).cgColor
         emberLayer.shadowColor = NinjaPalette.red.cgColor
-        emberLayer.shadowOpacity = 0.62
-        emberLayer.shadowRadius = 24
+        emberLayer.shadowOpacity = 0.88
+        emberLayer.shadowRadius = 34
         emberLayer.shadowOffset = .zero
-        emberLayer.opacity = 0.58
+        emberLayer.opacity = 0.74
         gradientLayer.insertSublayer(emberLayer, at: 0)
+
+        energySweep.colors = [
+            UIColor.clear.cgColor,
+            NinjaPalette.red.withAlphaComponent(0.02).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.16).cgColor,
+            UIColor(red: 1, green: 0.46, blue: 0.48, alpha: 0.34).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.12).cgColor,
+            UIColor.clear.cgColor
+        ]
+        energySweep.locations = [0, 0.26, 0.42, 0.52, 0.62, 1]
+        energySweep.startPoint = CGPoint(x: 0, y: 1)
+        energySweep.endPoint = CGPoint(x: 1, y: 0)
+        energySweep.cornerRadius = 22
+        energySweep.masksToBounds = true
+        energySweep.opacity = 0
+        gradientLayer.addSublayer(energySweep)
+
+        rimPulse.fillColor = UIColor.clear.cgColor
+        rimPulse.strokeColor = NinjaPalette.red.withAlphaComponent(0.78).cgColor
+        rimPulse.lineWidth = 1.4
+        rimPulse.shadowColor = NinjaPalette.red.cgColor
+        rimPulse.shadowOpacity = 0.86
+        rimPulse.shadowRadius = 13
+        rimPulse.shadowOffset = .zero
+        rimPulse.opacity = 0.52
+        gradientLayer.addSublayer(rimPulse)
 
         edgeSweep.colors = [
             UIColor.clear.cgColor,
-            NinjaPalette.red.withAlphaComponent(0.68).cgColor,
-            UIColor(red: 1, green: 0.42, blue: 0.44, alpha: 1).cgColor,
-            NinjaPalette.red.withAlphaComponent(0.62).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.82).cgColor,
+            UIColor(red: 1, green: 0.62, blue: 0.64, alpha: 1).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.78).cgColor,
             UIColor.clear.cgColor
         ]
         edgeSweep.locations = [0, 0.28, 0.52, 0.74, 1]
         edgeSweep.startPoint = CGPoint(x: 0, y: 0.5)
         edgeSweep.endPoint = CGPoint(x: 1, y: 0.5)
         edgeSweep.shadowColor = NinjaPalette.red.cgColor
-        edgeSweep.shadowOpacity = 0.72
-        edgeSweep.shadowRadius = 7
+        edgeSweep.shadowOpacity = 0.96
+        edgeSweep.shadowRadius = 11
         edgeSweep.opacity = 0
         gradientLayer.addSublayer(edgeSweep)
+
+        isExclusiveTouch = true
+        isAccessibilityElement = false
+        addTarget(self, action: #selector(pressBegan), for: [.touchDown, .touchDragEnter])
+        addTarget(
+            self,
+            action: #selector(pressEnded),
+            for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit]
+        )
+        addTarget(self, action: #selector(successfulTap), for: .touchUpInside)
 
         NotificationCenter.default.addObserver(
             self,
@@ -94,6 +133,64 @@ private final class SpringBookingCardView: UIView {
         NotificationCenter.default.removeObserver(self)
     }
 
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard
+            !isHidden,
+            isUserInteractionEnabled,
+            alpha > 0.01,
+            self.point(inside: point, with: event)
+        else {
+            return nil
+        }
+
+        let hitView = super.hitTest(point, with: event)
+        var candidate = hitView
+
+        // Preserve the Request, Call and Text controls. Every other visible
+        // part of the card acts as one large Spring Service target.
+        while let view = candidate, view !== self {
+            if let control = view as? UIControl {
+                return control
+            }
+            candidate = view.superview
+        }
+
+        return self
+    }
+
+    @objc private func pressBegan() {
+        feedback.prepare()
+
+        guard !UIAccessibility.isReduceMotionEnabled else {
+            alpha = 0.94
+            return
+        }
+
+        UIView.animate(
+            withDuration: 0.10,
+            delay: 0,
+            options: [.allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.transform = CGAffineTransform(scaleX: 0.992, y: 0.992)
+            self.alpha = 0.94
+        }
+    }
+
+    @objc private func pressEnded() {
+        UIView.animate(
+            withDuration: UIAccessibility.isReduceMotionEnabled ? 0.08 : 0.18,
+            delay: 0,
+            options: [.allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.transform = .identity
+            self.alpha = 1
+        }
+    }
+
+    @objc private func successfulTap() {
+        feedback.impactOccurred(intensity: 0.82)
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         guard bounds.width > 0, bounds.height > 0 else { return }
@@ -101,21 +198,38 @@ private final class SpringBookingCardView: UIView {
         emberLayer.frame = bounds
         let glowHeight = min(86, max(54, bounds.height * 0.27))
         let glowRect = CGRect(
-            x: bounds.width * 0.06,
-            y: bounds.height - glowHeight * 0.70,
-            width: bounds.width * 0.88,
-            height: glowHeight
+            x: bounds.width * 0.02,
+            y: bounds.height - glowHeight * 0.76,
+            width: bounds.width * 0.96,
+            height: glowHeight * 1.08
         )
         let glowPath = UIBezierPath(ovalIn: glowRect).cgPath
         emberLayer.path = glowPath
         emberLayer.shadowPath = glowPath
 
         let sizeChanged = lastLayoutSize != bounds.size
-        let sweepWidth = max(118, bounds.width * 0.36)
-        edgeSweep.bounds = CGRect(x: 0, y: 0, width: sweepWidth, height: 1.5)
+        let sweepWidth = max(142, bounds.width * 0.42)
+        edgeSweep.bounds = CGRect(x: 0, y: 0, width: sweepWidth, height: 2.5)
+
+        let energyWidth = max(190, bounds.width * 0.52)
+        energySweep.bounds = CGRect(
+            x: 0,
+            y: 0,
+            width: energyWidth,
+            height: bounds.height
+        )
+
+        rimPulse.frame = bounds
+        let rimPath = UIBezierPath(
+            roundedRect: bounds.insetBy(dx: 1.25, dy: 1.25),
+            cornerRadius: max(0, layer.cornerRadius - 1.25)
+        ).cgPath
+        rimPulse.path = rimPath
+        rimPulse.shadowPath = rimPath
 
         if sizeChanged {
             edgeSweep.position = CGPoint(x: -sweepWidth / 2, y: 0.75)
+            energySweep.position = CGPoint(x: -energyWidth / 2, y: bounds.midY)
             lastLayoutSize = bounds.size
             updateAmbientMotion()
         }
@@ -126,6 +240,8 @@ private final class SpringBookingCardView: UIView {
 
         if window == nil {
             emberLayer.removeAllAnimations()
+            energySweep.removeAllAnimations()
+            rimPulse.removeAllAnimations()
             edgeSweep.removeAllAnimations()
         } else {
             setNeedsLayout()
@@ -142,6 +258,8 @@ private final class SpringBookingCardView: UIView {
         guard bounds.width > 0, window != nil else { return }
 
         emberLayer.removeAllAnimations()
+        energySweep.removeAllAnimations()
+        rimPulse.removeAllAnimations()
         edgeSweep.removeAllAnimations()
 
         CATransaction.begin()
@@ -149,33 +267,39 @@ private final class SpringBookingCardView: UIView {
         emberLayer.transform = CATransform3DIdentity
 
         if UIAccessibility.isReduceMotionEnabled {
-            emberLayer.opacity = 0.42
-            edgeSweep.opacity = 0.62
+            emberLayer.opacity = 0.68
+            energySweep.opacity = 0.18
+            energySweep.position.x = bounds.midX
+            rimPulse.opacity = 0.72
+            edgeSweep.opacity = 0.78
             edgeSweep.position.x = 22 + edgeSweep.bounds.width / 2
             CATransaction.commit()
             return
         }
 
-        emberLayer.opacity = 0.58
+        emberLayer.opacity = 0.74
+        energySweep.opacity = 0
+        energySweep.position.x = -energySweep.bounds.width / 2
+        rimPulse.opacity = 0.48
         edgeSweep.opacity = 0
         edgeSweep.position.x = -edgeSweep.bounds.width / 2
         CATransaction.commit()
 
         let emberScale = CAKeyframeAnimation(keyPath: "transform.scale")
-        emberScale.values = [0.94, 1.03, 0.98, 1.05]
+        emberScale.values = [0.90, 1.08, 0.96, 1.12]
         emberScale.keyTimes = [0, 0.36, 0.68, 1]
 
         let emberDrift = CAKeyframeAnimation(keyPath: "transform.translation.x")
-        emberDrift.values = [-8, 3, 9, -3]
+        emberDrift.values = [-14, 5, 14, -5]
         emberDrift.keyTimes = [0, 0.36, 0.68, 1]
 
         let emberOpacity = CAKeyframeAnimation(keyPath: "opacity")
-        emberOpacity.values = [0.38, 0.64, 0.46, 0.68]
+        emberOpacity.values = [0.52, 0.92, 0.62, 1]
         emberOpacity.keyTimes = [0, 0.36, 0.68, 1]
 
         let emberGroup = CAAnimationGroup()
         emberGroup.animations = [emberScale, emberDrift, emberOpacity]
-        emberGroup.duration = 6.8
+        emberGroup.duration = 4.8
         emberGroup.autoreverses = true
         emberGroup.repeatCount = .infinity
         emberGroup.timingFunction = CAMediaTimingFunction(
@@ -186,19 +310,61 @@ private final class SpringBookingCardView: UIView {
         )
         emberLayer.add(emberGroup, forKey: "spring-ember")
 
+        let energyPosition = CABasicAnimation(keyPath: "position.x")
+        energyPosition.fromValue = -energySweep.bounds.width / 2
+        energyPosition.toValue = bounds.width + energySweep.bounds.width / 2
+
+        let energyOpacity = CAKeyframeAnimation(keyPath: "opacity")
+        energyOpacity.values = [0, 0, 0.78, 0.28, 0, 0]
+        energyOpacity.keyTimes = [0, 0.12, 0.28, 0.62, 0.78, 1]
+
+        let energyGroup = CAAnimationGroup()
+        energyGroup.animations = [energyPosition, energyOpacity]
+        energyGroup.duration = 5.2
+        energyGroup.beginTime = CACurrentMediaTime() + 0.55
+        energyGroup.fillMode = .backwards
+        energyGroup.repeatCount = .infinity
+        energyGroup.timingFunction = CAMediaTimingFunction(
+            controlPoints: 0.30,
+            0,
+            0.22,
+            1
+        )
+        energySweep.add(energyGroup, forKey: "spring-energy-sweep")
+
+        let rimOpacity = CAKeyframeAnimation(keyPath: "opacity")
+        rimOpacity.values = [0.34, 0.96, 0.52, 0.84, 0.34]
+        rimOpacity.keyTimes = [0, 0.22, 0.52, 0.74, 1]
+
+        let rimWidth = CAKeyframeAnimation(keyPath: "lineWidth")
+        rimWidth.values = [1.1, 2.4, 1.3, 2.0, 1.1]
+        rimWidth.keyTimes = [0, 0.22, 0.52, 0.74, 1]
+
+        let rimGroup = CAAnimationGroup()
+        rimGroup.animations = [rimOpacity, rimWidth]
+        rimGroup.duration = 3.8
+        rimGroup.repeatCount = .infinity
+        rimGroup.timingFunction = CAMediaTimingFunction(
+            controlPoints: 0.45,
+            0,
+            0.25,
+            1
+        )
+        rimPulse.add(rimGroup, forKey: "spring-rim-pulse")
+
         let sweepPosition = CABasicAnimation(keyPath: "position.x")
         sweepPosition.fromValue = -edgeSweep.bounds.width / 2
         sweepPosition.toValue = bounds.width + edgeSweep.bounds.width / 2
-        sweepPosition.duration = 6.4
+        sweepPosition.duration = 4.6
 
         let sweepOpacity = CAKeyframeAnimation(keyPath: "opacity")
-        sweepOpacity.values = [0, 0, 0.9, 0.9, 0, 0]
-        sweepOpacity.keyTimes = [0, 0.14, 0.23, 0.64, 0.76, 1]
-        sweepOpacity.duration = 6.4
+        sweepOpacity.values = [0, 0, 1, 1, 0, 0]
+        sweepOpacity.keyTimes = [0, 0.10, 0.20, 0.62, 0.74, 1]
+        sweepOpacity.duration = 4.6
 
         let sweepGroup = CAAnimationGroup()
         sweepGroup.animations = [sweepPosition, sweepOpacity]
-        sweepGroup.duration = 6.4
+        sweepGroup.duration = 4.6
         sweepGroup.repeatCount = .infinity
         sweepGroup.timingFunction = CAMediaTimingFunction(
             controlPoints: 0.35,
@@ -289,6 +455,12 @@ final class HomeViewController: NinjaBaseViewController {
     private func springBookingCard() -> UIView {
         let panel = SpringBookingCardView()
         panel.translatesAutoresizingMaskIntoConstraints = false
+        panel.addTarget(
+            self,
+            action: #selector(openSpringQuote),
+            for: .touchUpInside
+        )
+        panel.shouldGroupAccessibilityChildren = true
 
         let accent = UIView()
         accent.translatesAutoresizingMaskIntoConstraints = false

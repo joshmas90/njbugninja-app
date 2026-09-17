@@ -43,10 +43,33 @@ window_reveal = app_delegate.find('window.makeKeyAndVisible()')
 if overlay_mount == -1 or window_reveal == -1 or overlay_mount > window_reveal:
     errors.append('native launch overlay must mount before the app window becomes visible')
 
+active_callback = app_delegate.find('func applicationDidBecomeActive')
+overlay_front = app_delegate.find('window.bringSubviewToFront(launchOverlay)', active_callback)
+deferred_playback = app_delegate.find('DispatchQueue.main.async', active_callback)
+overlay_playback = app_delegate.find('launchOverlay.play()', deferred_playback)
+if (
+    active_callback == -1
+    or overlay_front == -1
+    or deferred_playback == -1
+    or overlay_playback == -1
+    or not window_reveal < active_callback < overlay_front < deferred_playback < overlay_playback
+):
+    errors.append('native launch overlay playback must wait for applicationDidBecomeActive')
+if 'accessibilityIdentifier="mosquito-ninja-launch-overlay"' not in app_delegate:
+    errors.append('native launch overlay is missing its UI-test accessibility identifier')
+
 home = (root/'MosquitoNinja'/'HomeViewController.swift').read_text(encoding='utf-8')
-for marker in ('spring-ember', 'spring-edge-sweep', 'isReduceMotionEnabled'):
+for marker in (
+    'spring-ember',
+    'spring-edge-sweep',
+    'spring-energy-sweep',
+    'spring-rim-pulse',
+    'isReduceMotionEnabled',
+):
     if marker not in home:
         errors.append(f'missing native Spring CTA motion safeguard: {marker}')
+if 'action: #selector(openSpringQuote)' not in home or 'for: .touchUpInside' not in home:
+    errors.append('Spring CTA card is missing its full-card quote action')
 if errors:
     print('\n'.join(errors)); sys.exit(1)
 print('PASS: bundled website references, asset metadata and splash assets verified.')
