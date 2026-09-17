@@ -13,7 +13,8 @@ final class QuoteViewController:
                 "Mosquito",
                 "Ticks",
                 "Both",
-                "Comm/Govt"
+                "Comm.",
+                "Flies"
             ]
         )
 
@@ -236,7 +237,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Optional: attach up to three photos of the yard, vegetation, standing water, wooded edges, or the area where activity is worst."
+                "Optional: attach up to three photos of the yard, vegetation, standing water, wooded edges, trash or recycling areas, or the area where activity is worst."
             )
         )
 
@@ -634,15 +635,19 @@ final class QuoteViewController:
             return
         }
 
-        let selected =
-            service.selectedSegmentIndex == 3
-            ? "Commercial / Government"
-            : (
-                service.titleForSegment(
-                    at: service.selectedSegmentIndex
-                )
-                ?? "Mosquito"
-            )
+        let selected: String
+        switch service.selectedSegmentIndex {
+        case 1:
+            selected = "Tick Control"
+        case 2:
+            selected = "Mosquito + Tick Control"
+        case 3:
+            selected = "Commercial / Government"
+        case 4:
+            selected = "Outdoor Fly Control"
+        default:
+            selected = "Mosquito Control"
+        }
 
         let notes =
             notesView.text.hasPrefix("Describe the property")
