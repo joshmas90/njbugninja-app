@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import re, json, sys
+import re, json, plistlib, sys
 root = Path(__file__).resolve().parents[1]
 web = root/'MosquitoNinja'/'Web'
 errors=[]
@@ -70,6 +70,52 @@ for marker in (
         errors.append(f'missing native Spring CTA motion safeguard: {marker}')
 if 'action: #selector(openSpringQuote)' not in home or 'for: .touchUpInside' not in home:
     errors.append('Spring CTA card is missing its full-card quote action')
+
+# Apple privacy-manifest checks. The app uses UserDefaults for on-device
+# appointments and collects only customer-supplied quote data when the customer
+# affirmatively sends a message to Mosquito Ninja.
+privacy_path = root/'MosquitoNinja'/'PrivacyInfo.xcprivacy'
+if not privacy_path.exists():
+    errors.append('missing MosquitoNinja/PrivacyInfo.xcprivacy')
+else:
+    try:
+        with privacy_path.open('rb') as handle:
+            privacy = plistlib.load(handle)
+    except Exception as exc:
+        errors.append(f'invalid PrivacyInfo.xcprivacy: {exc}')
+        privacy = {}
+
+    if privacy.get('NSPrivacyTracking') is not False:
+        errors.append('privacy manifest must declare tracking disabled')
+
+    accessed = {
+        item.get('NSPrivacyAccessedAPIType'): set(item.get('NSPrivacyAccessedAPITypeReasons', []))
+        for item in privacy.get('NSPrivacyAccessedAPITypes', [])
+        if isinstance(item, dict)
+    }
+    if 'CA92.1' not in accessed.get('NSPrivacyAccessedAPICategoryUserDefaults', set()):
+        errors.append('privacy manifest must declare UserDefaults reason CA92.1')
+
+    collected = {
+        item.get('NSPrivacyCollectedDataType')
+        for item in privacy.get('NSPrivacyCollectedDataTypes', [])
+        if isinstance(item, dict)
+    }
+    required_collected = {
+        'NSPrivacyCollectedDataTypeName',
+        'NSPrivacyCollectedDataTypePhoneNumber',
+        'NSPrivacyCollectedDataTypeCoarseLocation',
+        'NSPrivacyCollectedDataTypePhotosorVideos',
+        'NSPrivacyCollectedDataTypeOtherUserContent',
+    }
+    missing_collected = sorted(required_collected - collected)
+    if missing_collected:
+        errors.append('privacy manifest missing collected data types: ' + ', '.join(missing_collected))
+
+project = (root/'MosquitoNinja.xcodeproj'/'project.pbxproj').read_text(encoding='utf-8')
+if 'PrivacyInfo.xcprivacy in Resources' not in project:
+    errors.append('PrivacyInfo.xcprivacy is not included in the app target resources')
+
 if errors:
     print('\n'.join(errors)); sys.exit(1)
-print('PASS: bundled website references, asset metadata and splash assets verified.')
+print('PASS: bundled website references, asset metadata, splash assets and privacy manifest verified.')

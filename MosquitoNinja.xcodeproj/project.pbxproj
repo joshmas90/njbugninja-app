@@ -26,6 +26,7 @@
 		A00000000000000000000018 /* MessageComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000020 /* MessageComposer.swift */; };
 		A00000000000000000000019 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B00000000000000000000021 /* MessageUI.framework */; };
 		A00000000000000000000020 /* ServiceDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000022 /* ServiceDetailViewController.swift */; };
+		A00000000000000000000021 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000023 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +52,7 @@
 		B00000000000000000000020 /* MessageComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageComposer.swift; sourceTree = "<group>"; };
 		B00000000000000000000021 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		B00000000000000000000022 /* ServiceDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDetailViewController.swift; sourceTree = "<group>"; };
+		B00000000000000000000023 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,7 +61,7 @@
 
 /* Begin PBXGroup section */
 		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* MosquitoNinja */, D00000000000000000000003 /* Products */, B00000000000000000000021 /* MessageUI.framework */); sourceTree = "<group>"; };
-		D00000000000000000000002 /* MosquitoNinja */ = {isa = PBXGroup; path = MosquitoNinja; sourceTree = "<group>"; children = (B00000000000000000000001 /* AppDelegate.swift */, B00000000000000000000002 /* WebViewController.swift */, B00000000000000000000008 /* RootTabBarController.swift */, B00000000000000000000009 /* NativeUI.swift */, B00000000000000000000010 /* HomeViewController.swift */, B00000000000000000000011 /* ServicesViewController.swift */, B00000000000000000000012 /* QuoteViewController.swift */, B00000000000000000000013 /* PrepViewController.swift */, B00000000000000000000014 /* ContactViewController.swift */, B00000000000000000000015 /* Appointment.swift */, B00000000000000000000016 /* AppointmentNotificationManager.swift */, B00000000000000000000017 /* AppointmentsViewController.swift */, B00000000000000000000018 /* AppointmentEditorViewController.swift */, B00000000000000000000019 /* ServiceAreaManager.swift */, B00000000000000000000020 /* MessageComposer.swift */, B00000000000000000000022 /* ServiceDetailViewController.swift */, B00000000000000000000003 /* Info.plist */, B00000000000000000000004 /* Assets.xcassets */, B00000000000000000000005 /* LaunchScreen.storyboard */, B00000000000000000000006 /* Web */); };
+		D00000000000000000000002 /* MosquitoNinja */ = {isa = PBXGroup; path = MosquitoNinja; sourceTree = "<group>"; children = (B00000000000000000000001 /* AppDelegate.swift */, B00000000000000000000002 /* WebViewController.swift */, B00000000000000000000008 /* RootTabBarController.swift */, B00000000000000000000009 /* NativeUI.swift */, B00000000000000000000010 /* HomeViewController.swift */, B00000000000000000000011 /* ServicesViewController.swift */, B00000000000000000000012 /* QuoteViewController.swift */, B00000000000000000000013 /* PrepViewController.swift */, B00000000000000000000014 /* ContactViewController.swift */, B00000000000000000000015 /* Appointment.swift */, B00000000000000000000016 /* AppointmentNotificationManager.swift */, B00000000000000000000017 /* AppointmentsViewController.swift */, B00000000000000000000018 /* AppointmentEditorViewController.swift */, B00000000000000000000019 /* ServiceAreaManager.swift */, B00000000000000000000020 /* MessageComposer.swift */, B00000000000000000000022 /* ServiceDetailViewController.swift */, B00000000000000000000023 /* PrivacyInfo.xcprivacy */, B00000000000000000000003 /* Info.plist */, B00000000000000000000004 /* Assets.xcassets */, B00000000000000000000005 /* LaunchScreen.storyboard */, B00000000000000000000006 /* Web */); };
 		D00000000000000000000003 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000007 /* MosquitoNinja.app */); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -72,7 +74,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C00000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000003 /* Assets.xcassets in Resources */, A00000000000000000000004 /* LaunchScreen.storyboard in Resources */, A00000000000000000000005 /* Web in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000003 /* Assets.xcassets in Resources */, A00000000000000000000004 /* LaunchScreen.storyboard in Resources */, A00000000000000000000005 /* Web in Resources */, A00000000000000000000021 /* PrivacyInfo.xcprivacy in Resources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */

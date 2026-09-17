@@ -376,31 +376,51 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
     }
 
     private func fallbackConfig() -> ServiceAreaConfig {
-        let counties = [
-            "atlantic",
-            "burlington",
-            "camden",
-            "cape may",
-            "cumberland",
-            "gloucester",
-            "salem"
+        let rules: [String: ServiceAreaCountyRule] = [
+            "atlantic": ServiceAreaCountyRule(
+                status: .confirm,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "burlington": ServiceAreaCountyRule(
+                status: .covered,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "camden": ServiceAreaCountyRule(
+                status: .covered,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "cape may": ServiceAreaCountyRule(
+                status: .outside,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "cumberland": ServiceAreaCountyRule(
+                status: .confirm,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "gloucester": ServiceAreaCountyRule(
+                status: .covered,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "ocean": ServiceAreaCountyRule(
+                status: .outside,
+                includedZIPs: [],
+                excludedZIPs: []
+            ),
+            "salem": ServiceAreaCountyRule(
+                status: .confirm,
+                includedZIPs: [],
+                excludedZIPs: []
+            )
         ]
 
-        let rules = Dictionary(
-            uniqueKeysWithValues: counties.map {
-                (
-                    $0,
-                    ServiceAreaCountyRule(
-                        status: .confirm,
-                        includedZIPs: [],
-                        excludedZIPs: []
-                    )
-                )
-            }
-        )
-
         return ServiceAreaConfig(
-            version: 1,
+            version: 2,
             state: "NJ",
             defaultStatus: .outside,
             counties: rules
