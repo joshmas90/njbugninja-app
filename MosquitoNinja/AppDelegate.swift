@@ -4,6 +4,8 @@ import UserNotifications
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     var window: UIWindow?
+    private weak var launchOverlay: NinjaLaunchOverlay?
+    private var hasStartedLaunchOverlay = false
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
@@ -14,10 +16,37 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationC
         let launchOverlay = NinjaLaunchOverlay(frame: window.bounds)
         launchOverlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         window.addSubview(launchOverlay)
+        self.launchOverlay = launchOverlay
         self.window = window
         window.makeKeyAndVisible()
-        launchOverlay.play()
+        window.bringSubviewToFront(launchOverlay)
+
         return true
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        guard
+            !hasStartedLaunchOverlay,
+            let window = window,
+            let launchOverlay = launchOverlay
+        else {
+            return
+        }
+
+        hasStartedLaunchOverlay = true
+        window.bringSubviewToFront(launchOverlay)
+
+        // Start Core Animation only after iOS marks the app active. Starting it
+        // during didFinishLaunching can let the sequence advance off-screen,
+        // especially when the system prewarms the process before the user opens it.
+        DispatchQueue.main.async { [weak window, weak launchOverlay] in
+            guard let window = window, let launchOverlay = launchOverlay else {
+                return
+            }
+
+            window.bringSubviewToFront(launchOverlay)
+            launchOverlay.play()
+        }
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) { completionHandler([.banner, .list, .sound]) }
@@ -28,7 +57,7 @@ private final class NinjaLaunchOverlay: UIView {
     private enum Palette { static let background=UIColor(red:0.008,green:0.016,blue:0.012,alpha:1); static let red=UIColor(red:0.878,green:0.125,blue:0.153,alpha:1); static let green=UIColor(red:0.561,green:0.741,blue:0.180,alpha:1) }
     private let stage=UIView(), redHaze=CAGradientLayer(), greenHaze=CAGradientLayer(), aura=CAShapeLayer(), burst=CAShapeLayer(), orbit=CAShapeLayer(), redOrb=CAShapeLayer(), greenOrb=CAShapeLayer(), strikeGlow=CAShapeLayer(), strike=CAShapeLayer(), strikeTip=CAShapeLayer(), wordmarkMask=CAShapeLayer()
     private let mark=UIImageView(image:UIImage(named:"LaunchMark")), wordmark=UIImageView(image:UIImage(named:"SplashWordmark")); private var hasPlayed=false
-    override init(frame:CGRect){super.init(frame:frame);backgroundColor=Palette.background;isUserInteractionEnabled=true;isAccessibilityElement=true;accessibilityViewIsModal=true;accessibilityLabel="Mosquito Ninja. Bite Back.";configureHaze(redHaze,color:Palette.red,peakAlpha:0.23,center:CGPoint(x:0.5,y:0.47));layer.addSublayer(redHaze);configureHaze(greenHaze,color:Palette.green,peakAlpha:0.07,center:CGPoint(x:0.5,y:0.52));layer.addSublayer(greenHaze);stage.isUserInteractionEnabled=false;addSubview(stage);configureCircle(aura,color:Palette.red.withAlphaComponent(0.18),lineWidth:0);aura.shadowColor=Palette.red.cgColor;aura.shadowOpacity=0.68;aura.shadowRadius=54;aura.opacity=0;stage.layer.addSublayer(aura);configureCircle(burst,color:Palette.red.withAlphaComponent(0.72),lineWidth:1);burst.fillColor=UIColor.clear.cgColor;burst.shadowColor=Palette.red.cgColor;burst.shadowOpacity=0.5;burst.shadowRadius=18;burst.opacity=0;stage.layer.addSublayer(burst);configureCircle(orbit,color:UIColor.white.withAlphaComponent(0.14),lineWidth:1);orbit.fillColor=UIColor.clear.cgColor;orbit.opacity=0;stage.layer.addSublayer(orbit);redOrb.fillColor=Palette.red.cgColor;redOrb.shadowColor=Palette.red.cgColor;redOrb.shadowOpacity=0.95;redOrb.shadowRadius=7;orbit.addSublayer(redOrb);greenOrb.fillColor=Palette.green.cgColor;greenOrb.shadowColor=Palette.green.cgColor;greenOrb.shadowOpacity=0.9;greenOrb.shadowRadius=7;orbit.addSublayer(greenOrb);mark.contentMode = .scaleAspectFit;mark.alpha=0;mark.layer.shadowColor=UIColor.black.cgColor;mark.layer.shadowOpacity=0.72;mark.layer.shadowRadius=24;mark.layer.shadowOffset=CGSize(width:0,height:18);stage.addSubview(mark);configureStrike(strikeGlow,width:18,opacity:0.46);configureStrike(strike,width:7,opacity:1);stage.layer.addSublayer(strikeGlow);stage.layer.addSublayer(strike);strikeTip.fillColor=UIColor.white.cgColor;strikeTip.shadowColor=Palette.red.cgColor;strikeTip.shadowOpacity=1;strikeTip.shadowRadius=15;strikeTip.opacity=0;stage.layer.addSublayer(strikeTip);wordmark.contentMode = .scaleAspectFit;wordmark.alpha=0;wordmark.layer.shadowColor=Palette.red.cgColor;wordmark.layer.shadowOpacity=0.22;wordmark.layer.shadowRadius=14;wordmark.layer.mask=wordmarkMask;addSubview(wordmark)}
+    override init(frame:CGRect){super.init(frame:frame);backgroundColor=Palette.background;isUserInteractionEnabled=true;isAccessibilityElement=true;accessibilityViewIsModal=true;accessibilityIdentifier="mosquito-ninja-launch-overlay";accessibilityLabel="Mosquito Ninja. Bite Back.";configureHaze(redHaze,color:Palette.red,peakAlpha:0.23,center:CGPoint(x:0.5,y:0.47));layer.addSublayer(redHaze);configureHaze(greenHaze,color:Palette.green,peakAlpha:0.07,center:CGPoint(x:0.5,y:0.52));layer.addSublayer(greenHaze);stage.isUserInteractionEnabled=false;addSubview(stage);configureCircle(aura,color:Palette.red.withAlphaComponent(0.18),lineWidth:0);aura.shadowColor=Palette.red.cgColor;aura.shadowOpacity=0.68;aura.shadowRadius=54;aura.opacity=0;stage.layer.addSublayer(aura);configureCircle(burst,color:Palette.red.withAlphaComponent(0.72),lineWidth:1);burst.fillColor=UIColor.clear.cgColor;burst.shadowColor=Palette.red.cgColor;burst.shadowOpacity=0.5;burst.shadowRadius=18;burst.opacity=0;stage.layer.addSublayer(burst);configureCircle(orbit,color:UIColor.white.withAlphaComponent(0.14),lineWidth:1);orbit.fillColor=UIColor.clear.cgColor;orbit.opacity=0;stage.layer.addSublayer(orbit);redOrb.fillColor=Palette.red.cgColor;redOrb.shadowColor=Palette.red.cgColor;redOrb.shadowOpacity=0.95;redOrb.shadowRadius=7;orbit.addSublayer(redOrb);greenOrb.fillColor=Palette.green.cgColor;greenOrb.shadowColor=Palette.green.cgColor;greenOrb.shadowOpacity=0.9;greenOrb.shadowRadius=7;orbit.addSublayer(greenOrb);mark.contentMode = .scaleAspectFit;mark.alpha=0;mark.layer.shadowColor=UIColor.black.cgColor;mark.layer.shadowOpacity=0.72;mark.layer.shadowRadius=24;mark.layer.shadowOffset=CGSize(width:0,height:18);stage.addSubview(mark);configureStrike(strikeGlow,width:18,opacity:0.46);configureStrike(strike,width:7,opacity:1);stage.layer.addSublayer(strikeGlow);stage.layer.addSublayer(strike);strikeTip.fillColor=UIColor.white.cgColor;strikeTip.shadowColor=Palette.red.cgColor;strikeTip.shadowOpacity=1;strikeTip.shadowRadius=15;strikeTip.opacity=0;stage.layer.addSublayer(strikeTip);wordmark.contentMode = .scaleAspectFit;wordmark.alpha=0;wordmark.layer.shadowColor=Palette.red.cgColor;wordmark.layer.shadowOpacity=0.22;wordmark.layer.shadowRadius=14;wordmark.layer.mask=wordmarkMask;addSubview(wordmark)}
     required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
     override func layoutSubviews(){super.layoutSubviews();let compact=bounds.height<560;let isPad=traitCollection.userInterfaceIdiom == .pad;let markSize:CGFloat;let ww:CGFloat;if compact{markSize=min(bounds.height*0.58,bounds.width*0.52);ww=min(bounds.width*0.72,500)}else if isPad{markSize=min(min(bounds.width*0.60,bounds.height*0.48),560);ww=min(bounds.width*0.82,780)}else{markSize=min(min(bounds.width*0.92,bounds.height*0.48),400);ww=min(bounds.width*0.97,640)};let wh=ww*(361.0/1080.0);let overlap:CGFloat=compact ? 28:(isPad ? 46:38);let total=markSize+wh-overlap;let top=bounds.midY-total/2-(compact ? 0:bounds.height*0.018);stage.frame=CGRect(x:bounds.midX-markSize/2,y:top,width:markSize,height:markSize);mark.frame=stage.bounds;wordmark.frame=CGRect(x:bounds.midX-ww/2,y:stage.frame.maxY-overlap,width:ww,height:wh);redHaze.frame=bounds.insetBy(dx:-bounds.width*0.28,dy:-bounds.height*0.28);greenHaze.frame=bounds;[aura,burst,orbit,strikeGlow,strike,strikeTip].forEach{$0.frame=stage.bounds};let center=CGPoint(x:markSize/2,y:markSize/2);aura.path=UIBezierPath(ovalIn:stage.bounds.insetBy(dx:markSize*0.08,dy:markSize*0.08)).cgPath;burst.path=UIBezierPath(ovalIn:stage.bounds.insetBy(dx:markSize*0.04,dy:markSize*0.04)).cgPath;orbit.path=UIBezierPath(ovalIn:stage.bounds.insetBy(dx:0.5,dy:0.5)).cgPath;let rs=max(6,markSize*0.019);redOrb.path=UIBezierPath(ovalIn:CGRect(x:markSize*0.105,y:markSize*0.145,width:rs,height:rs)).cgPath;let gs=max(5,markSize*0.014);greenOrb.path=UIBezierPath(ovalIn:CGRect(x:markSize*0.915,y:markSize*0.745,width:gs,height:gs)).cgPath;let angle = -38.0*CGFloat.pi/180;let half=markSize*0.31;let sc=CGPoint(x:center.x,y:markSize*0.466);let delta=CGPoint(x:cos(angle)*half,y:sin(angle)*half);let start=CGPoint(x:sc.x-delta.x,y:sc.y-delta.y),end=CGPoint(x:sc.x+delta.x,y:sc.y+delta.y);let p=UIBezierPath();p.move(to:start);p.addLine(to:end);strikeGlow.path=p.cgPath;strike.path=p.cgPath;strikeGlow.lineWidth=max(15,markSize*0.052);strike.lineWidth=max(7,markSize*0.023);let tr=max(11,markSize*0.038);strikeTip.path=UIBezierPath(ovalIn:CGRect(x:end.x-tr,y:end.y-tr,width:tr*2,height:tr*2)).cgPath;wordmarkMask.frame=wordmark.bounds;wordmarkMask.path=UIBezierPath(rect:wordmark.bounds).cgPath}
     func play(){guard !hasPlayed else{return};hasPlayed=true;setNeedsLayout();layoutIfNeeded();if UIAccessibility.isReduceMotionEnabled{showReducedMotionSplash();return};animateAtmosphere();animateMark();animateStrike();animateWordmark();DispatchQueue.main.asyncAfter(deadline:.now()+1.04){NinjaHaptics.impact(.medium,intensity:0.9)};UIView.animate(withDuration:0.40,delay:2.62,options:[.curveEaseIn,.beginFromCurrentState]){self.alpha=0;self.transform=CGAffineTransform(scaleX:1.014,y:1.014)}completion:{_ in self.removeFromSuperview()}}

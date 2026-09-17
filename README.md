@@ -2,6 +2,12 @@
 
 A native UIKit customer-service app for Mosquito Ninja. The app uses native Home, Services, Appointments, Quote, Prep, and Contact experiences, with bundled website pages used only for deeper reference content.
 
+## Spring 2027 theatrical CTA interaction
+
+- Makes every non-button area of the Spring 2027 booking card open the existing Spring Service quote flow while preserving the dedicated Request, Call and Text controls.
+- Strengthens the premium treatment with a brighter red rim pulse, a deeper ember halo, a diagonal energy sweep and a faster illuminated upper-edge pass.
+- Keeps nested controls independently tappable and retains a polished static treatment when Reduce Motion is enabled.
+
 ## Premium native motion sync
 
 - Uses an artwork-free, launch-black storyboard and mounts the native cinematic overlay before the app window becomes visible, preventing the Home screen or a static logo from flashing first.
