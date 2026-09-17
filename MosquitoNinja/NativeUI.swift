@@ -368,16 +368,23 @@ class NinjaBaseViewController: UIViewController {
         contentStack.layoutMargins = UIEdgeInsets(top: 22, left: 20, bottom: 34, right: 20)
         scrollView.addSubview(contentStack)
 
+        // Keep wide iPad pages composed and readable, while phone and Split
+        // View layouts use all available width without horizontal scrolling.
+        let preferredWidth = contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        preferredWidth.priority = .defaultHigh
+
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentStack.centerXAnchor.constraint(equalTo: scrollView.frameLayoutGuide.centerXAnchor),
             contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+            scrollView.contentLayoutGuide.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentStack.widthAnchor.constraint(lessThanOrEqualTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentStack.widthAnchor.constraint(lessThanOrEqualToConstant: 1120),
+            preferredWidth
         ])
     }
 
@@ -399,6 +406,7 @@ class NinjaBaseViewController: UIViewController {
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         label.adjustsFontSizeToFitWidth = false
+        label.accessibilityTraits = .header
         return label
     }
 
@@ -419,6 +427,7 @@ class NinjaBaseViewController: UIViewController {
         label.font = UIFontMetrics(forTextStyle: .headline).scaledFont(for: .systemFont(ofSize: 18, weight: .bold))
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
+        label.accessibilityTraits = .header
         return label
     }
 
@@ -428,13 +437,22 @@ class NinjaBaseViewController: UIViewController {
         config.baseBackgroundColor = NinjaPalette.red
         config.baseForegroundColor = .white
         config.cornerStyle = .medium
+        config.titleAlignment = .center
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
+            var result = attributes
+            result.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(
+                for: .systemFont(ofSize: 13, weight: .heavy)
+            )
+            return result
+        }
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 18, bottom: 14, trailing: 18)
         if let symbol { config.image = UIImage(systemName: symbol); config.imagePadding = 8 }
         let button = NinjaButton(frame: .zero)
         button.layer.cornerCurve = .continuous
         button.configuration = config
         button.hapticStyle = .medium
-        button.titleLabel?.font = .systemFont(ofSize: 13, weight: .heavy)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 52).isActive = true
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
@@ -446,11 +464,21 @@ class NinjaBaseViewController: UIViewController {
         config.baseBackgroundColor = NinjaPalette.panel
         config.baseForegroundColor = .white
         config.cornerStyle = .medium
+        config.titleAlignment = .center
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
+            var result = attributes
+            result.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(
+                for: .systemFont(ofSize: 13, weight: .bold)
+            )
+            return result
+        }
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 18, bottom: 14, trailing: 18)
         if let symbol { config.image = UIImage(systemName: symbol); config.imagePadding = 8 }
         let button = NinjaButton(frame: .zero)
         button.layer.cornerCurve = .continuous
         button.configuration = config
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.hapticStyle = .light
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
         button.addTarget(self, action: action, for: .touchUpInside)

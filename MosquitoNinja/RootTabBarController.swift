@@ -58,6 +58,10 @@ private final class NinjaHeaderItem: UIControl {
 }
 
 private final class NinjaWebsiteHeaderView: UIView {
+    private enum LayoutStyle: Equatable {
+        case full, condensed, menu
+    }
+
     var onSelectTab: ((Int) -> Void)?
     var onCall: (() -> Void)?
 
@@ -78,8 +82,11 @@ private final class NinjaWebsiteHeaderView: UIView {
     private let brandMarkSize: CGFloat = 44
     private let brandCopySpacing: CGFloat = 10
     private let horizontalPadding: CGFloat = 28
+    private let fullCallTitle = "CALL  •  609-313-6317"
+    private var fullCallWidth: CGFloat = 0
+    private var condensedCallWidthConstraint: NSLayoutConstraint?
     private var selectedIndex = 0
-    private var isCompactHeader: Bool?
+    private var layoutStyle: LayoutStyle?
 
     override init(frame: CGRect) {
         let titles = ["Home", "Services", "My Service", "Quote", "Contact"]
@@ -176,6 +183,7 @@ private final class NinjaWebsiteHeaderView: UIView {
         nav.axis = .horizontal
         nav.alignment = .center
         nav.spacing = 26
+        nav.accessibilityIdentifier = "header-inline-navigation"
         nav.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         for item in items {
@@ -187,7 +195,7 @@ private final class NinjaWebsiteHeaderView: UIView {
         }
 
         callButton.translatesAutoresizingMaskIntoConstraints = false
-        callButton.setTitle("CALL  •  609-313-6317", for: .normal)
+        callButton.setTitle(fullCallTitle, for: .normal)
         callButton.setTitleColor(.white, for: .normal)
         callButton.setImage(UIImage(systemName: "phone.fill"), for: .normal)
         callButton.tintColor = NinjaPalette.red
@@ -209,7 +217,11 @@ private final class NinjaWebsiteHeaderView: UIView {
         callButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
         callButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 5)
         callButton.accessibilityLabel = "Call Mosquito Ninja at 609-313-6317"
+        callButton.accessibilityIdentifier = "header-call"
         callButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        // Preserve the expanded measurement while the compact style hides its title.
+        fullCallWidth = max(44, ceil(callButton.intrinsicContentSize.width))
+        condensedCallWidthConstraint = callButton.widthAnchor.constraint(equalToConstant: 44)
         callButton.addAction(UIAction { [weak self] _ in
             self?.onCall?()
         }, for: .touchUpInside)
@@ -237,6 +249,7 @@ private final class NinjaWebsiteHeaderView: UIView {
         menuButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 14, bottom: 10, right: 14)
         menuButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 6)
         menuButton.accessibilityLabel = "Open Mosquito Ninja navigation menu"
+        menuButton.accessibilityIdentifier = "header-menu"
         menuButton.showsMenuAsPrimaryAction = true
         menuButton.setContentCompressionResistancePriority(.required, for: .horizontal)
 
@@ -290,6 +303,11 @@ private final class NinjaWebsiteHeaderView: UIView {
         super.layoutSubviews()
     }
 
+    override func safeAreaInsetsDidChange() {
+        super.safeAreaInsetsDidChange()
+        setNeedsLayout()
+    }
+
     func setSelectedIndex(_ index: Int) {
         selectedIndex = index
         for item in items {
@@ -308,30 +326,52 @@ private final class NinjaWebsiteHeaderView: UIView {
             max($0, $1.intrinsicContentSize.width)
         }
         let brandWidth = brandMarkSize + brandCopySpacing + ceil(copyWidth)
-        let navigationWidth = items.reduce(CGFloat.zero) {
+        let itemWidths = items.reduce(CGFloat.zero) {
             $0 + $1.intrinsicContentSize.width
-        } + CGFloat(max(0, items.count - 1)) * nav.spacing
-        // Three gaps separate brand, spacer, navigation and call button.
-        // Reserve another 24 points of breathing room before expanding.
-        let fullWidth = brandWidth + navigationWidth
-            + ceil(callButton.intrinsicContentSize.width)
-            + shell.spacing * 3 + horizontalPadding * 2 + 24
-        let shouldCompact = availableWidth < ceil(fullWidth)
+        }
+        let navigationGaps = CGFloat(max(0, items.count - 1))
+        // Stable measurements let the header both collapse AND expand again.
+        // Keep the links visible at intermediate widths by shortening only Call.
+        let fullWidth = brandWidth + itemWidths + navigationGaps * 26
+            + fullCallWidth + 24 * 3 + horizontalPadding * 2 + 24
+        let condensedWidth = brandWidth + itemWidths + navigationGaps * 16
+            + 44 + 18 * 3 + 20 * 2 + 16
+        let style: LayoutStyle
+        if availableWidth >= ceil(fullWidth) {
+            style = .full
+        } else if availableWidth >= ceil(condensedWidth) {
+            style = .condensed
+        } else {
+            style = .menu
+        }
+        let shouldCompact = style == .menu
 
-        let padding: CGFloat = shouldCompact && availableWidth < 500 ? 16 : horizontalPadding
+        let padding: CGFloat = style == .full ? horizontalPadding : (availableWidth < 500 ? 16 : 20)
+        let sectionSpacing: CGFloat = style == .full ? 24 : 18
         let compactWidth = brandWidth + ceil(menuButton.intrinsicContentSize.width)
-            + shell.spacing * 2 + padding * 2
+            + sectionSpacing * 2 + padding * 2
         // Very narrow Split View windows keep the tappable logo and menu.
         let hideBrandCopy = shouldCompact && availableWidth < ceil(compactWidth)
-        guard isCompactHeader != shouldCompact
+        guard layoutStyle != style
             || brandCopy.isHidden != hideBrandCopy
             || shell.directionalLayoutMargins.leading != padding else { return }
-        isCompactHeader = shouldCompact
+        layoutStyle = style
 
         UIView.performWithoutAnimation {
+            condensedCallWidthConstraint?.isActive = false
+            nav.spacing = style == .full ? 26 : 16
+            shell.spacing = sectionSpacing
+            callButton.setTitle(style == .full ? fullCallTitle : nil, for: .normal)
+            callButton.contentEdgeInsets = UIEdgeInsets(
+                top: 10, left: style == .full ? 15 : 12,
+                bottom: 10, right: style == .full ? 15 : 12
+            )
+            callButton.imageEdgeInsets = style == .full
+                ? UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 5) : .zero
             nav.isHidden = shouldCompact
             callButton.isHidden = shouldCompact
             menuButton.isHidden = !shouldCompact
+            condensedCallWidthConstraint?.isActive = style == .condensed
             brandCopy.isHidden = hideBrandCopy
             shell.directionalLayoutMargins = NSDirectionalEdgeInsets(
                 top: 0, leading: padding, bottom: 0, trailing: padding
@@ -340,6 +380,7 @@ private final class NinjaWebsiteHeaderView: UIView {
     }
 
     private func updateMenu() {
+        menuButton.accessibilityValue = menuTitles[selectedIndex]
         let navigationActions = menuTitles.enumerated().map { index, title in
             UIAction(
                 title: title,

@@ -4,25 +4,53 @@ private final class NinjaGradientView: UIView {
     override class var layerClass: AnyClass { CAGradientLayer.self }
 
     var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
+    private var isNarrow: Bool?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        // Keep enough contrast behind the copy while allowing substantially
-        // more of the hero artwork to read on an iPhone display.
-        gradientLayer.colors = [
-            UIColor.black.withAlphaComponent(0.86).cgColor,
-            UIColor.black.withAlphaComponent(0.58).cgColor,
-            UIColor.black.withAlphaComponent(0.10).cgColor
-        ]
-        gradientLayer.locations = [0, 0.62, 1]
-
-        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
-        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+        isUserInteractionEnabled = false
+        updateGradient(for: frame.width)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateGradient(for: bounds.width)
+    }
+
+    private func updateGradient(for width: CGFloat) {
+        let narrow = width < 700
+        guard isNarrow != narrow else { return }
+        isNarrow = narrow
+
+        // Leave the artwork clear above the copy on phones, and across the
+        // right side on tablets. Contrast stays local to the text area.
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        if narrow {
+            gradientLayer.colors = [
+                UIColor.clear.cgColor,
+                UIColor.black.withAlphaComponent(0.04).cgColor,
+                UIColor.black.withAlphaComponent(0.64).cgColor
+            ]
+            gradientLayer.locations = [0, 0.40, 1]
+            gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)
+            gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
+        } else {
+            gradientLayer.colors = [
+                UIColor.black.withAlphaComponent(0.44).cgColor,
+                UIColor.black.withAlphaComponent(0.16).cgColor,
+                UIColor.clear.cgColor
+            ]
+            gradientLayer.locations = [0, 0.50, 1]
+            gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+            gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+        }
+        CATransaction.commit()
     }
 }
 
@@ -591,10 +619,11 @@ final class HomeViewController: NinjaBaseViewController {
         hero.layer.cornerCurve = .continuous
         hero.layer.masksToBounds = true
         hero.layer.borderWidth = 1
-        hero.layer.borderColor = UIColor.white.withAlphaComponent(0.09).cgColor
+        hero.layer.borderColor = UIColor.white.withAlphaComponent(0.16).cgColor
+        hero.accessibilityIdentifier = "home-hero"
 
-        hero.heightAnchor.constraint(greaterThanOrEqualToConstant: 400).isActive = true
-        let preferredHeight = hero.heightAnchor.constraint(equalToConstant: 400)
+        hero.heightAnchor.constraint(greaterThanOrEqualToConstant: 460).isActive = true
+        let preferredHeight = hero.heightAnchor.constraint(equalToConstant: 460)
         preferredHeight.priority = .defaultLow
         preferredHeight.isActive = true
 
@@ -602,8 +631,10 @@ final class HomeViewController: NinjaBaseViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
+        imageView.isAccessibilityElement = false
         // Text determines expansion; the artwork's pixel height must not size the card.
         imageView.setContentCompressionResistancePriority(.fittingSizeLevel, for: .vertical)
+        imageView.setContentCompressionResistancePriority(.fittingSizeLevel, for: .horizontal)
 
         if let root = Bundle.main.resourceURL {
             let images = [
@@ -637,6 +668,10 @@ final class HomeViewController: NinjaBaseViewController {
         eyebrow.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 12, weight: .bold))
         eyebrow.adjustsFontForContentSizeCategory = true
         eyebrow.numberOfLines = 0
+        eyebrow.layer.shadowColor = UIColor.black.cgColor
+        eyebrow.layer.shadowOpacity = 0.72
+        eyebrow.layer.shadowRadius = 3
+        eyebrow.layer.shadowOffset = CGSize(width: 0, height: 1)
 
         let headline = UILabel()
         headline.text = "THEY WON’T\nSEE US COMING."
@@ -644,8 +679,9 @@ final class HomeViewController: NinjaBaseViewController {
         headline.font = UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: .systemFont(ofSize: 34, weight: .black))
         headline.adjustsFontForContentSizeCategory = true
         headline.numberOfLines = 0
+        headline.accessibilityTraits = .header
         headline.layer.shadowColor = UIColor.black.cgColor
-        headline.layer.shadowOpacity = 0.55
+        headline.layer.shadowOpacity = 0.70
         headline.layer.shadowRadius = 5
         headline.layer.shadowOffset = .zero
 
@@ -656,7 +692,7 @@ final class HomeViewController: NinjaBaseViewController {
         detail.adjustsFontForContentSizeCategory = true
         detail.numberOfLines = 0
         detail.layer.shadowColor = UIColor.black.cgColor
-        detail.layer.shadowOpacity = 0.42
+        detail.layer.shadowOpacity = 0.65
         detail.layer.shadowRadius = 4
         detail.layer.shadowOffset = .zero
 
@@ -668,6 +704,10 @@ final class HomeViewController: NinjaBaseViewController {
         audience.numberOfLines = 0
         audience.lineBreakMode = .byWordWrapping
         audience.accessibilityLabel = "Residential, Commercial, Government"
+        audience.layer.shadowColor = UIColor.black.cgColor
+        audience.layer.shadowOpacity = 0.80
+        audience.layer.shadowRadius = 3
+        audience.layer.shadowOffset = CGSize(width: 0, height: 1)
 
         [brand, eyebrow, headline, detail, audience].forEach {
             $0.setContentCompressionResistancePriority(.required, for: .vertical)
@@ -842,12 +882,18 @@ final class HomeViewController: NinjaBaseViewController {
         let titleLabel = UILabel()
         titleLabel.text = title.uppercased()
         titleLabel.textColor = .white
-        titleLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        titleLabel.font = UIFontMetrics(forTextStyle: .headline).scaledFont(
+            for: .systemFont(ofSize: 15, weight: .bold)
+        )
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
         let detailLabel = UILabel()
         detailLabel.text = detail
         detailLabel.textColor = NinjaPalette.muted
-        detailLabel.font = .systemFont(ofSize: 14)
+        detailLabel.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(
+            for: .systemFont(ofSize: 14)
+        )
+        detailLabel.adjustsFontForContentSizeCategory = true
         detailLabel.numberOfLines = 0
         let chevron = UIImageView(image: UIImage(systemName: "chevron.right"))
         chevron.tintColor = UIColor.white.withAlphaComponent(0.45)
