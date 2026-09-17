@@ -296,7 +296,7 @@ private final class NinjaWebsiteHeaderView: UIView {
     }
 
     private func updateMenu() {
-        let navigationActions = menuTitles.enumerated().map { [weak self] index, title in
+        let navigationActions = menuTitles.enumerated().map { index, title in
             UIAction(
                 title: title,
                 image: UIImage(systemName: menuSymbols[index]),
