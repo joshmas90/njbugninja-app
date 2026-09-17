@@ -46,6 +46,10 @@ private final class NinjaHeaderItem: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: max(44, ceil(titleLabel.intrinsicContentSize.width)), height: 44)
+    }
+
     func setSelected(_ selected: Bool) {
         indicator.isHidden = !selected
         titleLabel.textColor = selected ? .white : UIColor.white.withAlphaComponent(0.86)
@@ -66,9 +70,14 @@ private final class NinjaWebsiteHeaderView: UIView {
         "phone.fill"
     ]
     private let items: [NinjaHeaderItem]
+    private let brandCopy = UIStackView()
     private let nav = UIStackView()
+    private let shell = UIStackView()
     private let callButton = NinjaButton(type: .system)
     private let menuButton = NinjaButton(type: .system)
+    private let brandMarkSize: CGFloat = 44
+    private let brandCopySpacing: CGFloat = 10
+    private let horizontalPadding: CGFloat = 28
     private var selectedIndex = 0
     private var isCompactHeader: Bool?
 
@@ -140,24 +149,26 @@ private final class NinjaWebsiteHeaderView: UIView {
         brandSubtitle.adjustsFontSizeToFitWidth = true
         brandSubtitle.minimumScaleFactor = 0.8
 
-        let brandCopy = UIStackView(arrangedSubviews: [brandName, brandSubtitle])
+        brandCopy.addArrangedSubview(brandName)
+        brandCopy.addArrangedSubview(brandSubtitle)
         brandCopy.translatesAutoresizingMaskIntoConstraints = false
         brandCopy.axis = .vertical
         brandCopy.spacing = 3
         brandCopy.alignment = .leading
 
-        brand.addSubview(mark)
-        brand.addSubview(brandCopy)
+        let brandContent = UIStackView(arrangedSubviews: [mark, brandCopy])
+        brandContent.translatesAutoresizingMaskIntoConstraints = false
+        brandContent.axis = .horizontal
+        brandContent.alignment = .center
+        brandContent.spacing = brandCopySpacing
+        brand.addSubview(brandContent)
 
         NSLayoutConstraint.activate([
-            mark.leadingAnchor.constraint(equalTo: brand.leadingAnchor),
-            mark.centerYAnchor.constraint(equalTo: brand.centerYAnchor),
-            mark.widthAnchor.constraint(equalToConstant: 44),
-            mark.heightAnchor.constraint(equalToConstant: 44),
-
-            brandCopy.leadingAnchor.constraint(equalTo: mark.trailingAnchor, constant: 10),
-            brandCopy.trailingAnchor.constraint(equalTo: brand.trailingAnchor),
-            brandCopy.centerYAnchor.constraint(equalTo: brand.centerYAnchor),
+            brandContent.leadingAnchor.constraint(equalTo: brand.leadingAnchor),
+            brandContent.trailingAnchor.constraint(equalTo: brand.trailingAnchor),
+            brandContent.centerYAnchor.constraint(equalTo: brand.centerYAnchor),
+            mark.widthAnchor.constraint(equalToConstant: brandMarkSize),
+            mark.heightAnchor.constraint(equalToConstant: brandMarkSize),
             brand.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
         ])
 
@@ -234,30 +245,38 @@ private final class NinjaWebsiteHeaderView: UIView {
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
-        let shell = UIStackView(arrangedSubviews: [
+        let sections: [UIView] = [
             brand,
             spacer,
             nav,
             callButton,
             menuButton
-        ])
+        ]
+        sections.forEach { shell.addArrangedSubview($0) }
         shell.translatesAutoresizingMaskIntoConstraints = false
         shell.axis = .horizontal
         shell.alignment = .center
         shell.spacing = 24
+        shell.isLayoutMarginsRelativeArrangement = true
+        shell.directionalLayoutMargins = NSDirectionalEdgeInsets(
+            top: 0, leading: horizontalPadding, bottom: 0, trailing: horizontalPadding
+        )
 
         addSubview(shell)
 
         NSLayoutConstraint.activate([
             shell.topAnchor.constraint(equalTo: topAnchor),
             shell.bottomAnchor.constraint(equalTo: bottomAnchor),
-            shell.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
-            shell.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -28),
-            callButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 36),
-            menuButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
+            shell.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            shell.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+            callButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            menuButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
         ])
 
-        menuButton.isHidden = true
+        // Start compact until the first layout supplies the actual window width.
+        nav.isHidden = true
+        callButton.isHidden = true
+        brandCopy.isHidden = true
         updateMenu()
         setSelectedIndex(0)
     }
@@ -267,8 +286,8 @@ private final class NinjaWebsiteHeaderView: UIView {
     }
 
     override func layoutSubviews() {
-        super.layoutSubviews()
         updateResponsiveLayout(for: bounds.width)
+        super.layoutSubviews()
     }
 
     func setSelectedIndex(_ index: Int) {
@@ -280,18 +299,43 @@ private final class NinjaWebsiteHeaderView: UIView {
     }
 
     private func updateResponsiveLayout(for width: CGFloat) {
-        // Full desktop-style navigation is excellent on the largest iPads,
-        // but it becomes cramped on 11-inch iPads, portrait orientation and
-        // split-screen. Collapse before the brand or navigation can truncate.
-        let shouldCompact = width < 1240
-        guard isCompactHeader != shouldCompact else { return }
+        let availableWidth = width - safeAreaInsets.left - safeAreaInsets.right
+        guard availableWidth > 0 else { return }
+
+        // Measure the content, not its current frames: hidden/compressed views
+        // must report the same preferred widths when the window grows again.
+        let copyWidth = brandCopy.arrangedSubviews.reduce(CGFloat.zero) {
+            max($0, $1.intrinsicContentSize.width)
+        }
+        let brandWidth = brandMarkSize + brandCopySpacing + ceil(copyWidth)
+        let navigationWidth = items.reduce(CGFloat.zero) {
+            $0 + $1.intrinsicContentSize.width
+        } + CGFloat(max(0, items.count - 1)) * nav.spacing
+        // Three gaps separate brand, spacer, navigation and call button.
+        // Reserve another 24 points of breathing room before expanding.
+        let fullWidth = brandWidth + navigationWidth
+            + ceil(callButton.intrinsicContentSize.width)
+            + shell.spacing * 3 + horizontalPadding * 2 + 24
+        let shouldCompact = availableWidth < ceil(fullWidth)
+
+        let padding: CGFloat = shouldCompact && availableWidth < 500 ? 16 : horizontalPadding
+        let compactWidth = brandWidth + ceil(menuButton.intrinsicContentSize.width)
+            + shell.spacing * 2 + padding * 2
+        // Very narrow Split View windows keep the tappable logo and menu.
+        let hideBrandCopy = shouldCompact && availableWidth < ceil(compactWidth)
+        guard isCompactHeader != shouldCompact
+            || brandCopy.isHidden != hideBrandCopy
+            || shell.directionalLayoutMargins.leading != padding else { return }
         isCompactHeader = shouldCompact
 
         UIView.performWithoutAnimation {
             nav.isHidden = shouldCompact
             callButton.isHidden = shouldCompact
             menuButton.isHidden = !shouldCompact
-            layoutIfNeeded()
+            brandCopy.isHidden = hideBrandCopy
+            shell.directionalLayoutMargins = NSDirectionalEdgeInsets(
+                top: 0, leading: padding, bottom: 0, trailing: padding
+            )
         }
     }
 
