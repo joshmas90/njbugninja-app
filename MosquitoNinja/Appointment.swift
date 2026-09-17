@@ -7,6 +7,7 @@ struct ServiceAppointment: Codable, Equatable, Identifiable {
         case tick = "Tick Control"
         case both = "Mosquito + Tick"
         case commercial = "Commercial Service"
+        case fly = "Outdoor Fly Control"
 
         var shortName: String {
             switch self {
@@ -14,6 +15,7 @@ struct ServiceAppointment: Codable, Equatable, Identifiable {
             case .tick: return "Tick"
             case .both: return "Mosquito + Tick"
             case .commercial: return "Commercial/Govt"
+            case .fly: return "Fly Control"
             }
         }
 
