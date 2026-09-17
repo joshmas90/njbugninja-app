@@ -5,12 +5,14 @@ enum NinjaService: Int {
     case mosquito = 0
     case tick = 1
     case commercial = 3
+    case fly = 4
 
     init?(page: String) {
         switch page {
         case "mosquito-control.html": self = .mosquito
         case "tick-control.html": self = .tick
         case "commercial.html": self = .commercial
+        case "fly-control.html": self = .fly
         default: return nil
         }
     }
@@ -20,6 +22,7 @@ enum NinjaService: Int {
         case .mosquito: return "Mosquito Control"
         case .tick: return "Tick Control"
         case .commercial: return "Commercial & Government"
+        case .fly: return "Outdoor Fly Control"
         }
     }
 
@@ -31,6 +34,8 @@ enum NinjaService: Int {
             return "Look closely at the places where your lawn meets the woods. Paths, brush and shaded boundaries matter as much as the open space around them."
         case .commercial:
             return "Your outdoor space has a job to do. Service is discussed around the property layout, access arrangements and the way customers, staff or the public use it."
+        case .fly:
+            return "Outdoor fly pressure usually has a source. Trash and recycling areas, pet areas, exterior moisture, outdoor food-service zones and nearby breeding conditions are considered before treatment is discussed."
         }
     }
 
@@ -52,7 +57,13 @@ enum NinjaService: Int {
             return [
                 ("Business and public spaces", "Dining patios, event lawns, courtyards, pool surroundings and municipal outdoor areas.", "building.2.fill"),
                 ("Access and operating hours", "Share site access, operating hours and upcoming events when discussing the visit.", "clock.fill"),
-                ("The pest concern", "Describe mosquito or tick activity, vegetation, wooded edges and places where water collects.", "scope")
+                ("The pest concern", "Describe mosquito, tick or nuisance-fly activity, vegetation, wooded edges and places where water or organic material collects.", "scope")
+            ]
+        case .fly:
+            return [
+                ("Breeding and attraction sources", "Trash, recycling, pet waste, decaying organic material and persistent moisture are checked first because source reduction is central to fly control.", "trash.fill"),
+                ("Exterior resting areas", "Shaded exterior surfaces, protected corners, dumpster or bin surroundings and other labeled treatment sites may be considered when appropriate.", "scope"),
+                ("Outdoor living and service areas", "Tell us where fly activity affects patios, decks, outdoor kitchens, entrances or commercial outdoor-use areas.", "fork.knife")
             ]
         }
     }
@@ -65,6 +76,8 @@ enum NinjaService: Int {
             return "Include your town or ZIP, where ticks have been noticed and nearby woods or brush. Mention mosquitoes too if both are a concern."
         case .commercial:
             return "Include your town or ZIP, property type, pest concerns, access arrangements and scheduling needs."
+        case .fly:
+            return "Include your town or ZIP, where the flies are worst, nearby trash or recycling areas, pet areas, outdoor food-service areas, moisture or other conditions that may be attracting them."
         }
     }
 }
@@ -94,12 +107,12 @@ final class ServiceDetailViewController: NinjaBaseViewController {
         }
 
         contentStack.addArrangedSubview(sectionTitle("How service works"))
-        contentStack.addArrangedSubview(card(title: "01 · Look at the property", detail: "Layout, vegetation, where water collects and where you spend time outside guide the assessment.", symbol: "mappin.and.ellipse", accent: NinjaPalette.red))
-        contentStack.addArrangedSubview(card(title: "02 · Identify the target areas", detail: "The mosquito or tick habitat and your areas of concern guide the treatment plan.", symbol: "scope", accent: NinjaPalette.red))
+        contentStack.addArrangedSubview(card(title: "01 · Look at the property", detail: "Layout, pest activity, likely source areas and the outdoor spaces you use guide the assessment.", symbol: "mappin.and.ellipse", accent: NinjaPalette.red))
+        contentStack.addArrangedSubview(card(title: "02 · Identify the target areas", detail: "Habitat, breeding or attraction sources and the relevant labeled treatment sites guide the service plan.", symbol: "scope", accent: NinjaPalette.red))
         contentStack.addArrangedSubview(card(title: "03 · Treat and explain", detail: "Treatment is focused on relevant areas. You receive written instructions for the actual product and visit.", symbol: "doc.text.fill", accent: NinjaPalette.red))
 
         contentStack.addArrangedSubview(sectionTitle("Clear expectations"))
-        contentStack.addArrangedSubview(body("Your quote and service stay with one point of contact. Availability and scheduling are confirmed directly. Weather, habitat and neighboring properties affect pest pressure; complete elimination is not promised."))
+        contentStack.addArrangedSubview(body("Your quote and service stay with one point of contact. Availability and scheduling are confirmed directly. Weather, habitat, sanitation conditions and neighboring properties can affect pest pressure; complete elimination is not promised."))
         contentStack.addArrangedSubview(body("Follow the written re-entry instructions for your visit before people or pets return to treated areas."))
         contentStack.addArrangedSubview(secondaryButton("Before & after service", symbol: "checklist", action: #selector(openPrep)))
 
