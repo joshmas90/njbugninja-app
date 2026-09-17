@@ -3,7 +3,7 @@ import UserNotifications
 
 final class AppointmentEditorViewController: NinjaBaseViewController, UITextFieldDelegate, UITextViewDelegate {
     private var appointment: ServiceAppointment?
-    private let serviceControl = UISegmentedControl(items: ["Mosquito", "Ticks", "Both", "Comm/Govt"])
+    private let serviceControl = UISegmentedControl(items: ["Mosquito", "Ticks", "Both", "Comm.", "Flies"])
     private let datePicker = UIDatePicker()
     private let propertyField = UITextField()
     private let notesView = UITextView()
