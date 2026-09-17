@@ -50,27 +50,27 @@ private final class SpringBookingCardView: UIControl {
         layer.cornerRadius = 22
         layer.cornerCurve = .continuous
         layer.borderWidth = 1
-        layer.borderColor = NinjaPalette.red.withAlphaComponent(0.52).cgColor
+        layer.borderColor = NinjaPalette.red.withAlphaComponent(0.40).cgColor
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.38
         layer.shadowRadius = 22
         layer.shadowOffset = CGSize(width: 0, height: 12)
         layer.masksToBounds = false
 
-        emberLayer.fillColor = NinjaPalette.red.withAlphaComponent(0.16).cgColor
+        emberLayer.fillColor = NinjaPalette.red.withAlphaComponent(0.11).cgColor
         emberLayer.shadowColor = NinjaPalette.red.cgColor
-        emberLayer.shadowOpacity = 0.88
-        emberLayer.shadowRadius = 34
+        emberLayer.shadowOpacity = 0.60
+        emberLayer.shadowRadius = 28
         emberLayer.shadowOffset = .zero
-        emberLayer.opacity = 0.74
+        emberLayer.opacity = 0.56
         gradientLayer.insertSublayer(emberLayer, at: 0)
 
         energySweep.colors = [
             UIColor.clear.cgColor,
             NinjaPalette.red.withAlphaComponent(0.02).cgColor,
-            NinjaPalette.red.withAlphaComponent(0.16).cgColor,
-            UIColor(red: 1, green: 0.46, blue: 0.48, alpha: 0.34).cgColor,
-            NinjaPalette.red.withAlphaComponent(0.12).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.10).cgColor,
+            UIColor(red: 1, green: 0.46, blue: 0.48, alpha: 0.22).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.08).cgColor,
             UIColor.clear.cgColor
         ]
         energySweep.locations = [0, 0.26, 0.42, 0.52, 0.62, 1]
@@ -82,28 +82,28 @@ private final class SpringBookingCardView: UIControl {
         gradientLayer.addSublayer(energySweep)
 
         rimPulse.fillColor = UIColor.clear.cgColor
-        rimPulse.strokeColor = NinjaPalette.red.withAlphaComponent(0.78).cgColor
+        rimPulse.strokeColor = NinjaPalette.red.withAlphaComponent(0.62).cgColor
         rimPulse.lineWidth = 1.4
         rimPulse.shadowColor = NinjaPalette.red.cgColor
-        rimPulse.shadowOpacity = 0.86
-        rimPulse.shadowRadius = 13
+        rimPulse.shadowOpacity = 0.60
+        rimPulse.shadowRadius = 10
         rimPulse.shadowOffset = .zero
-        rimPulse.opacity = 0.52
+        rimPulse.opacity = 0.40
         gradientLayer.addSublayer(rimPulse)
 
         edgeSweep.colors = [
             UIColor.clear.cgColor,
-            NinjaPalette.red.withAlphaComponent(0.82).cgColor,
-            UIColor(red: 1, green: 0.62, blue: 0.64, alpha: 1).cgColor,
-            NinjaPalette.red.withAlphaComponent(0.78).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.62).cgColor,
+            UIColor(red: 1, green: 0.62, blue: 0.64, alpha: 0.86).cgColor,
+            NinjaPalette.red.withAlphaComponent(0.58).cgColor,
             UIColor.clear.cgColor
         ]
         edgeSweep.locations = [0, 0.28, 0.52, 0.74, 1]
         edgeSweep.startPoint = CGPoint(x: 0, y: 0.5)
         edgeSweep.endPoint = CGPoint(x: 1, y: 0.5)
         edgeSweep.shadowColor = NinjaPalette.red.cgColor
-        edgeSweep.shadowOpacity = 0.96
-        edgeSweep.shadowRadius = 11
+        edgeSweep.shadowOpacity = 0.70
+        edgeSweep.shadowRadius = 9
         edgeSweep.opacity = 0
         gradientLayer.addSublayer(edgeSweep)
 
@@ -267,20 +267,20 @@ private final class SpringBookingCardView: UIControl {
         emberLayer.transform = CATransform3DIdentity
 
         if UIAccessibility.isReduceMotionEnabled {
-            emberLayer.opacity = 0.68
-            energySweep.opacity = 0.18
+            emberLayer.opacity = 0.50
+            energySweep.opacity = 0.12
             energySweep.position.x = bounds.midX
-            rimPulse.opacity = 0.72
-            edgeSweep.opacity = 0.78
+            rimPulse.opacity = 0.54
+            edgeSweep.opacity = 0.62
             edgeSweep.position.x = 22 + edgeSweep.bounds.width / 2
             CATransaction.commit()
             return
         }
 
-        emberLayer.opacity = 0.74
+        emberLayer.opacity = 0.56
         energySweep.opacity = 0
         energySweep.position.x = -energySweep.bounds.width / 2
-        rimPulse.opacity = 0.48
+        rimPulse.opacity = 0.38
         edgeSweep.opacity = 0
         edgeSweep.position.x = -edgeSweep.bounds.width / 2
         CATransaction.commit()
@@ -294,7 +294,7 @@ private final class SpringBookingCardView: UIControl {
         emberDrift.keyTimes = [0, 0.36, 0.68, 1]
 
         let emberOpacity = CAKeyframeAnimation(keyPath: "opacity")
-        emberOpacity.values = [0.52, 0.92, 0.62, 1]
+        emberOpacity.values = [0.40, 0.68, 0.46, 0.72]
         emberOpacity.keyTimes = [0, 0.36, 0.68, 1]
 
         let emberGroup = CAAnimationGroup()
@@ -315,7 +315,7 @@ private final class SpringBookingCardView: UIControl {
         energyPosition.toValue = bounds.width + energySweep.bounds.width / 2
 
         let energyOpacity = CAKeyframeAnimation(keyPath: "opacity")
-        energyOpacity.values = [0, 0, 0.78, 0.28, 0, 0]
+        energyOpacity.values = [0, 0, 0.52, 0.20, 0, 0]
         energyOpacity.keyTimes = [0, 0.12, 0.28, 0.62, 0.78, 1]
 
         let energyGroup = CAAnimationGroup()
@@ -333,11 +333,11 @@ private final class SpringBookingCardView: UIControl {
         energySweep.add(energyGroup, forKey: "spring-energy-sweep")
 
         let rimOpacity = CAKeyframeAnimation(keyPath: "opacity")
-        rimOpacity.values = [0.34, 0.96, 0.52, 0.84, 0.34]
+        rimOpacity.values = [0.26, 0.76, 0.40, 0.66, 0.26]
         rimOpacity.keyTimes = [0, 0.22, 0.52, 0.74, 1]
 
         let rimWidth = CAKeyframeAnimation(keyPath: "lineWidth")
-        rimWidth.values = [1.1, 2.4, 1.3, 2.0, 1.1]
+        rimWidth.values = [1.1, 2.0, 1.3, 1.7, 1.1]
         rimWidth.keyTimes = [0, 0.22, 0.52, 0.74, 1]
 
         let rimGroup = CAAnimationGroup()
@@ -358,7 +358,7 @@ private final class SpringBookingCardView: UIControl {
         sweepPosition.duration = 4.6
 
         let sweepOpacity = CAKeyframeAnimation(keyPath: "opacity")
-        sweepOpacity.values = [0, 0, 1, 1, 0, 0]
+        sweepOpacity.values = [0, 0, 0.82, 0.82, 0, 0]
         sweepOpacity.keyTimes = [0, 0.10, 0.20, 0.62, 0.74, 1]
         sweepOpacity.duration = 4.6
 
