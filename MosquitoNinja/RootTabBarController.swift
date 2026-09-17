@@ -57,16 +57,27 @@ private final class NinjaWebsiteHeaderView: UIView {
     var onSelectTab: ((Int) -> Void)?
     var onCall: (() -> Void)?
 
+    private let menuTitles: [String]
+    private let menuSymbols = [
+        "house.fill",
+        "shield.lefthalf.filled",
+        "clock.arrow.circlepath",
+        "doc.text.fill",
+        "phone.fill"
+    ]
     private let items: [NinjaHeaderItem]
+    private let nav = UIStackView()
+    private let callButton = NinjaButton(type: .system)
+    private let menuButton = NinjaButton(type: .system)
+    private var selectedIndex = 0
+    private var isCompactHeader: Bool?
 
     override init(frame: CGRect) {
-        items = [
-            NinjaHeaderItem(title: "Home", index: 0),
-            NinjaHeaderItem(title: "Services", index: 1),
-            NinjaHeaderItem(title: "My Service", index: 2),
-            NinjaHeaderItem(title: "Quote", index: 3),
-            NinjaHeaderItem(title: "Contact", index: 4)
-        ]
+        let titles = ["Home", "Services", "My Service", "Quote", "Contact"]
+        menuTitles = titles
+        items = titles.enumerated().map { index, title in
+            NinjaHeaderItem(title: title, index: index)
+        }
 
         super.init(frame: frame)
 
@@ -82,6 +93,7 @@ private final class NinjaWebsiteHeaderView: UIView {
         brand.addAction(UIAction { [weak self] _ in
             self?.onSelectTab?(0)
         }, for: .touchUpInside)
+        brand.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         let mark = UIImageView()
         mark.translatesAutoresizingMaskIntoConstraints = false
@@ -99,6 +111,8 @@ private final class NinjaWebsiteHeaderView: UIView {
         let brandName = UILabel()
         brandName.translatesAutoresizingMaskIntoConstraints = false
         brandName.numberOfLines = 1
+        brandName.adjustsFontSizeToFitWidth = true
+        brandName.minimumScaleFactor = 0.82
 
         let brandText = NSMutableAttributedString(
             string: "MOSQUITO ",
@@ -147,20 +161,20 @@ private final class NinjaWebsiteHeaderView: UIView {
             brand.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
         ])
 
-        let nav = UIStackView(arrangedSubviews: items)
         nav.translatesAutoresizingMaskIntoConstraints = false
         nav.axis = .horizontal
         nav.alignment = .center
         nav.spacing = 26
+        nav.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         for item in items {
+            nav.addArrangedSubview(item)
             item.addAction(UIAction { [weak self, weak item] _ in
                 guard let index = item?.index else { return }
                 self?.onSelectTab?(index)
             }, for: .touchUpInside)
         }
 
-        let callButton = NinjaButton(type: .system)
         callButton.translatesAutoresizingMaskIntoConstraints = false
         callButton.setTitle("CALL  •  609-313-6317", for: .normal)
         callButton.setTitleColor(.white, for: .normal)
@@ -184,35 +198,67 @@ private final class NinjaWebsiteHeaderView: UIView {
         callButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
         callButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 5)
         callButton.accessibilityLabel = "Call Mosquito Ninja at 609-313-6317"
+        callButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         callButton.addAction(UIAction { [weak self] _ in
             self?.onCall?()
         }, for: .touchUpInside)
 
-        let shell = UIView()
+        menuButton.translatesAutoresizingMaskIntoConstraints = false
+        menuButton.setTitle("MENU", for: .normal)
+        menuButton.setTitleColor(.white, for: .normal)
+        menuButton.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
+        menuButton.tintColor = NinjaPalette.red
+        menuButton.titleLabel?.font = .systemFont(ofSize: 11, weight: .heavy)
+        menuButton.backgroundColor = UIColor(
+            red: 0.035,
+            green: 0.055,
+            blue: 0.043,
+            alpha: 0.96
+        )
+        menuButton.layer.borderWidth = 1
+        menuButton.layer.borderColor = NinjaPalette.red.withAlphaComponent(0.48).cgColor
+        menuButton.layer.cornerRadius = 12
+        menuButton.layer.cornerCurve = .continuous
+        menuButton.layer.shadowColor = NinjaPalette.red.cgColor
+        menuButton.layer.shadowOpacity = 0.18
+        menuButton.layer.shadowRadius = 11
+        menuButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+        menuButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 14, bottom: 10, right: 14)
+        menuButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -3, bottom: 0, right: 6)
+        menuButton.accessibilityLabel = "Open Mosquito Ninja navigation menu"
+        menuButton.showsMenuAsPrimaryAction = true
+        menuButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        let spacer = UIView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let shell = UIStackView(arrangedSubviews: [
+            brand,
+            spacer,
+            nav,
+            callButton,
+            menuButton
+        ])
         shell.translatesAutoresizingMaskIntoConstraints = false
+        shell.axis = .horizontal
+        shell.alignment = .center
+        shell.spacing = 24
+
         addSubview(shell)
-        shell.addSubview(brand)
-        shell.addSubview(nav)
-        shell.addSubview(callButton)
 
         NSLayoutConstraint.activate([
             shell.topAnchor.constraint(equalTo: topAnchor),
             shell.bottomAnchor.constraint(equalTo: bottomAnchor),
             shell.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
             shell.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -28),
-
-            brand.leadingAnchor.constraint(equalTo: shell.leadingAnchor),
-            brand.centerYAnchor.constraint(equalTo: shell.centerYAnchor),
-
-            callButton.trailingAnchor.constraint(equalTo: shell.trailingAnchor),
-            callButton.centerYAnchor.constraint(equalTo: shell.centerYAnchor),
             callButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 36),
-
-            nav.trailingAnchor.constraint(equalTo: callButton.leadingAnchor, constant: -24),
-            nav.centerYAnchor.constraint(equalTo: shell.centerYAnchor),
-            nav.leadingAnchor.constraint(greaterThanOrEqualTo: brand.trailingAnchor, constant: 28)
+            menuButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
         ])
 
+        menuButton.isHidden = true
+        updateMenu()
         setSelectedIndex(0)
     }
 
@@ -220,10 +266,57 @@ private final class NinjaWebsiteHeaderView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateResponsiveLayout(for: bounds.width)
+    }
+
     func setSelectedIndex(_ index: Int) {
+        selectedIndex = index
         for item in items {
             item.setSelected(item.index == index)
         }
+        updateMenu()
+    }
+
+    private func updateResponsiveLayout(for width: CGFloat) {
+        // Full desktop-style navigation is excellent on the largest iPads,
+        // but it becomes cramped on 11-inch iPads, portrait orientation and
+        // split-screen. Collapse before the brand or navigation can truncate.
+        let shouldCompact = width < 1240
+        guard isCompactHeader != shouldCompact else { return }
+        isCompactHeader = shouldCompact
+
+        UIView.performWithoutAnimation {
+            nav.isHidden = shouldCompact
+            callButton.isHidden = shouldCompact
+            menuButton.isHidden = !shouldCompact
+            layoutIfNeeded()
+        }
+    }
+
+    private func updateMenu() {
+        let navigationActions = menuTitles.enumerated().map { [weak self] index, title in
+            UIAction(
+                title: title,
+                image: UIImage(systemName: menuSymbols[index]),
+                state: selectedIndex == index ? .on : .off
+            ) { [weak self] _ in
+                self?.onSelectTab?(index)
+            }
+        }
+
+        let callAction = UIAction(
+            title: "Call 609-313-6317",
+            image: UIImage(systemName: "phone.fill")
+        ) { [weak self] _ in
+            self?.onCall?()
+        }
+
+        menuButton.menu = UIMenu(
+            title: "Mosquito Ninja",
+            children: navigationActions + [callAction]
+        )
     }
 }
 
