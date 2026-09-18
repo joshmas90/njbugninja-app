@@ -63,17 +63,31 @@ if (form) {
     else form.appendChild(status);
   }
 
+  form.querySelectorAll('input[name="service"]').forEach(input => {
+    input.addEventListener('change', () => form.querySelector('.service-picker')?.removeAttribute('aria-invalid'));
+  });
+
   form.addEventListener('submit', event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
 
     const d = new FormData(form);
+    const services = d.getAll('service').map(value => String(value).trim()).filter(Boolean);
+    const servicePicker = form.querySelector('.service-picker');
+    if (!services.length) {
+      servicePicker?.setAttribute('aria-invalid', 'true');
+      status.textContent = 'Select at least one service, or choose “Not sure / discuss my property.”';
+      form.querySelector('input[name="service"]')?.focus();
+      return;
+    }
+    servicePicker?.removeAttribute('aria-invalid');
+
     const msg =
       `Hi Mosquito Ninja, I'd like a property quote.\n\n` +
       `Name: ${d.get('name') || ''}\n` +
       `Phone: ${d.get('phone') || ''}\n` +
       `Town/ZIP: ${d.get('location') || ''}\n` +
-      `Service: ${d.get('service') || ''}\n` +
+      `Services: ${services.join(', ')}\n` +
       `Property type: ${d.get('propertyType') || 'Residential'}\n` +
       `Property details: ${d.get('message') || ''}`;
 
