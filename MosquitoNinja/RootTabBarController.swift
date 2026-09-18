@@ -89,7 +89,6 @@ private final class NinjaWebsiteHeaderView: UIView {
         ] = [
             ("Home", "house.fill", 0),
             ("Services", "shield.lefthalf.filled", 1),
-            ("Fly Control", "ant.fill", 5),
             ("My Service", "clock.arrow.circlepath", 2),
             ("Quote", "doc.text.fill", 3),
             ("Contact", "phone.fill", 4)
@@ -497,22 +496,6 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         }
     }
 
-    private func showFlyControlFromHeader() {
-        guard let controllers = viewControllers,
-              controllers.indices.contains(1),
-              let nav = controllers[1] as? UINavigationController else {
-            return
-        }
-
-        selectedIndex = 1
-        nav.popToRootViewController(animated: false)
-        nav.pushViewController(
-            ServiceDetailViewController(service: .fly),
-            animated: true
-        )
-        websiteHeader.setSelectedIndex(5)
-    }
-
     private func makeNavigation(
         root: UIViewController,
         title: String,
@@ -561,12 +544,6 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
     }
 
     private func selectWebsiteHeaderTab(_ index: Int) {
-        if index == 5 {
-            showFlyControlFromHeader()
-            NinjaHaptics.selection()
-            return
-        }
-
         guard let controllers = viewControllers,
               controllers.indices.contains(index) else {
             return
