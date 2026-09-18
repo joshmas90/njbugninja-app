@@ -89,7 +89,7 @@ private final class NinjaWebsiteHeaderView: UIView {
         ] = [
             ("Home", "house.fill", 0),
             ("Services", "shield.lefthalf.filled", 1),
-            ("Outdoor Fly", "ant.fill", 5),
+            ("Fly Control", "ant.fill", 5),
             ("My Service", "clock.arrow.circlepath", 2),
             ("Quote", "doc.text.fill", 3),
             ("Contact", "phone.fill", 4)
@@ -497,29 +497,6 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         }
     }
 
-    func showFlyControl() {
-        // Keep iPhone's five-tab information architecture intact while giving
-        // iPad/header and hamburger navigation a direct Fly Control destination.
-        selectedIndex = 1
-
-        guard let controllers = viewControllers,
-              controllers.indices.contains(1),
-              let nav = controllers[1] as? UINavigationController else {
-            syncWebsiteHeaderSelection()
-            return
-        }
-
-        nav.popToRootViewController(animated: false)
-        nav.pushViewController(
-            ServiceDetailViewController(service: .fly),
-            animated: false
-        )
-
-        if usesWebsiteHeader {
-            websiteHeader.setSelectedIndex(99)
-        }
-    }
-
     private func showFlyControlFromHeader() {
         guard let controllers = viewControllers,
               controllers.indices.contains(1),
@@ -559,11 +536,7 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         tabBar.isHidden = true
 
         websiteHeader.onSelectTab = { [weak self] index in
-            if index == 99 {
-                self?.showFlyControl()
-            } else {
-                self?.selectWebsiteHeaderTab(index)
-            }
+            self?.selectWebsiteHeaderTab(index)
         }
 
         websiteHeader.onCall = {
