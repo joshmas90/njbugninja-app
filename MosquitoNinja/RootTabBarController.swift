@@ -65,13 +65,8 @@ private final class NinjaWebsiteHeaderView: UIView {
     var onSelectTab: ((Int) -> Void)?
     var onCall: (() -> Void)?
 
-    private let menuTitles: [String]
-    private let menuSymbols = [
-        "house.fill",
-        "shield.lefthalf.filled",
-        "clock.arrow.circlepath",
-        "doc.text.fill",
-        "phone.fill"
+    private let menuEntries: [
+        (title: String, symbol: String, index: Int)
     ]
     private let items: [NinjaHeaderItem]
     private let brandCopy = UIStackView()
@@ -89,10 +84,20 @@ private final class NinjaWebsiteHeaderView: UIView {
     private var layoutStyle: LayoutStyle?
 
     override init(frame: CGRect) {
-        let titles = ["Home", "Services", "My Service", "Quote", "Contact"]
-        menuTitles = titles
-        items = titles.enumerated().map { index, title in
-            NinjaHeaderItem(title: title, index: index)
+        let entries: [
+            (title: String, symbol: String, index: Int)
+        ] = [
+            ("Home", "house.fill", 0),
+            ("Services", "shield.lefthalf.filled", 1),
+            ("Outdoor Fly", "ant.fill", 5),
+            ("My Service", "clock.arrow.circlepath", 2),
+            ("Quote", "doc.text.fill", 3),
+            ("Contact", "phone.fill", 4)
+        ]
+
+        menuEntries = entries
+        items = entries.map {
+            NinjaHeaderItem(title: $0.title, index: $0.index)
         }
 
         super.init(frame: frame)
@@ -150,7 +155,7 @@ private final class NinjaWebsiteHeaderView: UIView {
 
         let brandSubtitle = UILabel()
         brandSubtitle.translatesAutoresizingMaskIntoConstraints = false
-        brandSubtitle.text = "MOSQUITO & TICK CONTROL"
+        brandSubtitle.text = "OUTDOOR PEST CONTROL"
         brandSubtitle.textColor = UIColor.white.withAlphaComponent(0.70)
         brandSubtitle.font = .systemFont(ofSize: 7.5, weight: .bold)
         brandSubtitle.adjustsFontSizeToFitWidth = true
@@ -380,14 +385,16 @@ private final class NinjaWebsiteHeaderView: UIView {
     }
 
     private func updateMenu() {
-        menuButton.accessibilityValue = menuTitles[selectedIndex]
-        let navigationActions = menuTitles.enumerated().map { index, title in
+        menuButton.accessibilityValue =
+            menuEntries.first(where: { $0.index == selectedIndex })?.title
+
+        let navigationActions = menuEntries.map { entry in
             UIAction(
-                title: title,
-                image: UIImage(systemName: menuSymbols[index]),
-                state: selectedIndex == index ? .on : .off
+                title: entry.title,
+                image: UIImage(systemName: entry.symbol),
+                state: selectedIndex == entry.index ? .on : .off
             ) { [weak self] _ in
-                self?.onSelectTab?(index)
+                self?.onSelectTab?(entry.index)
             }
         }
 
@@ -490,6 +497,22 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         }
     }
 
+    private func showFlyControlFromHeader() {
+        guard let controllers = viewControllers,
+              controllers.indices.contains(1),
+              let nav = controllers[1] as? UINavigationController else {
+            return
+        }
+
+        selectedIndex = 1
+        nav.popToRootViewController(animated: false)
+        nav.pushViewController(
+            ServiceDetailViewController(service: .fly),
+            animated: true
+        )
+        websiteHeader.setSelectedIndex(5)
+    }
+
     private func makeNavigation(
         root: UIViewController,
         title: String,
@@ -538,6 +561,12 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
     }
 
     private func selectWebsiteHeaderTab(_ index: Int) {
+        if index == 5 {
+            showFlyControlFromHeader()
+            NinjaHaptics.selection()
+            return
+        }
+
         guard let controllers = viewControllers,
               controllers.indices.contains(index) else {
             return
