@@ -87,6 +87,30 @@ for service_name in ('Mosquito Control', 'Tick Control', 'Outdoor Fly Control'):
 if 'selectedServiceIndices' not in quote:
     errors.append('quote services must support multi-select')
 
+
+bundled_index = (web/'index.html').read_text(encoding='utf-8')
+if bundled_index.count('name="service"') < 3 or 'SERVICES YOU’RE INTERESTED IN' not in bundled_index:
+    errors.append('bundled fallback quote must retain multi-service selection')
+
+bundled_js = (web/'mosquito-ninja-v12.js').read_text(encoding='utf-8')
+if "getAll('service')" not in bundled_js or 'Services:' not in bundled_js:
+    errors.append('bundled fallback quote runtime must preserve every selected service')
+
+service_area = (web/'service-area.html').read_text(encoding='utf-8')
+if 'outdoor fly control' not in service_area.lower() or '</a><a href="./fly-control.html"' in service_area:
+    errors.append('bundled service-area content is missing or mis-linking Outdoor Fly Control')
+for county in ('Burlington', 'Camden', 'Gloucester', 'Atlantic', 'Cumberland', 'Salem'):
+    if county not in service_area:
+        errors.append(f'bundled service-area page missing county: {county}')
+
+faq = (web/'faq.html').read_text(encoding='utf-8')
+if 'Do you offer outdoor fly control?' not in faq or 'Do you guarantee zero outdoor pests?' not in faq:
+    errors.append('bundled FAQ must cover Outdoor Fly Control and all-service expectations')
+
+commercial_web = (web/'commercial.html').read_text(encoding='utf-8')
+if '</a><a href="./fly-control.html"' in commercial_web or 'Outdoor fly control</a> starts with source' not in commercial_web:
+    errors.append('bundled commercial page must describe Outdoor Fly Control separately from tick habitat')
+
 home = (root/'MosquitoNinja'/'HomeViewController.swift').read_text(encoding='utf-8')
 for marker in (
     'spring-ember',
