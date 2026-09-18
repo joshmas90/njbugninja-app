@@ -971,7 +971,7 @@ final class HomeViewController: NinjaBaseViewController {
         title.font = .systemFont(ofSize: 14, weight: .bold)
 
         let detail = UILabel()
-        detail.text = "Add a confirmed service time for 24-hour and 1-hour reminders."
+        detail.text = "After Mosquito Ninja confirms the visit, save the service time for 24-hour and 1-hour reminders."
         detail.textColor = NinjaPalette.muted
         detail.font = .systemFont(ofSize: 13)
         detail.numberOfLines = 0
