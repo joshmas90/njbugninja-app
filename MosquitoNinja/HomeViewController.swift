@@ -23,7 +23,7 @@ private final class NinjaGradientView: UIView {
     }
 
     private func updateGradient(for width: CGFloat) {
-        let narrow = width < 700
+        let narrow = width < 760
         guard isNarrow != narrow else { return }
         isNarrow = narrow
 
