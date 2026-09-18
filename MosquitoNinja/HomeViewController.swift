@@ -54,6 +54,62 @@ private final class NinjaGradientView: UIView {
     }
 }
 
+private final class NinjaFocalImageView: UIImageView {
+    var focalPoint = CGPoint(x: 0.5, y: 0.5) {
+        didSet { setNeedsLayout() }
+    }
+
+    override var image: UIImage? {
+        didSet { setNeedsLayout() }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        guard
+            let image,
+            bounds.width > 0,
+            bounds.height > 0,
+            image.size.width > 0,
+            image.size.height > 0
+        else {
+            layer.contentsRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+            return
+        }
+
+        let viewAspect = bounds.width / bounds.height
+        let imageAspect = image.size.width / image.size.height
+
+        if imageAspect > viewAspect {
+            let visibleWidth = viewAspect / imageAspect
+            let originX = min(
+                max(focalPoint.x - visibleWidth / 2, 0),
+                1 - visibleWidth
+            )
+
+            layer.contentsRect = CGRect(
+                x: originX,
+                y: 0,
+                width: visibleWidth,
+                height: 1
+            )
+        } else {
+            let visibleHeight = imageAspect / viewAspect
+            let originY = min(
+                max(focalPoint.y - visibleHeight / 2, 0),
+                1 - visibleHeight
+            )
+
+            layer.contentsRect = CGRect(
+                x: 0,
+                y: originY,
+                width: 1,
+                height: visibleHeight
+            )
+        }
+    }
+}
+
 private final class SpringBookingCardView: UIControl {
     override class var layerClass: AnyClass { CAGradientLayer.self }
 
@@ -418,7 +474,9 @@ final class HomeViewController: NinjaBaseViewController {
         super.viewDidLoad()
         title = "Mosquito Ninja"
         navigationItem.backButtonTitle = "Home"
-        contentStack.layoutMargins.top = 12
+        scrollView.contentInsetAdjustmentBehavior = .never
+        contentStack.layoutMargins.top =
+            traitCollection.userInterfaceIdiom == .pad ? 4 : 10
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(refresh),
@@ -649,8 +707,12 @@ final class HomeViewController: NinjaBaseViewController {
         hero.layer.borderColor = UIColor.white.withAlphaComponent(0.16).cgColor
         hero.accessibilityIdentifier = "home-hero"
 
+        let useWideHero =
+            traitCollection.userInterfaceIdiom == .pad &&
+            view.bounds.width >= 760
+
         let preferredHeroHeight: CGFloat =
-            traitCollection.userInterfaceIdiom == .pad ? 360 : 460
+            useWideHero ? 340 : 432
 
         hero.heightAnchor.constraint(
             greaterThanOrEqualToConstant: preferredHeroHeight
@@ -662,10 +724,13 @@ final class HomeViewController: NinjaBaseViewController {
         preferredHeight.priority = .defaultLow
         preferredHeight.isActive = true
 
-        let imageView = UIImageView()
+        let imageView = NinjaFocalImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.contentMode = .scaleAspectFill
+        imageView.contentMode = .scaleToFill
         imageView.clipsToBounds = true
+        imageView.focalPoint = useWideHero
+            ? CGPoint(x: 0.50, y: 0.47)
+            : CGPoint(x: 0.45, y: 0.50)
         imageView.isAccessibilityElement = false
         // Text determines expansion; the artwork's pixel height must not size the card.
         imageView.setContentCompressionResistancePriority(.fittingSizeLevel, for: .vertical)
@@ -711,7 +776,12 @@ final class HomeViewController: NinjaBaseViewController {
         let headline = UILabel()
         headline.text = "THEY WON’T\nSEE US COMING."
         headline.textColor = .white
-        headline.font = UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: .systemFont(ofSize: 34, weight: .black))
+        headline.font = UIFontMetrics(forTextStyle: .largeTitle).scaledFont(
+            for: .systemFont(
+                ofSize: useWideHero ? 32 : 33,
+                weight: .black
+            )
+        )
         headline.adjustsFontForContentSizeCategory = true
         headline.numberOfLines = 0
         headline.accessibilityTraits = .header
@@ -759,15 +829,11 @@ final class HomeViewController: NinjaBaseViewController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
         stack.alignment = .leading
-        stack.spacing = 12
+        stack.spacing = useWideHero ? 10 : 11
 
         hero.addSubview(imageView)
         hero.addSubview(gradient)
         hero.addSubview(stack)
-
-        // Use the available phone width; keep tablet text comfortably readable.
-        let preferredTrailing = stack.trailingAnchor.constraint(equalTo: hero.trailingAnchor, constant: -24)
-        preferredTrailing.priority = .defaultHigh
 
         var heroConstraints: [NSLayoutConstraint] = [
             audience.widthAnchor.constraint(equalTo: stack.widthAnchor),
@@ -777,38 +843,53 @@ final class HomeViewController: NinjaBaseViewController {
             gradient.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
             gradient.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
 
-            stack.topAnchor.constraint(greaterThanOrEqualTo: hero.topAnchor, constant: 24),
+            stack.topAnchor.constraint(greaterThanOrEqualTo: hero.topAnchor, constant: 22),
             stack.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 24),
             stack.widthAnchor.constraint(lessThanOrEqualToConstant: 480),
-            preferredTrailing,
             stack.trailingAnchor.constraint(
                 lessThanOrEqualTo: hero.trailingAnchor,
-                constant: -24
-            ),
-            stack.bottomAnchor.constraint(
-                equalTo: hero.bottomAnchor,
                 constant: -24
             )
         ]
 
-        if traitCollection.userInterfaceIdiom == .pad {
-            // On iPad, the hero is extremely wide relative to the 4:3 artwork.
-            // A full-bleed aspect-fill crop cuts off most of the ninja's torso
-            // and the shoulder emblem. Keep the artwork right-weighted and
-            // slightly taller than the card so the face, torso, tank and
-            // shoulder logo remain visible without increasing the hero height.
+        if useWideHero {
+            // Give the iPad hero a deliberate two-zone composition instead of
+            // bottom-anchoring the copy and over-extending the artwork above the
+            // card. This keeps the copy centered in the dark pane while the face
+            // and shoulder mark stay visible in the image pane.
             heroConstraints += [
+                imageView.topAnchor.constraint(equalTo: hero.topAnchor),
                 imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
-                imageView.widthAnchor.constraint(equalTo: hero.widthAnchor, multiplier: 0.68),
-                imageView.topAnchor.constraint(equalTo: hero.topAnchor, constant: -120),
-                imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor)
+                imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
+                imageView.widthAnchor.constraint(
+                    equalTo: hero.widthAnchor,
+                    multiplier: 0.64
+                ),
+
+                stack.trailingAnchor.constraint(
+                    lessThanOrEqualTo: imageView.leadingAnchor,
+                    constant: -26
+                ),
+                stack.centerYAnchor.constraint(equalTo: hero.centerYAnchor),
+                stack.bottomAnchor.constraint(
+                    lessThanOrEqualTo: hero.bottomAnchor,
+                    constant: -22
+                )
             ]
         } else {
+            // On iPhone, keep the artwork full bleed but bias the crop slightly
+            // left in source space, which moves the ninja/shoulder emblem toward
+            // the right side and gives the copy cleaner visual territory.
             heroConstraints += [
                 imageView.topAnchor.constraint(equalTo: hero.topAnchor),
                 imageView.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
                 imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
-                imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor)
+                imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
+
+                stack.bottomAnchor.constraint(
+                    equalTo: hero.bottomAnchor,
+                    constant: -24
+                )
             ]
         }
 
