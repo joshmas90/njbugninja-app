@@ -350,6 +350,62 @@ class NinjaBaseViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = NinjaPalette.ink
         configureScroll()
+        configureKeyboardAvoidance()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    private func configureKeyboardAvoidance() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillChangeFrame(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+
+    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
+        guard
+            let value = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+        else { return }
+
+        let keyboardFrame = view.convert(value.cgRectValue, from: nil)
+        let isDockedAtBottom = keyboardFrame.maxY >= view.bounds.maxY - 1
+        let overlap = isDockedAtBottom
+            ? max(0, view.bounds.maxY - keyboardFrame.minY - view.safeAreaInsets.bottom)
+            : 0
+        updateKeyboardInset(overlap, notification: notification)
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        updateKeyboardInset(0, notification: notification)
+    }
+
+    private func updateKeyboardInset(
+        _ bottom: CGFloat,
+        notification: Notification
+    ) {
+        let duration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0.25
+        let curveValue = (notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber)?.uintValue ?? 7
+        let options = UIView.AnimationOptions(rawValue: curveValue << 16)
+
+        UIView.animate(
+            withDuration: duration,
+            delay: 0,
+            options: [options, .beginFromCurrentState]
+        ) {
+            self.scrollView.contentInset.bottom = bottom
+            self.scrollView.verticalScrollIndicatorInsets.bottom = bottom
+            self.view.layoutIfNeeded()
+        }
     }
 
     private func configureScroll() {
