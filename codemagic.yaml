@@ -84,16 +84,9 @@ workflows:
 
     max_build_duration: 60
 
-    # Every successful merge to main builds, signs, and uploads a new binary to
-    # App Store Connect/TestFlight. App Store review and release remain manual.
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
-      cancel_previous_builds: true
+    # Manual release workflow. No Git push automatically starts this build.
+    # Run this workflow explicitly in Codemagic only when a new App Store /
+    # TestFlight binary is intentionally requested.
 
     integrations:
       app_store_connect: "Codemagic CI"
