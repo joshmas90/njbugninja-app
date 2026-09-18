@@ -550,7 +550,7 @@ final class HomeViewController: NinjaBaseViewController {
         title.accessibilityTraits = .header
 
         let detail = UILabel()
-        detail.text = "Plan ahead for the first mosquito & tick season routes. Send an early scheduling request now and confirm the property details directly."
+        detail.text = "Plan ahead for the first spring outdoor pest-control routes. Mosquito, tick and targeted outdoor fly requests can be discussed together with the property details."
         detail.textColor = UIColor.white.withAlphaComponent(0.72)
         detail.font = .preferredFont(forTextStyle: .subheadline)
         detail.adjustsFontForContentSizeCategory = true
@@ -698,7 +698,7 @@ final class HomeViewController: NinjaBaseViewController {
         brand.layer.masksToBounds = true
 
         let eyebrow = UILabel()
-        eyebrow.text = "MOSQUITOES. TICKS. CONSIDER THEM WARNED."
+        eyebrow.text = "MOSQUITOES. TICKS. OUTDOOR FLIES. CONSIDER THEM WARNED."
         eyebrow.textColor = UIColor.white.withAlphaComponent(0.90)
         eyebrow.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 12, weight: .bold))
         eyebrow.adjustsFontForContentSizeCategory = true
