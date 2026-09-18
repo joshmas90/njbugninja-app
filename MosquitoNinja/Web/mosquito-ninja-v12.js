@@ -74,7 +74,8 @@ if (form) {
       `Phone: ${d.get('phone') || ''}\n` +
       `Town/ZIP: ${d.get('location') || ''}\n` +
       `Service: ${d.get('service') || ''}\n` +
-      `Property: ${d.get('message') || ''}`;
+      `Property type: ${d.get('propertyType') || 'Residential'}\n` +
+      `Property details: ${d.get('message') || ''}`;
 
     status.textContent =
       'Review your text in the in-app message sheet, then tap Send. Nothing is sent until you do.';
