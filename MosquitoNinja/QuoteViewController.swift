@@ -13,7 +13,8 @@ final class QuoteViewController:
                 "Mosquito",
                 "Ticks",
                 "Both",
-                "Flies"
+                "Flies",
+                "Not Sure"
             ]
         )
 
@@ -161,7 +162,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Choose the pest concern and property type, add your details and optional photos, then review and send the request without leaving the app."
+                "Choose the pest concern separately from the property type. If more than one pest is involved or you are not sure, choose Not Sure and describe what you are seeing."
             )
         )
 
@@ -690,6 +691,8 @@ final class QuoteViewController:
             selected = "Mosquito + Tick Control"
         case 3:
             selected = "Outdoor Fly Control"
+        case 4:
+            selected = "Multiple Pests / Not Sure Yet"
         default:
             selected = "Mosquito Control"
         }
