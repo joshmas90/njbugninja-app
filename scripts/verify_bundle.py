@@ -128,6 +128,19 @@ for marker in (
 if 'action: #selector(openSpringQuote)' not in home or 'for: .touchUpInside' not in home:
     errors.append('Spring CTA card is missing its full-card quote action')
 
+
+for marker in (
+    'NinjaFocalImageView',
+    'view.bounds.width >= 760',
+    'useWideHero ? 340 : 432',
+    'CGPoint(x: 0.45, y: 0.50)',
+    'multiplier: 0.64',
+    'stack.centerYAnchor.constraint(equalTo: hero.centerYAnchor)',
+    'scrollView.contentInsetAdjustmentBehavior = .never',
+):
+    if marker not in home:
+        errors.append(f'missing responsive home-hero safeguard: {marker}')
+
 # Guard the My Service dashboard against the layout regression that can shrink
 # the entire phone page to the width of its 1-point summary divider.
 appointment = (root/'MosquitoNinja'/'Appointment.swift').read_text(encoding='utf-8')
