@@ -181,7 +181,7 @@ final class QuoteViewController:
         )
 
         contentStack.addArrangedSubview(
-            sectionTitle("Service")
+            sectionTitle("Services")
         )
 
         configureServiceOptions()
@@ -848,7 +848,7 @@ final class QuoteViewController:
         Name: \(name)
         Phone: \(phone)
         Town/ZIP: \(location)
-        Service: \(selected)
+        Services: \(selectedServices.joined(separator: ", "))
         Property type: \(property)
         Property details: \(notes)
         """
