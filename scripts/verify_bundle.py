@@ -73,10 +73,19 @@ if 'accessibilityIdentifier="mosquito-ninja-launch-overlay"' not in app_delegate
     errors.append('native launch overlay is missing its UI-test accessibility identifier')
 
 root_tabs = (root/'MosquitoNinja'/'RootTabBarController.swift').read_text(encoding='utf-8')
-if '("Fly Control", "ant.fill", 5)' not in root_tabs:
-    errors.append('Fly Control header navigation is missing')
-if 'ServiceDetailViewController(service: .fly)' not in root_tabs:
-    errors.append('Fly Control header navigation is not wired to the native service detail')
+if '("Fly Control", "ant.fill", 5)' in root_tabs:
+    errors.append('Fly Control must stay under Services instead of primary navigation')
+
+services = (root/'MosquitoNinja'/'ServicesViewController.swift').read_text(encoding='utf-8')
+if '"Outdoor Fly Control"' not in services or '"fly-control.html"' not in services:
+    errors.append('Outdoor Fly Control must remain accessible from Services')
+
+quote = (root/'MosquitoNinja'/'QuoteViewController.swift').read_text(encoding='utf-8')
+for service_name in ('Mosquito Control', 'Tick Control', 'Outdoor Fly Control'):
+    if service_name not in quote:
+        errors.append(f'quote service checklist missing: {service_name}')
+if 'selectedServiceIndices' not in quote:
+    errors.append('quote services must support multi-select')
 
 home = (root/'MosquitoNinja'/'HomeViewController.swift').read_text(encoding='utf-8')
 for marker in (
