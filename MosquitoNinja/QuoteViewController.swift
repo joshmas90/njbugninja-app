@@ -13,8 +13,16 @@ final class QuoteViewController:
                 "Mosquito",
                 "Ticks",
                 "Both",
-                "Comm.",
                 "Flies"
+            ]
+        )
+
+    private let propertyType =
+        UISegmentedControl(
+            items: [
+                "Residential",
+                "Commercial",
+                "Government"
             ]
         )
 
@@ -41,7 +49,17 @@ final class QuoteViewController:
 
     func selectService(_ selection: NinjaService) {
         loadViewIfNeeded()
-        service.selectedSegmentIndex = selection.rawValue
+
+        switch selection {
+        case .mosquito:
+            service.selectedSegmentIndex = 0
+        case .tick:
+            service.selectedSegmentIndex = 1
+        case .fly:
+            service.selectedSegmentIndex = 3
+        case .commercial:
+            propertyType.selectedSegmentIndex = 1
+        }
     }
 
     func prepareForSpring2027Request() {
@@ -143,7 +161,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Add your details, include property photos if they help, then review and send the request without leaving the app."
+                "Choose the pest concern and property type, add your details and optional photos, then review and send the request without leaving the app."
             )
         )
 
@@ -171,6 +189,31 @@ final class QuoteViewController:
         )
 
         contentStack.addArrangedSubview(service)
+
+        contentStack.addArrangedSubview(
+            sectionTitle("Property type")
+        )
+
+        propertyType.selectedSegmentIndex = 0
+        propertyType.selectedSegmentTintColor = NinjaPalette.green
+        propertyType.setTitleTextAttributes(
+            [.foregroundColor: UIColor.white],
+            for: .selected
+        )
+        propertyType.setTitleTextAttributes(
+            [
+                .foregroundColor:
+                    UIColor.white.withAlphaComponent(0.72)
+            ],
+            for: .normal
+        )
+        propertyType.addTarget(
+            self,
+            action: #selector(propertyTypeSelectionChanged),
+            for: .valueChanged
+        )
+
+        contentStack.addArrangedSubview(propertyType)
 
         contentStack.addArrangedSubview(
             sectionTitle("Contact")
@@ -438,6 +481,10 @@ final class QuoteViewController:
         NinjaHaptics.selection()
     }
 
+    @objc private func propertyTypeSelectionChanged() {
+        NinjaHaptics.selection()
+    }
+
     private func resetValidation() {
         [
             nameField,
@@ -642,11 +689,19 @@ final class QuoteViewController:
         case 2:
             selected = "Mosquito + Tick Control"
         case 3:
-            selected = "Commercial / Government"
-        case 4:
             selected = "Outdoor Fly Control"
         default:
             selected = "Mosquito Control"
+        }
+
+        let property: String
+        switch propertyType.selectedSegmentIndex {
+        case 1:
+            property = "Commercial / Business"
+        case 2:
+            property = "Government / Municipal"
+        default:
+            property = "Residential"
         }
 
         let notes =
@@ -667,7 +722,8 @@ final class QuoteViewController:
         Phone: \(phone)
         Town/ZIP: \(location)
         Service: \(selected)
-        Property: \(notes)
+        Property type: \(property)
+        Property details: \(notes)
         """
 
         if !selectedPhotos.isEmpty {
