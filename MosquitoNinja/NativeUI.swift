@@ -371,7 +371,10 @@ class NinjaBaseViewController: UIViewController {
         // Keep wide iPad pages composed and readable, while phone and Split
         // View layouts use all available width without horizontal scrolling.
         let preferredWidth = contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
-        preferredWidth.priority = .defaultHigh
+        // Nearly-required on phone and compact layouts so an internal view
+        // cannot shrink the whole page. On very wide iPads the required
+        // 1120-point maximum still wins cleanly.
+        preferredWidth.priority = UILayoutPriority(999)
 
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
