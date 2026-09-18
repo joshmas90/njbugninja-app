@@ -21,7 +21,7 @@ final class ServicesViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Mosquito and tick control remain the core services. Outdoor fly control is available as a targeted nuisance-pest service when the property and source conditions make it appropriate."
+                "Choose the pest concern and property context. Mosquito, tick and targeted outdoor fly control are available for South Jersey residential, commercial and government properties."
             )
         )
 
