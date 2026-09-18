@@ -71,6 +71,23 @@ for marker in (
 if 'action: #selector(openSpringQuote)' not in home or 'for: .touchUpInside' not in home:
     errors.append('Spring CTA card is missing its full-card quote action')
 
+# Guard the My Service dashboard against the layout regression that can shrink
+# the entire phone page to the width of its 1-point summary divider.
+appointment = (root/'MosquitoNinja'/'Appointment.swift').read_text(encoding='utf-8')
+summary_start = appointment.find('private func summaryPanel()')
+summary_end = appointment.find('private func metric(', summary_start)
+summary_block = appointment[summary_start:summary_end] if summary_start != -1 and summary_end != -1 else ''
+if 'row.distribution = .fillEqually' in summary_block:
+    errors.append('My Service summary must not use fillEqually with its fixed-width divider')
+if 'upcoming.widthAnchor.constraint(equalTo: previous.widthAnchor)' not in summary_block:
+    errors.append('My Service summary metrics must keep equal widths explicitly')
+
+# On phones the shared content column must stay effectively full-width. The
+# 1120-point required maximum is allowed to override this only on wide iPads.
+native_ui = (root/'MosquitoNinja'/'NativeUI.swift').read_text(encoding='utf-8')
+if 'preferredWidth.priority = UILayoutPriority(999)' not in native_ui:
+    errors.append('shared content width priority must remain 999 to prevent page collapse')
+
 # Apple privacy-manifest checks. The app uses UserDefaults for on-device
 # appointments and collects only customer-supplied quote data when the customer
 # affirmatively sends a message to Mosquito Ninja.
