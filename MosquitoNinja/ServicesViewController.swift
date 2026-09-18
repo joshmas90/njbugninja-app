@@ -74,7 +74,7 @@ final class ServicesViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Our core liquid products are OneGuard Multi MoA and Demand CS. We also use professional larval-control tools for standing water that cannot simply be removed. Product choice follows the pest, habitat, site conditions and the current product label."
+                "Our core liquid products are OneGuard Multi MoA and Demand CS, with professional larval-control tools for standing water when appropriate. Outdoor fly work begins with source conditions and sanitation; any treatment product is selected only for labeled sites and the actual pest. Product choice follows the pest, habitat, site conditions and the current label."
             )
         )
 
