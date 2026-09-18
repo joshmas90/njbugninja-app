@@ -7,16 +7,30 @@ final class QuoteViewController:
     UITextViewDelegate,
     PHPickerViewControllerDelegate
 {
-    private let service =
-        UISegmentedControl(
-            items: [
-                "Mosquito",
-                "Ticks",
-                "Both",
-                "Flies",
-                "Not Sure"
-            ]
+    private let serviceChoices: [
+        (title: String, detail: String, symbol: String)
+    ] = [
+        (
+            "Mosquito Control",
+            "Mosquito resting, harborage and activity areas.",
+            "drop.fill"
+        ),
+        (
+            "Tick Control",
+            "Wooded edges, brush, leaf litter and transition zones.",
+            "scope"
+        ),
+        (
+            "Outdoor Fly Control",
+            "House-fly and nuisance-fly source, resting and activity areas.",
+            "ant.fill"
         )
+    ]
+
+    private let servicePanel = UIView()
+    private let serviceStack = UIStackView()
+    private var serviceButtons: [UIButton] = []
+    private var selectedServiceIndices: Set<Int> = []
 
     private let propertyType =
         UISegmentedControl(
@@ -53,11 +67,11 @@ final class QuoteViewController:
 
         switch selection {
         case .mosquito:
-            service.selectedSegmentIndex = 0
+            setSelectedServices([0])
         case .tick:
-            service.selectedSegmentIndex = 1
+            setSelectedServices([1])
         case .fly:
-            service.selectedSegmentIndex = 3
+            setSelectedServices([2])
         case .commercial:
             propertyType.selectedSegmentIndex = 1
         }
@@ -162,7 +176,7 @@ final class QuoteViewController:
 
         contentStack.addArrangedSubview(
             body(
-                "Choose the pest concern separately from the property type. If more than one pest is involved or you are not sure, choose Not Sure and describe what you are seeing."
+                "Select every service you’re interested in. You can choose one service or combine mosquito, tick and outdoor fly control in the same request."
             )
         )
 
@@ -170,26 +184,8 @@ final class QuoteViewController:
             sectionTitle("Service")
         )
 
-        service.selectedSegmentIndex = 0
-        service.selectedSegmentTintColor = NinjaPalette.red
-        service.setTitleTextAttributes(
-            [.foregroundColor: UIColor.white],
-            for: .selected
-        )
-        service.setTitleTextAttributes(
-            [
-                .foregroundColor:
-                    UIColor.white.withAlphaComponent(0.72)
-            ],
-            for: .normal
-        )
-        service.addTarget(
-            self,
-            action: #selector(serviceSelectionChanged),
-            for: .valueChanged
-        )
-
-        contentStack.addArrangedSubview(service)
+        configureServiceOptions()
+        contentStack.addArrangedSubview(servicePanel)
 
         contentStack.addArrangedSubview(
             sectionTitle("Property type")
@@ -478,7 +474,135 @@ final class QuoteViewController:
         }
     }
 
-    @objc private func serviceSelectionChanged() {
+    private func configureServiceOptions() {
+        servicePanel.backgroundColor = .clear
+        servicePanel.layer.cornerRadius = 16
+        servicePanel.layer.cornerCurve = .continuous
+        servicePanel.layer.borderWidth = 0
+
+        serviceStack.translatesAutoresizingMaskIntoConstraints = false
+        serviceStack.axis = .vertical
+        serviceStack.spacing = 10
+
+        servicePanel.addSubview(serviceStack)
+
+        NSLayoutConstraint.activate([
+            serviceStack.topAnchor.constraint(equalTo: servicePanel.topAnchor),
+            serviceStack.leadingAnchor.constraint(equalTo: servicePanel.leadingAnchor),
+            serviceStack.trailingAnchor.constraint(equalTo: servicePanel.trailingAnchor),
+            serviceStack.bottomAnchor.constraint(equalTo: servicePanel.bottomAnchor)
+        ])
+
+        serviceButtons = serviceChoices.enumerated().map {
+            index,
+            choice in
+
+            let button = UIButton(type: .system)
+            button.tag = index
+            button.contentHorizontalAlignment = .leading
+            button.layer.cornerRadius = 14
+            button.layer.cornerCurve = .continuous
+            button.layer.borderWidth = 1
+            button.heightAnchor.constraint(
+                greaterThanOrEqualToConstant: 66
+            ).isActive = true
+
+            var configuration = UIButton.Configuration.plain()
+            configuration.title = choice.title
+            configuration.subtitle = choice.detail
+            configuration.image = UIImage(systemName: choice.symbol)
+            configuration.imagePlacement = .leading
+            configuration.imagePadding = 13
+            configuration.titleAlignment = .leading
+            configuration.contentInsets =
+                NSDirectionalEdgeInsets(
+                    top: 12,
+                    leading: 15,
+                    bottom: 12,
+                    trailing: 15
+                )
+            configuration.baseForegroundColor = .white
+            configuration.background.backgroundColor =
+                NinjaPalette.panel
+
+            button.configuration = configuration
+            button.accessibilityLabel = choice.title
+            button.accessibilityHint =
+                "Double tap to add or remove this service from the quote request."
+
+            button.addTarget(
+                self,
+                action: #selector(serviceOptionTapped(_:)),
+                for: .touchUpInside
+            )
+
+            serviceStack.addArrangedSubview(button)
+            return button
+        }
+
+        updateServiceButtons()
+    }
+
+    private func setSelectedServices(_ indices: Set<Int>) {
+        selectedServiceIndices =
+            Set(indices.filter { serviceChoices.indices.contains($0) })
+        updateServiceButtons()
+    }
+
+    private func updateServiceButtons() {
+        for button in serviceButtons {
+            let selected =
+                selectedServiceIndices.contains(button.tag)
+
+            var configuration =
+                button.configuration ?? UIButton.Configuration.plain()
+
+            configuration.image =
+                UIImage(
+                    systemName:
+                        selected
+                        ? "checkmark.square.fill"
+                        : "square"
+                )
+
+            configuration.baseForegroundColor =
+                selected
+                ? .white
+                : UIColor.white.withAlphaComponent(0.84)
+
+            configuration.background.backgroundColor =
+                selected
+                ? NinjaPalette.red.withAlphaComponent(0.16)
+                : NinjaPalette.panel
+
+            button.configuration = configuration
+
+            button.layer.borderColor =
+                (
+                    selected
+                    ? NinjaPalette.red.withAlphaComponent(0.72)
+                    : UIColor.white.withAlphaComponent(0.11)
+                ).cgColor
+
+            button.accessibilityValue =
+                selected ? "Selected" : "Not selected"
+
+            button.accessibilityTraits =
+                selected
+                ? [.button, .selected]
+                : .button
+        }
+    }
+
+    @objc private func serviceOptionTapped(_ sender: UIButton) {
+        if selectedServiceIndices.contains(sender.tag) {
+            selectedServiceIndices.remove(sender.tag)
+        } else {
+            selectedServiceIndices.insert(sender.tag)
+        }
+
+        servicePanel.layer.borderWidth = 0
+        updateServiceButtons()
         NinjaHaptics.selection()
     }
 
@@ -487,6 +611,8 @@ final class QuoteViewController:
     }
 
     private func resetValidation() {
+        servicePanel.layer.borderWidth = 0
+
         [
             nameField,
             phoneField,
@@ -627,6 +753,13 @@ final class QuoteViewController:
         var issues: [String] = []
         var firstInvalid: UITextField?
 
+        if selectedServiceIndices.isEmpty {
+            issues.append("at least one service")
+            servicePanel.layer.borderWidth = 1.25
+            servicePanel.layer.borderColor =
+                NinjaPalette.red.withAlphaComponent(0.88).cgColor
+        }
+
         if name.isEmpty {
             issues.append("your name")
             markInvalid(nameField)
@@ -683,19 +816,10 @@ final class QuoteViewController:
             return
         }
 
-        let selected: String
-        switch service.selectedSegmentIndex {
-        case 1:
-            selected = "Tick Control"
-        case 2:
-            selected = "Mosquito + Tick Control"
-        case 3:
-            selected = "Outdoor Fly Control"
-        case 4:
-            selected = "Multiple Pests / Not Sure Yet"
-        default:
-            selected = "Mosquito Control"
-        }
+        let selectedServices =
+            selectedServiceIndices
+                .sorted()
+                .map { serviceChoices[$0].title }
 
         let property: String
         switch propertyType.selectedSegmentIndex {
