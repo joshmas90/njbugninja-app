@@ -42,8 +42,8 @@ private final class NinjaGradientView: UIView {
             gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
         } else {
             gradientLayer.colors = [
-                UIColor.black.withAlphaComponent(0.44).cgColor,
-                UIColor.black.withAlphaComponent(0.16).cgColor,
+                UIColor.black.withAlphaComponent(0.26).cgColor,
+                UIColor.black.withAlphaComponent(0.07).cgColor,
                 UIColor.clear.cgColor
             ]
             gradientLayer.locations = [0, 0.50, 1]
