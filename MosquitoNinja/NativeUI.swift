@@ -400,7 +400,7 @@ class NinjaBaseViewController: UIViewController {
         UIView.animate(
             withDuration: duration,
             delay: 0,
-            options: [options, .beginFromCurrentState]
+            options: options.union(.beginFromCurrentState)
         ) {
             self.scrollView.contentInset.bottom = bottom
             self.scrollView.verticalScrollIndicatorInsets.bottom = bottom
