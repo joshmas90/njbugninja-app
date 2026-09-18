@@ -29,7 +29,7 @@ final class AppointmentEditorViewController: NinjaBaseViewController, UITextFiel
     private func buildUI() {
         contentStack.addArrangedSubview(eyebrow("Confirmed service"))
         contentStack.addArrangedSubview(headline("Keep service day simple.", size: 34))
-        contentStack.addArrangedSubview(body("Save a confirmed Mosquito Ninja appointment on this device and receive private reminders before service."))
+        contentStack.addArrangedSubview(body("Save a confirmed Mosquito Ninja appointment on this device and receive private reminders before service. This screen does not book or confirm a new visit with Mosquito Ninja."))
 
         contentStack.addArrangedSubview(sectionTitle("Service"))
         serviceControl.selectedSegmentIndex = 0
