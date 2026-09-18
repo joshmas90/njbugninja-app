@@ -485,8 +485,9 @@ final class HomeViewController: NinjaBaseViewController {
         contentStack.addArrangedSubview(sectionTitle("Services"))
         let mosquito = tappableCard(title: "Mosquito Control", detail: "Target resting and harborage areas around the property.", symbol: "drop.fill", page: "mosquito-control.html", titleForPage: "Mosquito Control")
         let ticks = tappableCard(title: "Tick Control", detail: "Focus on wooded edges, leaf litter, brush and transition zones.", symbol: "scope", page: "tick-control.html", titleForPage: "Tick Control")
+        let flies = tappableCard(title: "Outdoor Fly Control", detail: "Source-focused service for house-fly and nuisance-fly pressure around exterior activity areas.", symbol: "ant.fill", page: "fly-control.html", titleForPage: "Outdoor Fly Control")
         let commercial = tappableCard(title: "Commercial & Government", detail: "Business, hospitality, municipal and government-managed outdoor properties.", symbol: "building.2.fill", page: "commercial.html", titleForPage: "Commercial & Government")
-        [mosquito, ticks, commercial].forEach(contentStack.addArrangedSubview)
+        [mosquito, ticks, flies, commercial].forEach(contentStack.addArrangedSubview)
 
         contentStack.addArrangedSubview(sectionTitle("Customer Tools"))
         contentStack.addArrangedSubview(
@@ -720,7 +721,7 @@ final class HomeViewController: NinjaBaseViewController {
         headline.layer.shadowOffset = .zero
 
         let detail = UILabel()
-        detail.text = "Targeted mosquito & tick control for South Jersey residential, commercial and government properties."
+        detail.text = "Targeted mosquito, tick & outdoor fly control for South Jersey residential, commercial and government properties."
         detail.textColor = UIColor.white.withAlphaComponent(0.92)
         detail.font = UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: .systemFont(ofSize: 15, weight: .medium))
         detail.adjustsFontForContentSizeCategory = true
