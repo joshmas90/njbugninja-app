@@ -732,13 +732,13 @@ final class HomeViewController: NinjaBaseViewController {
         detail.layer.shadowOffset = .zero
 
         let audience = UILabel()
-        audience.text = "RESIDENTIAL   COMMERCIAL   GOVERNMENT"
+        audience.text = "MOSQUITO   TICK   OUTDOOR FLY"
         audience.textColor = NinjaPalette.green
         audience.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 11, weight: .bold), maximumPointSize: 14)
         audience.adjustsFontForContentSizeCategory = true
         audience.numberOfLines = 0
         audience.lineBreakMode = .byWordWrapping
-        audience.accessibilityLabel = "Residential, Commercial, Government"
+        audience.accessibilityLabel = "Mosquito control, Tick control, Outdoor fly control"
         audience.layer.shadowColor = UIColor.black.cgColor
         audience.layer.shadowOpacity = 0.80
         audience.layer.shadowRadius = 3
