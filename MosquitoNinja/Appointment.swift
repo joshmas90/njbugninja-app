@@ -339,8 +339,14 @@ final class CustomerServiceViewController: NinjaBaseViewController {
         row.translatesAutoresizingMaskIntoConstraints = false
         row.axis = .horizontal
         row.alignment = .fill
-        row.distribution = .fillEqually
+        row.distribution = .fill
         row.spacing = 12
+
+        // Keep the two metrics balanced while preserving the divider as a
+        // true 1-point separator. Using .fillEqually here also forced the
+        // divider to consume one third of the row and could collapse the
+        // dashboard's intrinsic width on narrow layouts.
+        upcoming.widthAnchor.constraint(equalTo: previous.widthAnchor).isActive = true
 
         container.addSubview(row)
 
