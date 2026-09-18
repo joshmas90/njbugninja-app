@@ -71,6 +71,8 @@ if (
     errors.append('native launch overlay playback must wait for applicationDidBecomeActive')
 if 'accessibilityIdentifier="mosquito-ninja-launch-overlay"' not in app_delegate:
     errors.append('native launch overlay is missing its UI-test accessibility identifier')
+if 'UIView.animate(withDuration:0.45,delay:3.55' not in app_delegate:
+    errors.append('native premium launch sequence must remain approximately four seconds')
 
 root_tabs = (root/'MosquitoNinja'/'RootTabBarController.swift').read_text(encoding='utf-8')
 if '("Fly Control", "ant.fill", 5)' in root_tabs:
@@ -158,6 +160,25 @@ native_ui = (root/'MosquitoNinja'/'NativeUI.swift').read_text(encoding='utf-8')
 if 'preferredWidth.priority = UILayoutPriority(999)' not in native_ui:
     errors.append('shared content width priority must remain 999 to prevent page collapse')
 
+for marker in (
+    'keyboardWillChangeFrame',
+    'scrollView.contentInset.bottom = bottom',
+    'scrollView.verticalScrollIndicatorInsets.bottom = bottom',
+):
+    if marker not in native_ui:
+        errors.append(f'missing shared keyboard-avoidance safeguard: {marker}')
+
+appointments_ui = (root/'MosquitoNinja'/'AppointmentsViewController.swift').read_text(encoding='utf-8')
+appointment_editor = (root/'MosquitoNinja'/'AppointmentEditorViewController.swift').read_text(encoding='utf-8')
+if 'Saving an appointment here does not book service or send anything to Mosquito Ninja.' not in appointments_ui:
+    errors.append('appointments dashboard must explain that local saves do not book service')
+if 'does not book or confirm a new visit with Mosquito Ninja' not in appointment_editor:
+    errors.append('appointment editor must explain that local saves do not confirm service')
+
+quote_ui = (root/'MosquitoNinja'/'QuoteViewController.swift').read_text(encoding='utf-8')
+if 'propertyType.accessibilityLabel = "Property type"' not in quote_ui:
+    errors.append('quote property type control is missing its accessibility label')
+
 # Apple privacy-manifest checks. The app uses UserDefaults for on-device
 # appointments and collects only customer-supplied quote data when the customer
 # affirmatively sends a message to Mosquito Ninja.
@@ -198,6 +219,12 @@ else:
     missing_collected = sorted(required_collected - collected)
     if missing_collected:
         errors.append('privacy manifest missing collected data types: ' + ', '.join(missing_collected))
+
+codemagic = (root/'codemagic.yaml').read_text(encoding='utf-8')
+if 'triggering:' in codemagic:
+    errors.append('Codemagic must remain manual-only; automatic Git push triggering is not allowed')
+if 'Manual release workflow. No Git push automatically starts this build.' not in codemagic:
+    errors.append('Codemagic manual-release safeguard comment is missing')
 
 project = (root/'MosquitoNinja.xcodeproj'/'project.pbxproj').read_text(encoding='utf-8')
 if 'PrivacyInfo.xcprivacy in Resources' not in project:
