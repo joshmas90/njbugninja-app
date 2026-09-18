@@ -4,6 +4,20 @@ import re, json, plistlib, sys
 root = Path(__file__).resolve().parents[1]
 web = root/'MosquitoNinja'/'Web'
 errors=[]
+
+required_web_pages = [
+    web/'index.html',
+    web/'mosquito-control.html',
+    web/'tick-control.html',
+    web/'fly-control.html',
+    web/'commercial.html',
+    web/'service-area.html',
+    web/'faq.html',
+]
+for page in required_web_pages:
+    if not page.exists():
+        errors.append(f'missing bundled service page: {page.relative_to(root)}')
+
 for p in web.glob('*.html'):
     text=p.read_text(encoding='utf-8')
 # More robust attribute extraction
@@ -57,6 +71,12 @@ if (
     errors.append('native launch overlay playback must wait for applicationDidBecomeActive')
 if 'accessibilityIdentifier="mosquito-ninja-launch-overlay"' not in app_delegate:
     errors.append('native launch overlay is missing its UI-test accessibility identifier')
+
+root_tabs = (root/'MosquitoNinja'/'RootTabBarController.swift').read_text(encoding='utf-8')
+if '("Fly Control", "ant.fill", 5)' not in root_tabs:
+    errors.append('Fly Control header navigation is missing')
+if 'ServiceDetailViewController(service: .fly)' not in root_tabs:
+    errors.append('Fly Control header navigation is not wired to the native service detail')
 
 home = (root/'MosquitoNinja'/'HomeViewController.swift').read_text(encoding='utf-8')
 for marker in (
