@@ -497,6 +497,29 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         }
     }
 
+    func showFlyControl() {
+        // Keep iPhone's five-tab information architecture intact while giving
+        // iPad/header and hamburger navigation a direct Fly Control destination.
+        selectedIndex = 1
+
+        guard let controllers = viewControllers,
+              controllers.indices.contains(1),
+              let nav = controllers[1] as? UINavigationController else {
+            syncWebsiteHeaderSelection()
+            return
+        }
+
+        nav.popToRootViewController(animated: false)
+        nav.pushViewController(
+            ServiceDetailViewController(service: .fly),
+            animated: false
+        )
+
+        if usesWebsiteHeader {
+            websiteHeader.setSelectedIndex(99)
+        }
+    }
+
     private func showFlyControlFromHeader() {
         guard let controllers = viewControllers,
               controllers.indices.contains(1),
@@ -536,7 +559,11 @@ final class RootTabBarController: UITabBarController, UITabBarControllerDelegate
         tabBar.isHidden = true
 
         websiteHeader.onSelectTab = { [weak self] index in
-            self?.selectWebsiteHeaderTab(index)
+            if index == 99 {
+                self?.showFlyControl()
+            } else {
+                self?.selectWebsiteHeaderTab(index)
+            }
         }
 
         websiteHeader.onCall = {
