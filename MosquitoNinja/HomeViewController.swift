@@ -698,7 +698,7 @@ final class HomeViewController: NinjaBaseViewController {
         brand.layer.masksToBounds = true
 
         let eyebrow = UILabel()
-        eyebrow.text = "MOSQUITOES. TICKS. OUTDOOR FLIES. CONSIDER THEM WARNED."
+        eyebrow.text = "MOSQUITOES. TICKS. FLIES. CONSIDER THEM WARNED."
         eyebrow.textColor = UIColor.white.withAlphaComponent(0.90)
         eyebrow.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .systemFont(ofSize: 12, weight: .bold))
         eyebrow.adjustsFontForContentSizeCategory = true
