@@ -430,12 +430,28 @@ final class HomeViewController: NinjaBaseViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        // The iPad website-style header already occupies the first 82 points
+        // beneath the system safe area. Keeping that inset on the navigation
+        // controller and then pinning Home to its safe area creates a second
+        // empty band above the hero. Apply the inset once, directly to Home.
+        if traitCollection.userInterfaceIdiom == .pad {
+            navigationController?.additionalSafeAreaInsets.top = 0
+            additionalSafeAreaInsets.top = 82
+        }
+
         navigationController?.setNavigationBarHidden(true, animated: animated)
         refresh()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+
+        if traitCollection.userInterfaceIdiom == .pad {
+            additionalSafeAreaInsets.top = 0
+            navigationController?.additionalSafeAreaInsets.top = 82
+        }
+
         // Detail screens still need their title and Back button.
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
@@ -587,10 +603,14 @@ final class HomeViewController: NinjaBaseViewController {
         ])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
-        stack.spacing = 14
+        stack.spacing =
+            traitCollection.userInterfaceIdiom == .pad ? 10 : 14
 
         panel.addSubview(accent)
         panel.addSubview(stack)
+
+        let panelVerticalInset: CGFloat =
+            traitCollection.userInterfaceIdiom == .pad ? 18 : 22
 
         NSLayoutConstraint.activate([
             signal.widthAnchor.constraint(equalToConstant: 8),
@@ -601,10 +621,16 @@ final class HomeViewController: NinjaBaseViewController {
             accent.widthAnchor.constraint(equalToConstant: 4),
             accent.heightAnchor.constraint(equalToConstant: 48),
 
-            stack.topAnchor.constraint(equalTo: panel.topAnchor, constant: 22),
+            stack.topAnchor.constraint(
+                equalTo: panel.topAnchor,
+                constant: panelVerticalInset
+            ),
             stack.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 22),
             stack.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -22),
-            stack.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -22)
+            stack.bottomAnchor.constraint(
+                equalTo: panel.bottomAnchor,
+                constant: -panelVerticalInset
+            )
         ])
 
         panel.accessibilityIdentifier = "spring-2027-booking-card"
@@ -622,8 +648,16 @@ final class HomeViewController: NinjaBaseViewController {
         hero.layer.borderColor = UIColor.white.withAlphaComponent(0.16).cgColor
         hero.accessibilityIdentifier = "home-hero"
 
-        hero.heightAnchor.constraint(greaterThanOrEqualToConstant: 460).isActive = true
-        let preferredHeight = hero.heightAnchor.constraint(equalToConstant: 460)
+        let preferredHeroHeight: CGFloat =
+            traitCollection.userInterfaceIdiom == .pad ? 360 : 460
+
+        hero.heightAnchor.constraint(
+            greaterThanOrEqualToConstant: preferredHeroHeight
+        ).isActive = true
+
+        let preferredHeight = hero.heightAnchor.constraint(
+            equalToConstant: preferredHeroHeight
+        )
         preferredHeight.priority = .defaultLow
         preferredHeight.isActive = true
 
