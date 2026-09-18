@@ -451,7 +451,10 @@ class NinjaBaseViewController: UIViewController {
         let label = UILabel()
         label.text = text.uppercased()
         label.textColor = NinjaPalette.red
-        label.font = .systemFont(ofSize: 12, weight: .heavy)
+        label.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(
+            for: .systemFont(ofSize: 12, weight: .heavy)
+        )
+        label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         label.setContentHuggingPriority(.required, for: .vertical)
         return label
