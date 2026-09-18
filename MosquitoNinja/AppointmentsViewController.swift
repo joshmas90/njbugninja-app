@@ -34,6 +34,7 @@ final class AppointmentsViewController: NinjaBaseViewController {
         contentStack.addArrangedSubview(eyebrow("Service day"))
         contentStack.addArrangedSubview(headline("Your next visit.\nClear and on time.", size: 34))
         contentStack.addArrangedSubview(body("Keep confirmed Mosquito Ninja appointments in one place and receive private reminders before service."))
+        contentStack.addArrangedSubview(card(title: "Confirmed appointments only", detail: "Saving an appointment here does not book service or send anything to Mosquito Ninja. Add it only after the date and time have been confirmed directly.", symbol: "checkmark.shield.fill", accent: NinjaPalette.green))
 
         if let next = AppointmentStore.shared.nextAppointment {
             contentStack.addArrangedSubview(appointmentHero(next))
