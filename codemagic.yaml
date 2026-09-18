@@ -84,18 +84,9 @@ workflows:
 
     max_build_duration: 60
 
-    # ONE-SHOT FINAL RELEASE TRIGGER — this commit intentionally starts exactly
-    # one App Store Connect upload from main. The following commit restores
-    # manual-only behavior.
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: 'main'
-          include: true
-          source: true
-      cancel_previous_builds: false
-
+    # Manual release workflow. No Git push automatically starts this build.
+    # Run this workflow explicitly in Codemagic only when a new App Store /
+    # TestFlight binary is intentionally requested.
 
     integrations:
       app_store_connect: "Codemagic CI"
