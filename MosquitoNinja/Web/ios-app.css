@@ -135,3 +135,46 @@ h1, h2, h3, .eyebrow, .btn {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Multi-service quote fallback. Native Quote uses richer selectable cards. */
+.service-picker {
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+.service-picker legend {
+  margin-bottom: 4px;
+  color: #f3f5f3;
+  font-size: .8125rem;
+  font-weight: 700;
+}
+.service-picker__hint {
+  margin: 0 0 10px;
+  color: #9aa39c;
+  font-size: .8125rem;
+}
+.service-picker__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+}
+.service-picker__grid label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #2b342e;
+  border-radius: 12px;
+  background: #0e110f;
+}
+.service-picker__grid input {
+  width: 20px;
+  height: 20px;
+  accent-color: #b4d578;
+}
+.service-picker[aria-invalid="true"] .service-picker__grid {
+  outline: 2px solid #e02027;
+  outline-offset: 3px;
+}
