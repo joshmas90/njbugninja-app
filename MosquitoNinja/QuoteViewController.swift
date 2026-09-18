@@ -192,6 +192,7 @@ final class QuoteViewController:
         )
 
         propertyType.selectedSegmentIndex = 0
+        propertyType.accessibilityLabel = "Property type"
         propertyType.selectedSegmentTintColor = NinjaPalette.green
         propertyType.setTitleTextAttributes(
             [.foregroundColor: UIColor.white],
