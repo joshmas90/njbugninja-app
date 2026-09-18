@@ -768,12 +768,8 @@ final class HomeViewController: NinjaBaseViewController {
         let preferredTrailing = stack.trailingAnchor.constraint(equalTo: hero.trailingAnchor, constant: -24)
         preferredTrailing.priority = .defaultHigh
 
-        NSLayoutConstraint.activate([
+        var heroConstraints: [NSLayoutConstraint] = [
             audience.widthAnchor.constraint(equalTo: stack.widthAnchor),
-            imageView.topAnchor.constraint(equalTo: hero.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor),
 
             gradient.topAnchor.constraint(equalTo: hero.topAnchor),
             gradient.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
@@ -792,7 +788,30 @@ final class HomeViewController: NinjaBaseViewController {
                 equalTo: hero.bottomAnchor,
                 constant: -24
             )
-        ])
+        ]
+
+        if traitCollection.userInterfaceIdiom == .pad {
+            // On iPad, the hero is extremely wide relative to the 4:3 artwork.
+            // A full-bleed aspect-fill crop cuts off most of the ninja's torso
+            // and the shoulder emblem. Keep the artwork right-weighted and
+            // slightly taller than the card so the face, torso, tank and
+            // shoulder logo remain visible without increasing the hero height.
+            heroConstraints += [
+                imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
+                imageView.widthAnchor.constraint(equalTo: hero.widthAnchor, multiplier: 0.68),
+                imageView.topAnchor.constraint(equalTo: hero.topAnchor, constant: -120),
+                imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor)
+            ]
+        } else {
+            heroConstraints += [
+                imageView.topAnchor.constraint(equalTo: hero.topAnchor),
+                imageView.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
+                imageView.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
+                imageView.bottomAnchor.constraint(equalTo: hero.bottomAnchor)
+            ]
+        }
+
+        NSLayoutConstraint.activate(heroConstraints)
 
         return hero
     }
