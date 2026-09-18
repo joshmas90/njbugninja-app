@@ -10,7 +10,7 @@ final class PrepViewController: NinjaBaseViewController {
 
         contentStack.addArrangedSubview(sectionTitle("Before service"))
         add("Confirm property access", "Make sure gates and treatment areas can be reached.", "lock.open.fill")
-        add("Identify problem areas", "Note where mosquitoes or ticks are most noticeable.", "mappin.and.ellipse")
+        add("Identify problem areas", "Note where mosquitoes, ticks or outdoor flies are most noticeable, including wooded edges, standing water, trash/recycling or pet areas when relevant.", "mappin.and.ellipse")
         add("Share property details", "Mention pets, events, sensitive areas or scheduling constraints that matter to the visit.", "text.bubble.fill")
         add("Review written instructions", "Follow any product- or visit-specific preparation provided to you.", "doc.text.fill")
 
