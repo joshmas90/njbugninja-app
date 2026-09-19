@@ -2,6 +2,14 @@
 
 A native UIKit customer-service app for Mosquito Ninja. The app uses native Home, Services, Appointments, Quote, Prep, and Contact experiences, with bundled website pages used only for deeper reference content.
 
+## Splash timing safeguards
+
+- Rechecks that the app is active and the overlay is attached to its visible window immediately before starting playback. An activation interrupted before playback no longer consumes the once-per-launch flag.
+- Schedules every splash effect from one shared start time converted into the target layer's local clock, keeping the mark, atmosphere, strike and wordmark synchronized.
+- Retains the four-second full-motion sequence and the brief static treatment when iOS Reduce Motion is enabled. Returning to an already-running app does not replay the launch sequence.
+
+Validation: bundled-resource checks and Swift source syntax parsing pass. These changes have not been built or visually verified in Xcode; the cause of the reported static splash on the installed build is not yet confirmed. Before release, test a terminated-app launch on iPhone and iPad with Reduce Motion off, repeat with it on, and interrupt startup by locking the device or switching apps. Confirm that the full-motion launch animates and dismisses, the reduced-motion launch stays brief, and an interrupted launch never blocks access to Home. Codemagic remains manual-only.
+
 ## Adaptive iPad navigation
 
 - Shows the full header navigation and call button whenever their measured widths fit, including spacing and a small reserve of breathing room.
