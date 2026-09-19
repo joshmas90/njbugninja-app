@@ -92,7 +92,7 @@ if (form) {
       `Property details: ${d.get('message') || ''}`;
 
     status.textContent =
-      'Review your text in the in-app message sheet, then tap Send. Nothing is sent until you do.';
+      'Review the prepared request, then tap Send in Messages. If texting is unavailable, choose the email or website option. Nothing is sent automatically.';
 
     window.location.href = `sms:+16093136317?&body=${encodeURIComponent(msg)}`;
   });

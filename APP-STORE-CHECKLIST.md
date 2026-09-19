@@ -17,10 +17,11 @@
 
 ## App Privacy answers to reconcile in App Store Connect
 
-The final App Store Connect answers should match the production build and public policy. For the current quote flow, use the conservative disclosures below for information a customer affirmatively sends to Mosquito Ninja through Apple's Messages composer:
+The final App Store Connect answers should match the production build and public policy. For the current quote flow, use the conservative disclosures below for information a customer affirmatively sends to Mosquito Ninja through Apple's Messages or Mail composer:
 
 - **Name** — linked to the user, not used for tracking, App Functionality.
 - **Phone Number** — linked to the user, not used for tracking, App Functionality.
+- **Email Address** — linked to the user, not used for tracking, App Functionality, when the customer uses the in-app email quote fallback.
 - **Coarse Location** — linked to the user, not used for tracking, App Functionality, representing the customer-supplied property town/ZIP in a sent quote.
 - **Photos or Videos** — linked to the user, not used for tracking, App Functionality, only when the customer chooses property-photo attachments and sends them.
 - **Other User Content** — linked to the user, not used for tracking, App Functionality, representing property notes/details the customer chooses to send.
@@ -37,10 +38,10 @@ Before submission, install the exact TestFlight build that will be selected for 
 - iPad responsive header / hamburger menu.
 - Dynamic Type and Reduce Motion.
 - Call and Text actions.
-- Quote validation, cancel, successful send, failed/unavailable messaging behavior, and optional photo attachments.
+- Quote validation, cancel, successful send, failed/unavailable messaging behavior, in-app email fallback, and optional photo attachments including slow, replaced and partially failed selections.
 - Appointment add, edit, delete, relaunch persistence, and local history.
 - 24-hour and 1-hour notification scheduling, including notification-denied behavior.
-- Location Allow, Approximate Location, Deny, and unavailable-network fallback.
+- Location Allow, Approximate Location, Deny, and unavailable-network behavior. A rules-download failure must show Coverage Not Verified rather than confirming from built-in rules.
 - Every native navigation destination and bundled reference page.
 - External links and privacy-policy access.
 

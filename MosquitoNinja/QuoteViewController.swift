@@ -51,8 +51,23 @@ final class QuoteViewController:
     private let photoCountLabel = UILabel()
     private let clearPhotosButton = NinjaButton(type: .system)
     private let quoteMessageComposer = MessageComposer()
+    private lazy var choosePhotosButton =
+        secondaryButton(
+            "Choose Property Photos",
+            symbol: "photo.on.rectangle.angled",
+            action: #selector(choosePhotos)
+        )
+    private lazy var reviewButton =
+        primaryButton(
+            "Review & Send",
+            symbol: "checkmark.bubble.fill",
+            action: #selector(reviewQuote)
+        )
 
     private var selectedPhotos: [UIImage] = []
+    private var photoSelectionGeneration = 0
+    private var pendingPhotoCount = 0
+    private var isLoadingPhotos = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -195,7 +210,7 @@ final class QuoteViewController:
         propertyType.accessibilityLabel = "Property type"
         propertyType.selectedSegmentTintColor = NinjaPalette.green
         propertyType.setTitleTextAttributes(
-            [.foregroundColor: UIColor.white],
+            [.foregroundColor: NinjaPalette.ink],
             for: .selected
         )
         propertyType.setTitleTextAttributes(
@@ -285,27 +300,14 @@ final class QuoteViewController:
         configurePhotoPanel()
         contentStack.addArrangedSubview(photoPanel)
 
-        contentStack.addArrangedSubview(
-            secondaryButton(
-                "Choose Property Photos",
-                symbol: "photo.on.rectangle.angled",
-                action: #selector(choosePhotos)
-            )
-        )
-
-        contentStack.addArrangedSubview(
-            primaryButton(
-                "Review & Send",
-                symbol: "checkmark.bubble.fill",
-                action: #selector(reviewQuote)
-            )
-        )
+        contentStack.addArrangedSubview(choosePhotosButton)
+        contentStack.addArrangedSubview(reviewButton)
 
         contentStack.addArrangedSubview(
             card(
                 title: "You stay in control",
                 detail:
-                    "Review the prepared request in Apple's Messages sheet, then tap Send. Nothing is sent automatically.",
+                    "Review the prepared request in Apple's Messages sheet, or use the in-app email option when texting is unavailable. Nothing is sent automatically.",
                 symbol: "hand.tap.fill",
                 accent: NinjaPalette.green
             )
@@ -427,52 +429,80 @@ final class QuoteViewController:
             $0.removeFromSuperview()
         }
 
-        switch selectedPhotos.count {
-        case 0:
-            photoCountLabel.text = "No photos selected"
-            clearPhotosButton.isHidden = true
-
-            let placeholder = UILabel()
-            placeholder.text =
-                "Photos are optional. Choose images only if they help show the property or pest activity."
-            placeholder.textColor =
-                UIColor.white.withAlphaComponent(0.52)
-            placeholder.font =
-                .preferredFont(forTextStyle: .footnote)
-            placeholder.adjustsFontForContentSizeCategory = true
-            placeholder.numberOfLines = 0
-            placeholder.widthAnchor.constraint(
-                lessThanOrEqualToConstant: 330
-            ).isActive = true
-            photoPreviewStack.addArrangedSubview(placeholder)
-
-        default:
+        if isLoadingPhotos {
             photoCountLabel.text =
-                "\(selectedPhotos.count) of 3 photos selected"
+                "Loading \(pendingPhotoCount) photo\(pendingPhotoCount == 1 ? "" : "s")..."
             clearPhotosButton.isHidden = false
 
-            for (index, image) in selectedPhotos.enumerated() {
-                let preview = UIImageView(image: image)
-                preview.contentMode = .scaleAspectFill
-                preview.clipsToBounds = true
-                preview.layer.cornerRadius = 12
-                preview.layer.cornerCurve = .continuous
-                preview.layer.borderWidth = 1
-                preview.layer.borderColor =
-                    UIColor.white.withAlphaComponent(0.12).cgColor
-                preview.translatesAutoresizingMaskIntoConstraints = false
-                preview.widthAnchor.constraint(
-                    equalToConstant: 78
+            let loading = UIActivityIndicatorView(style: .medium)
+            loading.color = NinjaPalette.green
+            loading.startAnimating()
+            loading.accessibilityLabel = "Loading selected property photos"
+            photoPreviewStack.addArrangedSubview(loading)
+
+            let detail = UILabel()
+            detail.text =
+                "Review & Send will be available when the active selection finishes loading."
+            detail.textColor = UIColor.white.withAlphaComponent(0.62)
+            detail.font = .preferredFont(forTextStyle: .footnote)
+            detail.adjustsFontForContentSizeCategory = true
+            detail.numberOfLines = 0
+            photoPreviewStack.addArrangedSubview(detail)
+        } else {
+            switch selectedPhotos.count {
+            case 0:
+                photoCountLabel.text = "No photos selected"
+                clearPhotosButton.isHidden = true
+
+                let placeholder = UILabel()
+                placeholder.text =
+                    "Photos are optional. Choose images only if they help show the property or pest activity."
+                placeholder.textColor =
+                    UIColor.white.withAlphaComponent(0.52)
+                placeholder.font =
+                    .preferredFont(forTextStyle: .footnote)
+                placeholder.adjustsFontForContentSizeCategory = true
+                placeholder.numberOfLines = 0
+                placeholder.widthAnchor.constraint(
+                    lessThanOrEqualToConstant: 330
                 ).isActive = true
-                preview.heightAnchor.constraint(
-                    equalToConstant: 78
-                ).isActive = true
-                preview.isAccessibilityElement = true
-                preview.accessibilityLabel =
-                    "Selected property photo \(index + 1)"
-                photoPreviewStack.addArrangedSubview(preview)
+                photoPreviewStack.addArrangedSubview(placeholder)
+
+            default:
+                photoCountLabel.text =
+                    "\(selectedPhotos.count) of 3 photos selected"
+                clearPhotosButton.isHidden = false
+
+                for (index, image) in selectedPhotos.enumerated() {
+                    let preview = UIImageView(image: image)
+                    preview.contentMode = .scaleAspectFill
+                    preview.clipsToBounds = true
+                    preview.layer.cornerRadius = 12
+                    preview.layer.cornerCurve = .continuous
+                    preview.layer.borderWidth = 1
+                    preview.layer.borderColor =
+                        UIColor.white.withAlphaComponent(0.12).cgColor
+                    preview.translatesAutoresizingMaskIntoConstraints = false
+                    preview.widthAnchor.constraint(
+                        equalToConstant: 78
+                    ).isActive = true
+                    preview.heightAnchor.constraint(
+                        equalToConstant: 78
+                    ).isActive = true
+                    preview.isAccessibilityElement = true
+                    preview.accessibilityLabel =
+                        "Selected property photo \(index + 1)"
+                    photoPreviewStack.addArrangedSubview(preview)
+                }
             }
         }
+
+        choosePhotosButton.isEnabled = !isLoadingPhotos
+        reviewButton.isEnabled = !isLoadingPhotos
+        photoPanel.accessibilityValue =
+            isLoadingPhotos
+            ? "Loading selected photos"
+            : photoCountLabel.text
     }
 
     private func configureServiceOptions() {
@@ -646,8 +676,11 @@ final class QuoteViewController:
     }
 
     @objc private func clearPhotos() {
-        guard !selectedPhotos.isEmpty else { return }
+        guard isLoadingPhotos || !selectedPhotos.isEmpty else { return }
 
+        photoSelectionGeneration &+= 1
+        isLoadingPhotos = false
+        pendingPhotoCount = 0
         selectedPhotos.removeAll()
         updatePhotoUI()
 
@@ -669,6 +702,13 @@ final class QuoteViewController:
         guard !results.isEmpty else { return }
 
         let limitedResults = Array(results.prefix(3))
+        photoSelectionGeneration &+= 1
+        let selectionGeneration = photoSelectionGeneration
+        isLoadingPhotos = true
+        pendingPhotoCount = limitedResults.count
+        selectedPhotos.removeAll()
+        updatePhotoUI()
+
         let group = DispatchGroup()
         let lock = NSLock()
 
@@ -701,21 +741,37 @@ final class QuoteViewController:
 
         group.notify(queue: .main) { [weak self] in
             guard let self else { return }
+            guard selectionGeneration == self.photoSelectionGeneration else {
+                return
+            }
 
             self.selectedPhotos =
                 ordered
                     .sorted { $0.index < $1.index }
                     .map(\.image)
 
+            self.isLoadingPhotos = false
+            self.pendingPhotoCount = 0
             self.updatePhotoUI()
+
+            let failedCount =
+                limitedResults.count - self.selectedPhotos.count
 
             if self.selectedPhotos.isEmpty {
                 self.showFeedback(
                     title: "Photos Couldn't Load",
                     detail:
-                        "Try choosing the property photos again.",
+                        "None of the selected photos loaded. Try choosing them again, or continue without photos.",
                     kind: .warning,
-                    duration: 1.6
+                    duration: 3
+                )
+            } else if failedCount > 0 {
+                self.showFeedback(
+                    title: "Some Photos Couldn't Load",
+                    detail:
+                        "\(self.selectedPhotos.count) of \(limitedResults.count) photos are ready. Choose the photos again to retry, or continue with the loaded selection.",
+                    kind: .warning,
+                    duration: 4
                 )
             } else {
                 self.showFeedback(
@@ -731,6 +787,18 @@ final class QuoteViewController:
 
     @objc private func reviewQuote() {
         view.endEditing(true)
+
+        guard !isLoadingPhotos else {
+            showFeedback(
+                title: "Photos Are Still Loading",
+                detail:
+                    "Wait for the active photo selection to finish, or tap Clear to continue without photos.",
+                kind: .info,
+                duration: 3
+            )
+            return
+        }
+
         resetValidation()
 
         let name =
@@ -767,15 +835,11 @@ final class QuoteViewController:
             firstInvalid = nameField
         }
 
-        let digitCount =
-            phone.reduce(into: 0) {
-                count,
-                character in
-
-                if character.wholeNumberValue != nil {
-                    count += 1
-                }
-            }
+        let normalizedPhone = normalizedUSPhoneDigits(phone)
+        let validPhone = normalizedPhone.map {
+            $0.count == 10 ||
+                ($0.count == 11 && $0.hasPrefix("1"))
+        } ?? false
 
         if phone.isEmpty {
             issues.append("your phone number")
@@ -784,8 +848,8 @@ final class QuoteViewController:
             if firstInvalid == nil {
                 firstInvalid = phoneField
             }
-        } else if digitCount < 10 {
-            issues.append("a complete phone number")
+        } else if !validPhone {
+            issues.append("a valid 10-digit U.S. phone number")
             markInvalid(phoneField)
 
             if firstInvalid == nil {
@@ -817,6 +881,10 @@ final class QuoteViewController:
             return
         }
 
+        guard let normalizedPhone else { return }
+        let formattedPhone = formattedUSPhone(normalizedPhone)
+        phoneField.text = formattedPhone
+
         let selectedServices =
             selectedServiceIndices
                 .sorted()
@@ -843,21 +911,16 @@ final class QuoteViewController:
                 ?? ""
             )
 
-        var message = """
+        let message = """
         Hi Mosquito Ninja, I'd like a property quote.
 
         Name: \(name)
-        Phone: \(phone)
+        Phone: \(formattedPhone)
         Town/ZIP: \(location)
         Services: \(selectedServices.joined(separator: ", "))
         Property type: \(property)
         Property details: \(notes)
         """
-
-        if !selectedPhotos.isEmpty {
-            message +=
-                "\nProperty photos attached: \(selectedPhotos.count)"
-        }
 
         quoteMessageComposer.present(
             from: self,
@@ -865,6 +928,57 @@ final class QuoteViewController:
             kind: .quote,
             images: selectedPhotos
         )
+    }
+
+    private func normalizedUSPhoneDigits(
+        _ value: String
+    ) -> String? {
+        let allowedFormatting =
+            CharacterSet.whitespacesAndNewlines.union(
+                CharacterSet(charactersIn: "+-()./")
+            )
+
+        var digits = ""
+
+        for character in value {
+            if
+                let digit = character.wholeNumberValue,
+                (0...9).contains(digit)
+            {
+                digits.append(String(digit))
+                continue
+            }
+
+            let scalars = String(character).unicodeScalars
+            guard scalars.allSatisfy({
+                allowedFormatting.contains($0)
+            }) else {
+                return nil
+            }
+        }
+
+        return digits
+    }
+
+    private func formattedUSPhone(_ digits: String) -> String {
+        let national =
+            digits.count == 11
+            ? String(digits.dropFirst())
+            : digits
+
+        let areaEnd = national.index(
+            national.startIndex,
+            offsetBy: 3
+        )
+        let exchangeEnd = national.index(
+            areaEnd,
+            offsetBy: 3
+        )
+
+        return
+            "(" + String(national[..<areaEnd]) + ") " +
+            String(national[areaEnd..<exchangeEnd]) + "-" +
+            String(national[exchangeEnd...])
     }
 
     func textFieldDidBeginEditing(

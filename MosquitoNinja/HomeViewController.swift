@@ -1099,6 +1099,11 @@ final class HomeViewController: NinjaBaseViewController {
                 titleText = "OUTSIDE OUR CURRENT SERVICE AREA"
                 symbol = "xmark.circle.fill"
                 accent = NinjaPalette.red
+
+            case .unverified:
+                titleText = "COVERAGE NOT VERIFIED"
+                symbol = "exclamationmark.triangle.fill"
+                accent = NinjaPalette.red
             }
 
             let locationText = [
@@ -1296,6 +1301,12 @@ final class HomeViewController: NinjaBaseViewController {
                         kind: .warning,
                         duration: 2.0
                     )
+
+                case .unverified:
+                    NinjaHaptics.warning()
+                    self.showCoverageUnavailableAlert(
+                        for: areaResult
+                    )
                 }
 
             case .failure(let error):
@@ -1386,6 +1397,85 @@ final class HomeViewController: NinjaBaseViewController {
                 style: .default
             ) { [weak self] _ in
                 self?.checkServiceArea()
+            }
+        )
+
+        present(alert, animated: true)
+    }
+
+    private func showCoverageUnavailableAlert(
+        for result: ServiceAreaResult
+    ) {
+        let location = [
+            result.county,
+            result.postalCode
+        ]
+        .compactMap { value -> String? in
+            guard let value, !value.isEmpty else { return nil }
+            return value
+        }
+        .joined(separator: " ")
+
+        let locationDetail =
+            location.isEmpty
+            ? "this property"
+            : location
+
+        let alert = UIAlertController(
+            title: "Coverage Wasn't Verified",
+            message:
+                "The current service-area rules could not be loaded, so nothing has been confirmed for \(locationDetail). Try again when connected, or contact Mosquito Ninja for a direct route check.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Not Now",
+                style: .cancel
+            )
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Try Again",
+                style: .default
+            ) { [weak self] _ in
+                self?.checkServiceArea()
+            }
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Call 609-313-6317",
+                style: .default
+            ) { [weak self] _ in
+                self?.openExternal("tel:+16093136317")
+            }
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Email Mosquito Ninja",
+                style: .default
+            ) { [weak self] _ in
+                var components = URLComponents()
+                components.scheme = "mailto"
+                components.path = "service@njbugninja.com"
+                components.queryItems = [
+                    URLQueryItem(
+                        name: "subject",
+                        value: "Service Area Confirmation"
+                    ),
+                    URLQueryItem(
+                        name: "body",
+                        value:
+                            "Hi Mosquito Ninja, please confirm current service availability for \(locationDetail)."
+                    )
+                ]
+
+                if let value = components.url?.absoluteString {
+                    self?.openExternal(value)
+                }
             }
         )
 

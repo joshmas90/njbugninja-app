@@ -178,10 +178,38 @@ if 'does not book or confirm a new visit with Mosquito Ninja' not in appointment
 quote_ui = (root/'MosquitoNinja'/'QuoteViewController.swift').read_text(encoding='utf-8')
 if 'propertyType.accessibilityLabel = "Property type"' not in quote_ui:
     errors.append('quote property type control is missing its accessibility label')
+if '[.foregroundColor: NinjaPalette.ink]' not in quote_ui:
+    errors.append('selected quote property type must use accessible dark text')
+for marker in (
+    'photoSelectionGeneration',
+    'isLoadingPhotos',
+    'guard selectionGeneration == self.photoSelectionGeneration',
+    '$0.count == 10',
+    '$0.count == 11 && $0.hasPrefix("1")',
+):
+    if marker not in quote_ui:
+        errors.append(f'missing quote reliability safeguard: {marker}')
+
+message_composer = (root/'MosquitoNinja'/'MessageComposer.swift').read_text(encoding='utf-8')
+for marker in (
+    'MFMailComposeViewControllerDelegate',
+    'service@njbugninja.com',
+    'let accepted = composer.addAttachmentData',
+    'acceptedAttachmentCount',
+):
+    if marker not in message_composer:
+        errors.append(f'missing quote delivery safeguard: {marker}')
+
+service_area_manager = (root/'MosquitoNinja'/'ServiceAreaManager.swift').read_text(encoding='utf-8')
+if 'fallbackConfig' in service_area_manager:
+    errors.append('service-area download failure must not fall back to confirmable built-in coverage')
+for marker in ('case unverified', 'ruleSource: .unavailable', 'completion(nil)'):
+    if marker not in service_area_manager:
+        errors.append(f'missing unverified coverage safeguard: {marker}')
 
 # Apple privacy-manifest checks. The app uses UserDefaults for on-device
 # appointments and collects only customer-supplied quote data when the customer
-# affirmatively sends a message to Mosquito Ninja.
+# affirmatively sends a message or email to Mosquito Ninja.
 privacy_path = root/'MosquitoNinja'/'PrivacyInfo.xcprivacy'
 if not privacy_path.exists():
     errors.append('missing MosquitoNinja/PrivacyInfo.xcprivacy')
@@ -212,6 +240,7 @@ else:
     required_collected = {
         'NSPrivacyCollectedDataTypeName',
         'NSPrivacyCollectedDataTypePhoneNumber',
+        'NSPrivacyCollectedDataTypeEmailAddress',
         'NSPrivacyCollectedDataTypeCoarseLocation',
         'NSPrivacyCollectedDataTypePhotosorVideos',
         'NSPrivacyCollectedDataTypeOtherUserContent',

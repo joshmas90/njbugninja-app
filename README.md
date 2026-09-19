@@ -42,7 +42,7 @@ A native UIKit customer-service app for Mosquito Ninja. The app uses native Home
 ## Native iOS features
 
 - Native service dashboard and navigation.
-- Native quote request flow with a single in-app review/send sheet and feedback after iOS reports the result.
+- Native quote request flow with an in-app Messages review sheet, an in-app Mail fallback when texting is unavailable, and feedback after iOS reports the result.
 - Optional property-photo attachments with previews and preserved quote-form state.
 - **Appointments center** with confirmed service date/time, service type, property label, notes, and service-day tools.
 - **My Service dashboard** with premium appointment status and local service history.
@@ -51,7 +51,7 @@ A native UIKit customer-service app for Mosquito Ninja. The app uses native Home
 - Appointment information is stored on the customer’s device using `UserDefaults`.
 - Optional, on-demand service-area check using iOS location/geocoding. No background location tracking.
 - Native service-prep guide.
-- Text buttons and bundled `sms:` links use Apple's in-app message composer. `tel:` and `mailto:` links open the appropriate iOS app.
+- Text buttons and bundled `sms:` links use Apple's in-app message composer. A prepared quote can fall back to Apple's in-app Mail composer when texting is unavailable; `tel:` and ordinary `mailto:` links open the appropriate iOS app.
 - Bundled service/reference pages remain available offline.
 - Website-matched theatrical launch overlay with the transparent `MOSQUITO NINJA / BITE BACK!` lockup, an accurately aligned animated strike, and Reduce Motion support.
 - iPhone and iPad support, iOS 15+.
@@ -95,9 +95,9 @@ On a Mac with Xcode:
 
 ## In-app messaging
 
-Quotes and texts use `MFMessageComposeViewController`. Customers review once and tap Send inside the app. No backend or SMS-provider credentials are required. The device must be configured for messaging; unsupported devices keep the customer in the app and offer an explicit copy action.
+Quotes and texts use `MFMessageComposeViewController`. Customers review once and tap Send inside the app. No backend or SMS-provider credentials are required. If texting is unavailable for a prepared quote, the app offers `MFMailComposeViewController` with the quote text and successfully prepared photo attachments, plus separate website and copy alternatives. The native quote draft remains intact.
 
-Completion feedback follows the MessageUI delegate result after the sheet dismisses. Apple's `.sent` means queued or sent, not delivered or received; the app makes no delivery or quote-acceptance guarantee. Replies arrive in Messages. Cancelling or failing leaves the native quote form intact for retry. MessageUI exposes initial content, so edits made inside Apple's composer are not promised to be saved. No new server storage or persistent draft storage is introduced.
+Completion feedback follows the MessageUI delegate result after the sheet dismisses. Apple's `.sent` means accepted for sending, not delivered or received; the app makes no delivery or quote-acceptance guarantee. Replies arrive through the channel the customer used. Cancelling or failing leaves the native quote form intact for retry. MessageUI exposes initial content, so edits made inside Apple's composer are not promised to be saved. No new server storage or persistent draft storage is introduced.
 
 Physical-device checks required before release:
 
@@ -105,7 +105,7 @@ Physical-device checks required before release:
 - Text: Home, Contact, Appointments and bundled-page links all open a composer without switching apps.
 - Send, cancel and failure each dismiss once, then show the correct result; cancelling/failing keeps the original quote form details.
 - Repeated taps do not stack composers; emoji, ampersands and multiline notes remain intact.
-- A device without messaging gets a clear unavailable state and optional copy action.
+- A device without messaging gets an in-app email route when Mail is configured, plus website and copy alternatives that explain photo limitations and preserve the app draft.
 - Check iPhone/iPad sheet layout, keyboard dismissal, VoiceOver and Reduce Motion.
 
 Reference: https://developer.apple.com/documentation/messageui/mfmessagecomposeviewcontroller

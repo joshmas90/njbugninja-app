@@ -5,6 +5,12 @@ enum ServiceAreaCoverage: String, Decodable {
     case covered
     case confirm
     case outside
+    case unverified
+}
+
+enum ServiceAreaRuleSource {
+    case current
+    case unavailable
 }
 
 struct ServiceAreaResult {
@@ -13,6 +19,7 @@ struct ServiceAreaResult {
     let postalCode: String?
     let message: String
     let approximate: Bool
+    let ruleSource: ServiceAreaRuleSource
 }
 
 enum ServiceAreaError: LocalizedError {
@@ -158,11 +165,25 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
             }
 
             self.loadConfig { config in
-                let result = self.evaluate(
-                    placemark: placemark,
-                    config: config,
-                    approximate: approximate
-                )
+                let result: ServiceAreaResult
+
+                if let config {
+                    result = self.evaluate(
+                        placemark: placemark,
+                        config: config,
+                        approximate: approximate
+                    )
+                } else {
+                    result = ServiceAreaResult(
+                        coverage: .unverified,
+                        county: placemark.subAdministrativeArea,
+                        postalCode: placemark.postalCode,
+                        message:
+                            "Current service-area rules could not be loaded, so this location has not been confirmed. Try again or contact Mosquito Ninja for a direct route check.",
+                        approximate: approximate,
+                        ruleSource: .unavailable
+                    )
+                }
 
                 self.finish(.success(result))
             }
@@ -195,7 +216,8 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
                 message:
                     "Precise Location was unavailable. " +
                     "Contact Mosquito Ninja to confirm this route.",
-                approximate: true
+                approximate: true,
+                ruleSource: .current
             )
         }
 
@@ -207,7 +229,8 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
                 message:
                     "This location is outside the current " +
                     "New Jersey service area.",
-                approximate: false
+                approximate: false,
+                ruleSource: .current
             )
         }
 
@@ -268,6 +291,10 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
             message =
                 "This location is outside the current configured " +
                 "service area. Coverage can change as routes expand."
+
+        case .unverified:
+            message =
+                "Current service-area rules could not be loaded, so coverage has not been verified."
         }
 
         return ServiceAreaResult(
@@ -275,7 +302,8 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
             county: county,
             postalCode: postalCode,
             message: message,
-            approximate: false
+            approximate: false,
+            ruleSource: .current
         )
     }
 
@@ -295,7 +323,7 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
 
     private func loadConfig(
         completion:
-            @escaping (ServiceAreaConfig) -> Void
+            @escaping (ServiceAreaConfig?) -> Void
     ) {
         let stamp = Int(Date().timeIntervalSince1970)
 
@@ -324,10 +352,10 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
         urls: [URL],
         index: Int,
         completion:
-            @escaping (ServiceAreaConfig) -> Void
+            @escaping (ServiceAreaConfig?) -> Void
     ) {
         guard index < urls.count else {
-            completion(fallbackConfig())
+            completion(nil)
             return
         }
 
@@ -373,58 +401,6 @@ final class ServiceAreaManager: NSObject, CLLocationManagerDelegate {
             )
         }
         .resume()
-    }
-
-    private func fallbackConfig() -> ServiceAreaConfig {
-        let rules: [String: ServiceAreaCountyRule] = [
-            "atlantic": ServiceAreaCountyRule(
-                status: .confirm,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "burlington": ServiceAreaCountyRule(
-                status: .covered,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "camden": ServiceAreaCountyRule(
-                status: .covered,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "cape may": ServiceAreaCountyRule(
-                status: .outside,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "cumberland": ServiceAreaCountyRule(
-                status: .confirm,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "gloucester": ServiceAreaCountyRule(
-                status: .covered,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "ocean": ServiceAreaCountyRule(
-                status: .outside,
-                includedZIPs: [],
-                excludedZIPs: []
-            ),
-            "salem": ServiceAreaCountyRule(
-                status: .confirm,
-                includedZIPs: [],
-                excludedZIPs: []
-            )
-        ]
-
-        return ServiceAreaConfig(
-            version: 2,
-            state: "NJ",
-            defaultStatus: .outside,
-            counties: rules
-        )
     }
 
     private func finish(
